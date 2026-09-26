@@ -31,6 +31,7 @@ Gallery wall labels. Heavy grotesk type, hard black rules, generous imagery, one
 - **Hero:** a full-bleed image with the title and museum overlaid on a bottom scrim. Used for the top "Sinulle" pick.
 - **RegionSelector:** always visible in the header, e.g. `Pk-seutu, Tampere ▾`. Opens a sheet (mobile) or popover (desktop) of region checkboxes. For signed-in users it edits their preferred regions (persisted). For anonymous users it keeps state in a cookie. It filters Koti and Selaa.
 - **StatusActions:** a segmented control of three buttons joined by 2 px rules: Kiinnostaa / Käyty / Piilota. `aria-pressed` on each. Pressing the active one clears it. Optimistic update, with a polite live-region announcement.
+- **Museokortti:** mark only the exception ("Ei Museokorttia"). No badge when eligible. The Museokortti filter is rendered only when some current exhibition is not eligible.
 - **CategoryList:** plain text links, not chips.
 - **ImageFallback:** if the image is missing or broken, the title is set large on `--surface`. It must never collapse the layout.
 - **UrgencyLabel:** a `--signal` block with `--on-signal` text ("7 päivää jäljellä"). Used on the detail page and the hero.
@@ -67,6 +68,6 @@ Mobile first. Bottom tab bar on mobile: **Koti · Selaa · Omat · Profiili**. T
   2. Per theme `topic_N=1` (the IDs and labels come from the checkbox list on page 1, not hardcoded), for category membership.
   3. Per `maakunta_id` (the options on page 1), for each museum's region.
   4. The detail page (`nayttely_id=N`) only for new exhibitions or ones whose listing hash changed. This adds the full description, `museo_id`, Museum Card status (entrance image "Sisäänpääsy Museokortilla") and the text languages. Rate-limited to about 2 requests per second.
-- The `museokortti=1` listing filter returns the full list, so card status comes from detail pages.
+- The `museokortti=1` listing filter returns the full list, so card status comes from detail pages (`div.sisaanpaasy_museokortilla`). A 52-exhibition sample on 27.9.2026 was 100% eligible: museot.fi is run by Museoliitto, which also runs Museokortti. Keep parsing it anyway for future sources.
 - Upsert keyed by (`source`, `source_id`). Every run touches `last_seen_at`; a record isn't deleted when it goes missing. Each run is recorded in `import_runs` with its counts. If one record fails validation, it's counted in `items_failed` and the rest are still imported. If the whole fetch fails, the run is marked failed and nothing is touched.
 - Fixtures in `fixtures/museot/` (snapshot of 27.9.2026) back the parser tests.
