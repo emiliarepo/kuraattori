@@ -5,7 +5,7 @@ import {
   sqliteTableCreator,
   unique,
 } from "drizzle-orm/sqlite-core";
-import { type AdapterAccount } from "next-auth/adapters";
+import type { AdapterAccount } from "next-auth/adapters";
 
 /**
  * Use the same database instance for multiple projects.
