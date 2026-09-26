@@ -13,4 +13,25 @@ export const t = {
     startsOn: (date: string) => `Alkaa ${date}`,
     indefinite: "Toistaiseksi",
   },
+  ui: {
+    nav: {
+      koti: "Koti",
+      selaa: "Selaa",
+      omat: "Omat",
+      profiili: "Profiili",
+    },
+    region: {
+      label: "Alueet",
+      sheetTitle: "Valitse alueet",
+      allRegions: "Kaikki alueet",
+      apply: "Valmis",
+    },
+    status: {
+      interested: "Kiinnostaa",
+      visited: "Käyty",
+      hidden: "Piilota",
+      announceSet: (label: string) => `Merkitty: ${label}`,
+      announceCleared: "Merkintä poistettu",
+    },
+  },
 } as const;
