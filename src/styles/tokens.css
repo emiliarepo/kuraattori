@@ -1,0 +1,23 @@
+:root {
+  --bg: #ffffff;
+  --fg: #0a0a0a;
+  --muted: #555555;
+  --rule: #0a0a0a;
+  --rule-soft: #d9d9d9;
+  --signal: #d9331a;
+  --on-signal: #ffffff;
+  --surface: #f3f3f1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0b0b;
+    --fg: #f2f0ec;
+    --muted: #a3a09a;
+    --rule: #f2f0ec;
+    --rule-soft: #2a2a2a;
+    --signal: #ff6a4d;
+    --on-signal: #0b0b0b;
+    --surface: #161616;
+  }
+}
