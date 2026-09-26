@@ -15,10 +15,10 @@ export const t = {
   },
   ui: {
     nav: {
-      koti: "Koti",
-      selaa: "Selaa",
-      omat: "Omat",
-      profiili: "Profiili",
+      home: "Koti",
+      browse: "Selaa",
+      mine: "Omat",
+      profile: "Profiili",
     },
     region: {
       label: "Alueet",

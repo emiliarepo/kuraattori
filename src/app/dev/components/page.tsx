@@ -5,7 +5,7 @@ import { DaysNumeral } from "~/app/_components/DaysNumeral";
 import { ExhibitionRow } from "~/app/_components/ExhibitionRow";
 import { Hero } from "~/app/_components/Hero";
 import { ImageFallback } from "~/app/_components/ImageFallback";
-import { StatusActionsDemo } from "~/app/dev/komponentit/StatusActionsDemo";
+import { StatusActionsDemo } from "~/app/dev/components/StatusActionsDemo";
 import { type TimeBarProps } from "~/app/_components/TimeBar";
 import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
 
@@ -246,7 +246,7 @@ export default function ComponentLibraryPage() {
           imageAlt={`${HERO.title}, ${HERO.museum}`}
           title={HERO.title}
           museum={HERO.museum}
-          href={`/nayttelyt/${HERO.slug}`}
+          href={`/exhibitions/${HERO.slug}`}
         />
         <div className="mt-2">
           <UrgencyLabel label="126 päivää jäljellä" />
@@ -323,7 +323,7 @@ export default function ComponentLibraryPage() {
           {EXHIBITIONS.map((exhibition, index) => (
             <ExhibitionRow
               key={exhibition.slug}
-              href={`/nayttelyt/${exhibition.slug}`}
+              href={`/exhibitions/${exhibition.slug}`}
               title={exhibition.title}
               museum={exhibition.museum}
               city={exhibition.city}

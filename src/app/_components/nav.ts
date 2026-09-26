@@ -1,14 +1,14 @@
 import { t } from "~/i18n/fi";
 
-export type NavKey = "koti" | "selaa" | "omat" | "profiili";
+export type NavKey = "home" | "browse" | "mine" | "profile";
 
 export const NAV_ITEMS: readonly {
   key: NavKey;
   label: string;
   href: string;
 }[] = [
-  { key: "koti", label: t.ui.nav.koti, href: "/" },
-  { key: "selaa", label: t.ui.nav.selaa, href: "/nayttelyt" },
-  { key: "omat", label: t.ui.nav.omat, href: "/omat" },
-  { key: "profiili", label: t.ui.nav.profiili, href: "/profiili" },
+  { key: "home", label: t.ui.nav.home, href: "/" },
+  { key: "browse", label: t.ui.nav.browse, href: "/exhibitions" },
+  { key: "mine", label: t.ui.nav.mine, href: "/my" },
+  { key: "profile", label: t.ui.nav.profile, href: "/profile" },
 ];

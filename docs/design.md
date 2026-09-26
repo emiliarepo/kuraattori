@@ -38,17 +38,17 @@ Gallery wall labels. Heavy grotesk type, hard black rules, generous imagery, one
 
 ## Navigation and screens
 
-Mobile first. Bottom tab bar on mobile: **Koti · Selaa · Omat · Profiili**. Top bar on desktop, with the logo left, tabs, and the RegionSelector right. Routes are Finnish:
+Mobile first. Bottom tab bar on mobile: **Koti · Selaa · Omat · Profiili** (keys `home`, `browse`, `mine`, `profile`). Top bar on desktop, with the logo left, tabs, and the RegionSelector right. Code identifiers and routes are English, including public paths; only visible text is Finnish (from `src/i18n/fi.ts`). Slugs come from Finnish titles because they are data.
 
 | Route | Content |
 |---|---|
 | `/` | Signed in: Hero (best "Sinulle"), Päättyy pian (DaysNumeral list, interested ones first, then relevant), Sinulle (2-col grid), Uudet, Tulossa. Anonymous: the same without Sinulle, plus a sign-in prompt. |
-| `/nayttelyt` | Browse: ExhibitionRow list, cursor paging. Filters: region, city, museum, category, Museokortti, käynnissä/tulossa, päättyy N pv sisällä, text search. Filter state lives in the URL. Mobile: a filter bottom sheet; desktop: a left sidebar. |
-| `/nayttelyt/[slug]` | Detail: 60/40 split with image left and info right (stacked on mobile). UrgencyLabel, huge title, description, a meta grid (Museo, Kaupunki, Avoinna, Museokortti), TimeBar, StatusActions, categories, source link, last update. |
-| `/museot`, `/museot/[slug]` | Museum list and museum page with its exhibitions (current, upcoming, past). |
-| `/omat` | Tabs: Kiinnostavat, Käydyt (history, including ended ones), Piilotetut. |
-| `/profiili` | Interests (categories), regions, sign out. `/tervetuloa` is onboarding after first login, skippable, with the same controls. |
-| `/kirjaudu` | Google sign-in. |
+| `/exhibitions` | Browse: ExhibitionRow list, cursor paging. Filters: region, city, museum, category, Museokortti, käynnissä/tulossa, päättyy N pv sisällä, text search. Filter state lives in the URL. Mobile: a filter bottom sheet; desktop: a left sidebar. |
+| `/exhibitions/[slug]` | Detail: 60/40 split with image left and info right (stacked on mobile). UrgencyLabel, huge title, description, a meta grid (Museo, Kaupunki, Avoinna, Museokortti), TimeBar, StatusActions, categories, source link, last update. |
+| `/museums`, `/museums/[slug]` | Museum list and museum page with its exhibitions (current, upcoming, past). |
+| `/my` | Tabs (`/my/interested`, `/my/visited`, `/my/hidden`): Kiinnostavat, Käydyt (history, including ended ones), Piilotetut. |
+| `/profile` | Interests (categories), regions, sign out. `/welcome` is onboarding after first login, skippable, with the same controls. |
+| `/sign-in` | Google sign-in. |
 
 ## Data and domain decisions
 
