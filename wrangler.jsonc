@@ -1,0 +1,38 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"name": "kuraattori",
+	"compatibility_date": "2026-09-26",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"d1_databases": [
+		{
+			// Local dev only: this id is a placeholder, not a real Cloudflare
+			// database. Replace it with the id from `wrangler d1 create` before
+			// any remote deploy.
+			"binding": "DB",
+			"database_name": "kuraattori-db",
+			"database_id": "7111592d-14ad-489c-8389-1ee3670a277d",
+			"migrations_dir": "drizzle"
+		}
+	],
+	"services": [
+		{
+			// Self-reference service binding, the service name must match the worker name
+			// see https://opennext.js.org/cloudflare/caching
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "kuraattori"
+		}
+	],
+	"images": {
+		// Enable image optimization
+		// see https://opennext.js.org/cloudflare/howtos/image
+		"binding": "IMAGES"
+	}
+}
