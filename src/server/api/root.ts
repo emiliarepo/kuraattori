@@ -1,4 +1,10 @@
 import { systemRouter } from "~/server/api/routers/system";
+import { exhibitionRouter } from "~/server/api/routers/exhibition";
+import { museumRouter } from "~/server/api/routers/museum";
+import { categoryRouter } from "~/server/api/routers/category";
+import { profileRouter } from "~/server/api/routers/profile";
+import { userExhibitionRouter } from "~/server/api/routers/user-exhibition";
+import { recommendationRouter } from "~/server/api/routers/recommendation";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,6 +14,12 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   system: systemRouter,
+  exhibition: exhibitionRouter,
+  museum: museumRouter,
+  category: categoryRouter,
+  profile: profileRouter,
+  userExhibition: userExhibitionRouter,
+  recommendation: recommendationRouter,
 });
 
 // export type definition of API
