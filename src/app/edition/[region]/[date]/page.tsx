@@ -41,10 +41,10 @@ export async function generateMetadata({
   if (!region || !edition) return {};
   const title = [
     t.pages.edition.name,
-    region.region,
+    t.regionName(region.region),
     formatDate(date, locale),
   ].join(" · ");
-  const description = t.pages.meta.edition(region.region);
+  const description = t.pages.meta.edition(t.regionName(region.region));
   const lead = edition.lead;
   return {
     title: `${title} — ${t.app.name}`,
@@ -95,7 +95,7 @@ export default async function EditionPage({ params }: { params: Params }) {
           {t.pages.edition.name}
         </h1>
         <p className="border-rule text-kicker mt-4 border-y py-2 tabular-nums">
-          {region.region} · {formatDate(date, locale)}
+          {t.regionName(region.region)} · {formatDate(date, locale)}
         </p>
       </header>
 

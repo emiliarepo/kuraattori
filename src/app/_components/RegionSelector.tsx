@@ -53,7 +53,7 @@ export function RegionSelector({
     selected.length === 0
       ? t.ui.region.allRegions
       : selected.length === 1
-        ? selected[0]!
+        ? t.regionName(selected[0]!)
         : t.ui.region.regionCount(selected.length);
 
   function toggle(region: string) {
@@ -128,7 +128,7 @@ export function RegionSelector({
                             onChange={() => toggle(region)}
                             className="accent-signal h-4 w-4"
                           />
-                          {region}
+                          {t.regionName(region)}
                         </label>
                       </li>
                     ))}

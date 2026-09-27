@@ -36,7 +36,7 @@ function reasonLabel(
       return reason.weight === 2 ? `${name} ★` : name;
     }
     case "region":
-      return context.region;
+      return context.region && context.t.regionName(context.region);
     case "museum":
       return context.t.pages.home.whyFollowed(context.museumName);
     case "new":

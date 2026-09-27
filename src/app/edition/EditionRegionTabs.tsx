@@ -36,7 +36,7 @@ export function EditionRegionTabs({ active }: { active: string }) {
                 current ? "border-b-signal text-signal" : "border-b-transparent"
               }`}
             >
-              {region}
+              {t.regionName(region)}
             </Link>
           );
         })}

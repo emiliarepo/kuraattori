@@ -398,6 +398,7 @@ export function passportShareText(
   passport: Passport,
   year: number,
   copy: ShareCopy,
+  regionName: (region: string) => string = (region) => region,
 ): string {
   const regions = passport.regions
     .filter((region) => region.stamped.length)
@@ -411,7 +412,7 @@ export function passportShareText(
     .slice(0, SHARE_REGIONS)
     .map(
       (region) =>
-        `${region.region} ${progressBar(region.stamped.length, region.total)}`,
+        `${regionName(region.region)} ${progressBar(region.stamped.length, region.total)}`,
     );
   if (regions.length > SHARE_REGIONS)
     parts.push(copy.moreRegions(regions.length - SHARE_REGIONS));

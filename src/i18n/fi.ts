@@ -3,6 +3,8 @@
  * `sv.ts`. Formatting (dates, numbers) goes through `Intl`, not templates.
  */
 export const t = {
+  /** Region identifiers are Finnish; only English and Swedish rename any. */
+  regionName: (region: string): string => region,
   app: {
     name: "Kuraattori",
   },

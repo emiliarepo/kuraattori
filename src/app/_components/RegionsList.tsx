@@ -1,4 +1,5 @@
 import { groupRegions } from "~/domain/regions";
+import { useI18n } from "~/i18n/client";
 
 export function RegionsList({
   allRegions,
@@ -9,6 +10,7 @@ export function RegionsList({
   regions: readonly string[];
   onChange: (region: string) => void;
 }) {
+  const { t } = useI18n();
   const regionGroups = groupRegions(allRegions);
 
   return (
@@ -29,7 +31,7 @@ export function RegionsList({
                     onChange={() => onChange(region)}
                     className="accent-signal h-4 w-4 flex-none"
                   />
-                  {region}
+                  {t.regionName(region)}
                 </label>
               </li>
             ))}

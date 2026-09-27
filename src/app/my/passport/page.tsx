@@ -45,6 +45,7 @@ export default async function MyPassportPage() {
               passport,
               Number(todayInHelsinki().slice(0, 4)),
               copy.shareText,
+              t.regionName,
             )}
             url={siteUrl.origin}
           />
@@ -56,7 +57,7 @@ export default async function MyPassportPage() {
             <Fragment key={region.region}>
               {index > 0 && " · "}
               <span className="whitespace-nowrap">
-                {region.region}{" "}
+                {t.regionName(region.region)}{" "}
                 {copy.regionCount(region.stamped.length, region.total)}
               </span>
             </Fragment>
@@ -77,7 +78,7 @@ export default async function MyPassportPage() {
               id={`region-${region.region}`}
               className="text-headline text-2xl"
             >
-              {region.region}
+              {t.regionName(region.region)}
             </h2>
             <p className="text-kicker text-muted tabular-nums">
               {copy.regionCount(region.stamped.length, region.total)}

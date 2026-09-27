@@ -34,3 +34,19 @@ describe("localeFromAcceptLanguage", () => {
     expect(localeFromAcceptLanguage(header)).toBe(locale);
   });
 });
+
+describe("regionName", () => {
+  it("renames Pääkaupunkiseutu in English and Swedish only", async () => {
+    const { i18nFor } = await import(".");
+    expect(i18nFor("fi").t.regionName("Pääkaupunkiseutu")).toBe(
+      "Pääkaupunkiseutu",
+    );
+    expect(i18nFor("en").t.regionName("Pääkaupunkiseutu")).toBe(
+      "Helsinki region",
+    );
+    expect(i18nFor("sv").t.regionName("Pääkaupunkiseutu")).toBe(
+      "Huvudstadsregionen",
+    );
+    expect(i18nFor("en").t.regionName("Lappi")).toBe("Lappi");
+  });
+});

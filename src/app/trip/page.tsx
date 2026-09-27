@@ -92,7 +92,7 @@ export default async function TripPage({
               <optgroup label={t.pages.trip.cityRegions}>
                 {cityRegions.map((region) => (
                   <option key={region} value={region}>
-                    {region}
+                    {t.regionName(region)}
                   </option>
                 ))}
               </optgroup>
@@ -101,7 +101,7 @@ export default async function TripPage({
               <optgroup label={t.pages.trip.regions}>
                 {otherRegions.map((region) => (
                   <option key={region} value={region}>
-                    {region}
+                    {t.regionName(region)}
                   </option>
                 ))}
               </optgroup>
