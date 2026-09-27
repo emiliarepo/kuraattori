@@ -5,6 +5,7 @@ import { useId, useState } from "react";
 
 import { persistRegionsCookie } from "~/app/_components/region-cookie-action";
 import { refreshHeaderData } from "~/app/_components/refresh-header-action";
+import { groupRegions } from "~/domain/regions";
 import { t } from "~/i18n/fi";
 import { api } from "~/trpc/react";
 
@@ -24,6 +25,7 @@ export function RegionSelector({
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<readonly string[]>(initialSelected);
   const panelId = useId();
+  const groups = groupRegions(allRegions);
   const router = useRouter();
   const updateRegions = api.profile.updateRegions.useMutation();
 
@@ -82,21 +84,28 @@ export function RegionSelector({
             <p className="text-headline mb-3 text-xl">
               {t.ui.region.sheetTitle}
             </p>
-            <ul className="flex flex-col gap-2">
-              {allRegions.map((region) => (
-                <li key={region}>
-                  <label className="flex items-center gap-2 py-0.5">
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(region)}
-                      onChange={() => toggle(region)}
-                      className="accent-signal h-4 w-4"
-                    />
-                    {region}
-                  </label>
-                </li>
+            {[groups.cities, groups.others]
+              .filter((group) => group.length > 0)
+              .map((group, index) => (
+                <ul
+                  key={index}
+                  className={`flex flex-col gap-2 ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
+                >
+                  {group.map((region) => (
+                    <li key={region}>
+                      <label className="flex items-center gap-2 py-0.5">
+                        <input
+                          type="checkbox"
+                          checked={selected.includes(region)}
+                          onChange={() => toggle(region)}
+                          className="accent-signal h-4 w-4"
+                        />
+                        {region}
+                      </label>
+                    </li>
+                  ))}
+                </ul>
               ))}
-            </ul>
             <button
               type="button"
               onClick={() => setOpen(false)}
