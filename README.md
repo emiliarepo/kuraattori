@@ -59,11 +59,35 @@ deploy, or an import.
 - **Workers Routes: Edit** on zone `emialis.com` — keep the
   `kuraattori.emialis.com` custom domain route attached.
 - **Account Settings: Read** — `wrangler` reads this on every command.
+- **Account Analytics: Read** — the daily D1 read check queries GraphQL
+  analytics.
 
 `AUTH_SECRET`, `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` are set directly on
 the Worker (`wrangler secret put`) and are never read or written by CI; the
 typecheck/lint/build steps run with `SKIP_ENV_VALIDATION=1` instead, since
 they only need `src/env.js`'s schema satisfied, not the real values.
+
+## Health checks
+
+`.github/workflows/health.yml` checks the public site every 30 minutes and on
+manual dispatch. It requests the home page, exhibition list, an exhibition
+linked from `/sitemap.xml`, Auth.js providers, and `robots.txt`. Each request
+must return HTTP 2xx or 3xx within five seconds; the workflow summary shows
+each URL, status, and response time. GitHub emails the repository owner for
+failed scheduled runs when Actions notifications are enabled.
+
+At 02:15 UTC each day, the same workflow also checks account-wide D1 rows read
+since 00:00 UTC. It fails above 2,500,000 rows, half the Workers Free daily
+limit. Manual dispatch runs both checks. The existing `CLOUDFLARE_API_TOKEN`
+repository secret needs **Account Analytics: Read** on the account for this
+check. Run `node scripts/check-health.mjs` locally to test the public route
+checks without credentials.
+
+The nightly importer records fetched and failed counts in `import_run`. It
+marks a run failed after writing the fetched data if its fetched count falls
+below half the last successful run or failures exceed 5% of all attempted
+items. The GitHub run then fails so the source change is visible without
+discarding the imported data.
 
 ## Notes
 
