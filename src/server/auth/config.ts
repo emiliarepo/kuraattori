@@ -53,6 +53,7 @@ export async function buildAuthConfig(): Promise<NextAuthConfig> {
   const db = await getDb();
 
   return {
+    trustHost: true,
     providers: [
       GoogleProvider,
       /**
