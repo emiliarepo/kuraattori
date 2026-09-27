@@ -351,8 +351,10 @@ export const t = {
       more: (count: number) => `+${count}`,
       noExhibitions: "No current exhibitions.",
       empty: "No museums nearby are open right now.",
-      nextOpens: (museum: string, when: string) =>
-        `Opening next: ${museum}, ${when}`,
+      showingAll: "Showing all museums nearby instead.",
+      closed: "Closed",
+      closedOpens: (when: string) => `Closed · opens ${when}`,
+      noneInRadius: "There are no museums within this distance.",
       opensToday: (time: string) => `today at ${time}`,
       opensOn: (weekday: string, time: string) => `${weekday} at ${time}`,
       straightLine: "Walking times are straight-line.",

@@ -352,8 +352,10 @@ export const t = {
       more: (count: number) => `+${count}`,
       noExhibitions: "Inga pågående utställningar.",
       empty: "Inga museer i närheten är öppna just nu.",
-      nextOpens: (museum: string, when: string) =>
-        `Öppnar härnäst: ${museum}, ${when}`,
+      showingAll: "Här är alla museer i närheten.",
+      closed: "Stängt",
+      closedOpens: (when: string) => `Stängt · öppnar ${when}`,
+      noneInRadius: "Det finns inga museer inom det här avståndet.",
       opensToday: (time: string) => `i dag kl. ${time}`,
       opensOn: (weekday: string, time: string) => `${weekday} kl. ${time}`,
       straightLine: "Gångtiderna är fågelvägen.",

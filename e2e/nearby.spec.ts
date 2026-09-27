@@ -84,11 +84,15 @@ test.describe("with a granted location", () => {
     ).toContainText(t.pages.nearby.closingSoon);
   });
 
-  test("shows what opens next when nothing is open", async ({ page }) => {
+  test("lists every nearby museum with its opening time when nothing is open", async ({
+    page,
+  }) => {
     await page.clock.setFixedTime(helsinkiInstant(openDay, 3 * 60));
     await openFromHome(page);
-    await expect(page.getByText(t.pages.nearby.empty)).toBeVisible();
-    await expect(page.getByText(/^Seuraavaksi avautuu: /)).toBeVisible();
+    await expect(page.getByText(t.pages.nearby.showingAll)).toBeVisible();
+    await expect(
+      page.getByRole("listitem").filter({ hasText: KIASMA }).first(),
+    ).toContainText(/Suljettu · avautuu tänään klo /);
   });
 
   test("a plain page load does not ask for the location", async ({ page }) => {

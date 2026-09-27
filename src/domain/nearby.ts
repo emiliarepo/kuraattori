@@ -152,23 +152,26 @@ export function openNearby<T extends NearbyPlace>(
     .sort((a, b) => a.distance.km - b.distance.km);
 }
 
-/** The place within `radiusKm` that opens soonest, nearest on a tie. */
-export function nextToOpen<T extends NearbyPlace>(
+export interface NearbyPlaceStatus<T> {
+  readonly place: T;
+  readonly distance: Distance;
+  readonly opening: NextOpening | undefined;
+}
+
+/** Every place within `radiusKm`, open or not, nearest first, with when it next opens. */
+export function allNearby<T extends NearbyPlace>(
   places: readonly T[],
   origin: Coordinates,
   radiusKm: number,
   clock: HelsinkiClock,
-): { place: T; opening: NextOpening } | undefined {
-  let best: { place: T; opening: NextOpening; km: number } | undefined;
-  for (const place of places) {
-    const km = haversineKm(origin, place.coordinates);
-    if (km > radiusKm) continue;
-    const opening = nextOpening(place.openingHours, clock);
-    if (!opening) continue;
-    const key = `${opening.date}T${opening.opens}`;
-    const bestKey = best && `${best.opening.date}T${best.opening.opens}`;
-    if (!best || key < bestKey! || (key === bestKey && km < best.km))
-      best = { place, opening, km };
-  }
-  return best && { place: best.place, opening: best.opening };
+): NearbyPlaceStatus<T>[] {
+  return places
+    .flatMap((place) => {
+      const distance = distanceFrom(origin, place.coordinates);
+      if (distance.km > radiusKm) return [];
+      return [
+        { place, distance, opening: nextOpening(place.openingHours, clock) },
+      ];
+    })
+    .sort((a, b) => a.distance.km - b.distance.km);
 }

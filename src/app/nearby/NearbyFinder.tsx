@@ -11,9 +11,10 @@ import { localized } from "~/domain/localized";
 import {
   helsinkiClock,
   NEARBY_RADII_KM,
-  nextToOpen,
+  allNearby,
   openNearby,
   roundCoordinates,
+  type Distance,
   type HelsinkiClock,
   type NearbyRadiusKm,
 } from "~/domain/nearby";
@@ -242,10 +243,10 @@ function Results({
   const open = coordinates
     ? openNearby(places, coordinates, radius, clock)
     : [];
-  const next =
+  const closed =
     coordinates && open.length === 0
-      ? nextToOpen(places, coordinates, radius, clock)
-      : undefined;
+      ? allNearby(places, coordinates, radius, clock)
+      : [];
   const km = new Intl.NumberFormat(INTL_LOCALE[locale], {
     minimumFractionDigits: 1,
     maximumFractionDigits: 1,
@@ -295,125 +296,167 @@ function Results({
         <p className="text-muted font-sans text-sm" role="status">
           {t.pages.nearby.loading}
         </p>
-      ) : open.length === 0 ? (
-        <div className="flex flex-col gap-1.5">
-          <p className="text-muted italic">{t.pages.nearby.empty}</p>
-          {next && (
-            <p className="font-sans text-sm">
-              {t.pages.nearby.nextOpens(
-                localized(next.place, "name", locale).text,
-                next.opening.date === clock.date
-                  ? t.pages.nearby.opensToday(formatTime(next.opening.opens))
-                  : t.pages.nearby.opensOn(
-                      formatWeekday(next.opening.date, locale),
-                      formatTime(next.opening.opens),
-                    ),
-              )}
-            </p>
-          )}
-        </div>
-      ) : (
+      ) : open.length > 0 ? (
         <ul aria-label={t.pages.nearby.title}>
-          {open.map(({ place, distance, closes, closingSoon }) => {
-            const name = localized(place, "name", locale);
-            const current = place.exhibitions.filter(
-              (exhibition) => getPhase(exhibition, clock.date) === "current",
-            );
-            const hidden = current.length - EXHIBITIONS_SHOWN;
-            return (
-              <li
-                key={place.id}
-                className="border-rule-soft flex flex-col gap-1.5 border-t py-5 first:border-t-0 first:pt-0"
-              >
-                <h3 className="text-headline text-xl sm:text-2xl">
-                  <Link
-                    href={`/museums/${place.slug}`}
-                    lang={name.lang}
-                    className="hover:text-signal"
-                  >
-                    {name.text}
-                  </Link>
-                </h3>
-                <p className="font-sans text-sm tabular-nums">
-                  <span className="text-muted">
-                    {t.pages.nearby.distance(
-                      km.format(distance.km),
-                      distance.walkingMinutes,
-                    )}
-                  </span>
-                  {" · "}
-                  <span
-                    className={
-                      closingSoon ? "text-signal font-semibold" : undefined
-                    }
-                  >
-                    {t.pages.nearby.openUntil(formatTime(closes))}
-                    {closingSoon && ` · ${t.pages.nearby.closingSoon}`}
-                  </span>
-                </p>
-                {current.length === 0 ? (
-                  <p className="text-muted text-sm italic">
-                    {t.pages.nearby.noExhibitions}
-                  </p>
-                ) : (
-                  <ul className="flex flex-col gap-1">
-                    {current.slice(0, EXHIBITIONS_SHOWN).map((exhibition) => {
-                      const title = localized(exhibition, "title", locale);
-                      const bar = timeBarProps(exhibition, clock.date, i18n);
-                      return (
-                        <li
-                          key={exhibition.id}
-                          className="flex flex-wrap items-baseline gap-x-2"
-                        >
-                          <Link
-                            href={`/exhibitions/${exhibition.slug}`}
-                            lang={title.lang}
-                            className="hover:text-signal underline-offset-4 hover:underline"
-                          >
-                            {title.text}
-                          </Link>
-                          {bar.urgent && (
-                            <span className="text-signal font-sans text-xs font-semibold">
-                              {bar.remainingLabel}
-                            </span>
-                          )}
-                        </li>
-                      );
-                    })}
-                    {hidden > 0 && (
-                      <li>
-                        <Link
-                          href={`/museums/${place.slug}`}
-                          aria-label={`${t.pages.nearby.more(hidden)}: ${name.text}`}
-                          className="hover:text-signal font-sans text-sm underline underline-offset-4"
-                        >
-                          {t.pages.nearby.more(hidden)}
-                        </Link>
-                      </li>
-                    )}
-                  </ul>
-                )}
-                <a
-                  href={mapHref(
-                    name.text,
-                    place.address ?? place.city ?? "",
-                    apple,
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${t.pages.museums.showOnMap}: ${name.text}`}
-                  className="hover:text-signal self-start py-2 font-sans text-sm underline underline-offset-4"
+          {open.map(({ place, distance, closes, closingSoon }) => (
+            <NearbyEntry
+              key={place.id}
+              place={place}
+              distance={distance}
+              clock={clock}
+              apple={apple}
+              km={km}
+              status={
+                <span
+                  className={
+                    closingSoon ? "text-signal font-semibold" : undefined
+                  }
                 >
-                  {t.pages.museums.showOnMap}
-                </a>
-              </li>
-            );
-          })}
+                  {t.pages.nearby.openUntil(formatTime(closes))}
+                  {closingSoon && ` · ${t.pages.nearby.closingSoon}`}
+                </span>
+              }
+            />
+          ))}
         </ul>
+      ) : closed.length > 0 ? (
+        <>
+          <p className="text-muted mb-5 italic">
+            {t.pages.nearby.empty} {t.pages.nearby.showingAll}
+          </p>
+          <ul aria-label={t.pages.nearby.title}>
+            {closed.map(({ place, distance, opening }) => (
+              <NearbyEntry
+                key={place.id}
+                place={place}
+                distance={distance}
+                clock={clock}
+                apple={apple}
+                km={km}
+                status={
+                  <span>
+                    {opening
+                      ? t.pages.nearby.closedOpens(
+                          opening.date === clock.date
+                            ? t.pages.nearby.opensToday(
+                                formatTime(opening.opens),
+                              )
+                            : t.pages.nearby.opensOn(
+                                formatWeekday(opening.date, locale),
+                                formatTime(opening.opens),
+                              ),
+                        )
+                      : t.pages.nearby.closed}
+                  </span>
+                }
+              />
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p className="text-muted italic">{t.pages.nearby.noneInRadius}</p>
       )}
       <p className="text-muted mt-6 font-sans text-xs">
         {t.pages.nearby.straightLine}
       </p>
     </section>
+  );
+}
+
+function NearbyEntry({
+  place,
+  distance,
+  status,
+  clock,
+  apple,
+  km,
+}: {
+  place: Museum;
+  distance: Distance;
+  status: React.ReactNode;
+  clock: HelsinkiClock;
+  apple: boolean;
+  km: Intl.NumberFormat;
+}) {
+  const i18n = useI18n();
+  const { t, locale } = i18n;
+  const name = localized(place, "name", locale);
+  const current = place.exhibitions.filter(
+    (exhibition) => getPhase(exhibition, clock.date) === "current",
+  );
+  const hidden = current.length - EXHIBITIONS_SHOWN;
+  return (
+    <li className="border-rule-soft flex flex-col gap-1.5 border-t py-5 first:border-t-0 first:pt-0">
+      <h3 className="text-headline text-xl sm:text-2xl">
+        <Link
+          href={`/museums/${place.slug}`}
+          lang={name.lang}
+          className="hover:text-signal"
+        >
+          {name.text}
+        </Link>
+      </h3>
+      <p className="font-sans text-sm tabular-nums">
+        <span className="text-muted">
+          {t.pages.nearby.distance(
+            km.format(distance.km),
+            distance.walkingMinutes,
+          )}
+        </span>
+        {" · "}
+        {status}
+      </p>
+      {current.length === 0 ? (
+        <p className="text-muted text-sm italic">
+          {t.pages.nearby.noExhibitions}
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-1">
+          {current.slice(0, EXHIBITIONS_SHOWN).map((exhibition) => {
+            const title = localized(exhibition, "title", locale);
+            const bar = timeBarProps(exhibition, clock.date, i18n);
+            return (
+              <li
+                key={exhibition.id}
+                className="flex flex-wrap items-baseline gap-x-2"
+              >
+                <Link
+                  href={`/exhibitions/${exhibition.slug}`}
+                  lang={title.lang}
+                  className="hover:text-signal underline-offset-4 hover:underline"
+                >
+                  {title.text}
+                </Link>
+                {bar.urgent && (
+                  <span className="text-signal font-sans text-xs font-semibold">
+                    {bar.remainingLabel}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+          {hidden > 0 && (
+            <li>
+              <Link
+                href={`/museums/${place.slug}`}
+                aria-label={`${t.pages.nearby.more(hidden)}: ${name.text}`}
+                className="hover:text-signal font-sans text-sm underline underline-offset-4"
+              >
+                {t.pages.nearby.more(hidden)}
+              </Link>
+            </li>
+          )}
+        </ul>
+      )}
+      <a
+        href={mapHref(name.text, place.address ?? place.city ?? "", apple)}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${t.pages.museums.showOnMap}: ${name.text}`}
+        className="hover:text-signal self-start py-2 font-sans text-sm underline underline-offset-4"
+      >
+        {t.pages.museums.showOnMap}
+      </a>
+    </li>
   );
 }

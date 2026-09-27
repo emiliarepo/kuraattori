@@ -4,7 +4,7 @@ import {
   distanceFrom,
   helsinkiClock,
   nextOpening,
-  nextToOpen,
+  allNearby,
   openNearby,
   openState,
   roundCoordinates,
@@ -167,12 +167,19 @@ describe("openNearby", () => {
     ).toEqual(["near", "far"]);
   });
 
-  it("names what opens next when nothing is open", () => {
+  it("lists every place in the radius with its next opening when nothing is open", () => {
+    const early = { date: "2026-10-02", minutes: 8 * 60 };
+    expect(openNearby(places, origin, 5, early)).toEqual([]);
     expect(
-      nextToOpen(places, origin, 2, { date: "2026-10-02", minutes: 8 * 60 }),
-    ).toMatchObject({
-      place: { name: "near" },
-      opening: { date: "2026-10-02", opens: "10:00" },
-    });
+      allNearby(places, origin, 5, early).map((r) => ({
+        name: r.place.name,
+        opens: r.opening?.opens,
+      })),
+    ).toEqual([
+      { name: "closed", opens: "18:00" },
+      { name: "near", opens: "10:00" },
+      { name: "far", opens: "10:00" },
+    ]);
+    expect(allNearby(places, origin, 0.01, early)).toEqual([]);
   });
 });

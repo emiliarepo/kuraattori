@@ -354,8 +354,10 @@ export const t = {
       more: (count: number) => `+${count}`,
       noExhibitions: "Ei käynnissä olevia näyttelyitä.",
       empty: "Lähistöllä ei ole juuri nyt avoinna olevia museoita.",
-      nextOpens: (museum: string, when: string) =>
-        `Seuraavaksi avautuu: ${museum}, ${when}`,
+      showingAll: "Näytetään kaikki lähimmät museot.",
+      closed: "Suljettu",
+      closedOpens: (when: string) => `Suljettu · avautuu ${when}`,
+      noneInRadius: "Tällä etäisyydellä ei ole museoita.",
       opensToday: (time: string) => `tänään klo ${time}`,
       opensOn: (weekday: string, time: string) => `${weekday} klo ${time}`,
       straightLine: "Kävelyajat ovat linnuntietä.",
