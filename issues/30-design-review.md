@@ -33,3 +33,4 @@ Deliverables: fixes committed per area, before/after screenshots for anything vi
 | /profile/account | Delete confirmation button 40 px and off the button scale | `btn` with the rust fill kept for the destructive action | consistency |
 | /profile, /my tabs | Focus outline clipped by the scrolling tab row | Outline inset by 2 px on both tab bars | consistency |
 | /profile interests, regions | The "Tallennettu" autosave confirmation was screen-reader only, and never re-announced after the first save | Visible muted kicker in a reserved line, cleared when a new change starts; E2E asserts it | behaviour |
+| /exhibitions filter sheet (390 px) | "Näytä tulokset" dropped the filters: the back-to-close cleanup ran `history.back()` before Next updated the URL, cancelling the navigation and eating the previous history entry | `useBackToClose` returns a release function; the sheet replaces its history entry with the filtered URL; E2E in `browse.spec.ts` | behaviour |

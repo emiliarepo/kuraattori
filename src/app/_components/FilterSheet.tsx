@@ -196,12 +196,20 @@ export function FilterSheet(props: {
   const pathname = usePathname();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  useBackToClose(sheetOpen, () => dialogRef.current?.close());
+  const releaseHistoryEntry = useBackToClose(sheetOpen, () =>
+    dialogRef.current?.close(),
+  );
 
   function apply(next: BrowseFilters) {
     const query = browseFiltersToParams(next).toString();
-    dialogRef.current?.close();
-    router.push(query ? `${pathname}?${query}` : pathname);
+    const href = query ? `${pathname}?${query}` : pathname;
+    if (sheetOpen) {
+      releaseHistoryEntry();
+      dialogRef.current?.close();
+      router.replace(href);
+    } else {
+      router.push(href);
+    }
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

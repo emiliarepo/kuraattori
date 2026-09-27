@@ -29,3 +29,27 @@ test("browse: a category filter narrows results without a reload", async ({
 
   assertPageClean();
 });
+
+test.describe("mobile filter sheet", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("applies on the first submit and back returns to the unfiltered list", async ({
+    page,
+  }) => {
+    await page.goto("/exhibitions");
+    await page
+      .getByRole("button", { name: t.pages.browse.openFilters })
+      .click();
+    const sheet = page.getByRole("dialog", { name: t.pages.browse.filters });
+    await sheet.getByRole("checkbox").first().check();
+    await sheet
+      .getByRole("button", { name: t.pages.browse.applyFilters })
+      .click();
+
+    await expect(page).toHaveURL(/\/exhibitions\?.+/);
+    await expect(sheet).toBeHidden();
+
+    await page.goBack();
+    await expect(page).toHaveURL(/\/exhibitions$/);
+  });
+});
