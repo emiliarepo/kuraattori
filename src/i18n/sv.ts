@@ -171,6 +171,8 @@ export const t = {
       upcoming: "Kommande",
       whyNew: "Ny",
       whyFollowed: (museum: string) => `Du följer: ${museum}`,
+      whyLikedSimilar: "Du gillade liknande",
+      whyLikedMuseum: (museum: string) => `Du gillade ${museum}`,
       seeAll: "Alla",
       chooseInterests: "Välj dina intressen",
       followedMuseums: "Museer du följer",

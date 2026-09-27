@@ -1,7 +1,8 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { z } from "zod";
 
 import { todayInHelsinki } from "~/domain/dates";
+import { learnAffinity, type RatedVisit } from "~/domain/learned-affinity";
 import { getRelevance, type RelevanceReason } from "~/domain/relevance";
 import { getSinulleScore, isSinulleEligible } from "~/domain/ranking";
 import { getUrgency } from "~/domain/urgency";
@@ -13,6 +14,8 @@ import { categoryRouter } from "~/server/api/routers/category";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getActiveExhibitionPool } from "~/server/cache/active-pool";
 import {
+  exhibitionCategories,
+  exhibitions,
   importRuns,
   userExhibitions,
   userFollowedMuseums,
@@ -41,6 +44,11 @@ function reasonLabel(
       return context.t.pages.home.whyFollowed(context.museumName);
     case "new":
       return context.t.pages.home.whyNew;
+    case "learned":
+      if (reason.points <= 0) return null;
+      return reason.basis === "museum"
+        ? context.t.pages.home.whyLikedMuseum(context.museumName)
+        : context.t.pages.home.whyLikedSimilar;
   }
 }
 
@@ -64,6 +72,7 @@ export const recommendationRouter = createTRPCRouter({
         secondSucceededImport,
         pool,
         allCategories,
+        ratingRows,
       ] = await Promise.all([
         ctx.db
           .select({
@@ -95,6 +104,30 @@ export const recommendationRouter = createTRPCRouter({
           .offset(1),
         getActiveExhibitionPool(ctx.db),
         categoryRouter.createCaller(ctx).list(),
+        ctx.db
+          .select({
+            exhibitionId: userExhibitions.exhibitionId,
+            rating: userExhibitions.rating,
+            visitedAt: userExhibitions.visitedAt,
+            museumId: exhibitions.museumId,
+            categoryId: exhibitionCategories.categoryId,
+          })
+          .from(userExhibitions)
+          .innerJoin(
+            exhibitions,
+            eq(exhibitions.id, userExhibitions.exhibitionId),
+          )
+          .leftJoin(
+            exhibitionCategories,
+            eq(exhibitionCategories.exhibitionId, userExhibitions.exhibitionId),
+          )
+          .where(
+            and(
+              eq(userExhibitions.userId, userId),
+              eq(userExhibitions.status, "visited"),
+              isNotNull(userExhibitions.rating),
+            ),
+          ),
       ]);
       const rows = pool.map(({ exhibition, museum }) => ({
         exhibition,
@@ -118,13 +151,29 @@ export const recommendationRouter = createTRPCRouter({
           excludedCategoryIds.add(interest.categoryId);
         else interestWeights.set(interest.categoryId, interest.weight as 1 | 2);
       }
+      const ratedVisits = new Map<
+        number,
+        RatedVisit & { categoryIds: number[] }
+      >();
+      for (const row of ratingRows) {
+        if (row.rating === null) continue;
+        const visit = ratedVisits.get(row.exhibitionId) ?? {
+          categoryIds: [],
+          museumId: row.museumId,
+          rating: row.rating,
+          visitedAt: row.visitedAt?.toISOString().slice(0, 10) ?? null,
+        };
+        if (row.categoryId !== null) visit.categoryIds.push(row.categoryId);
+        ratedVisits.set(row.exhibitionId, visit);
+      }
+      const today = todayInHelsinki();
       const preferences = {
         interestWeights,
         excludedCategoryIds,
         preferredRegions: new Set(regions.map((x) => x.region)),
         followedMuseumIds: new Set(followed.map((x) => x.id)),
+        learnedAffinity: learnAffinity([...ratedVisits.values()], today),
       };
-      const today = todayInHelsinki();
       const hasMultipleImports = secondSucceededImport.length > 0;
       const groups = groupExhibitionRows(rows);
       return groups

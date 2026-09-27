@@ -173,6 +173,8 @@ export const t = {
       upcoming: "Tulossa",
       whyNew: "Uusi",
       whyFollowed: (museum: string) => `Seuraat: ${museum}`,
+      whyLikedSimilar: "Pidit samankaltaisista",
+      whyLikedMuseum: (museum: string) => `Pidit kohteesta ${museum}`,
       seeAll: "Kaikki",
       chooseInterests: "Valitse kiinnostuksen kohteet",
       followedMuseums: "Seuraamasi museot",
