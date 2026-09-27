@@ -28,7 +28,7 @@ No real 14-day baseline exists: the Worker's first production deploy was today a
 |---|---:|---:|
 | Worker requests | 7,438 | 37,000 (`BUDGET_WORKER_REQUESTS`) |
 | Worker CPU (median × requests, ms) | ~199,000 | 1,000,000 (`BUDGET_WORKER_CPU_MS`) |
-| D1 rows read | 34,179,591 | 25,000,000 (`BUDGET_D1_ROWS_READ`, 10× the health threshold; the measured day was the incident) |
+| D1 rows read | 34,179,591 | 100,000,000 (`BUDGET_D1_ROWS_READ`; the measured day was the incident) |
 | D1 rows written | 47,785 | 240,000 (`BUDGET_D1_ROWS_WRITTEN`) |
 | KV reads | 637 | 3,200 (`BUDGET_KV_READS`) |
 | KV writes | 11 | 200 (`BUDGET_KV_WRITES`, floor) |
