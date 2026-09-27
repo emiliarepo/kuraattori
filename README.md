@@ -1,106 +1,109 @@
 # Kuraattori
 
-Finnish-language exhibition discovery and visit tracking. See `docs/spec.md` and
-`docs/design.md` for product and design decisions, and `issues/` for the ticket
-breakdown.
+Kuraattori is a Finnish-language web app for finding museum exhibitions in Finland and keeping track of the ones you want to see. It shows what is on, what closes soon and what matches your interests, and it remembers where you have been.
+
+Live at **https://kuraattori.emialis.com**.
+
+## Features
+
+- **Home:** a daily lead pick, then rails for exhibitions closing soon, recommendations ("Sinulle"), new openings, upcoming ones and followed museums.
+- **Browse:** filters by region, city, museum, category and dates, with results and paging kept in the URL.
+- **Personal state:** mark exhibitions *Kiinnostaa*, *Käyty* or *Piilota*, add a visit date and a private note, and sort the Omat lists.
+- **Explainable recommendations:** a deterministic score from weighted interests (Kiinnostaa, Erityisesti, Ei kiinnosta), preferred regions and followed museums. Closing dates only break ties; they never push an unrelated exhibition to the top. Every recommendation shows its reasons.
+- **Travel mode:** what is open in a given place over a date range.
+- **Museum pages:** addresses with a map link (Apple Maps on Apple devices, Google Maps elsewhere) and a follow button.
+- **Museokortti savings and year in review:** admission prices you saved with the Museum Card, and a yearly summary of your visits.
+- **Calendar feed:** a private `.ics` subscription with the closing dates of the exhibitions you are interested in.
+- **Installable (PWA):** works offline for your saved list.
+- **Accounts:** Google sign-in, data export as JSON and account deletion.
 
 ## Stack
 
-Next.js (App Router) + tRPC + Drizzle, deployed to Cloudflare Workers via
-`@opennextjs/cloudflare`, with Cloudflare D1 as the database and Auth.js
-(Google, not configured yet) for sign-in.
+- [Next.js](https://nextjs.org) App Router, TypeScript, Tailwind CSS, [tRPC](https://trpc.io), [Drizzle ORM](https://orm.drizzle.team) and [Auth.js](https://authjs.dev), started from [create-t3-app](https://create.t3.gg).
+- [Cloudflare Workers](https://developers.cloudflare.com/workers/) through [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare), with **D1** for the database and **KV** for caching public data.
+- GitHub Actions for deploys, the nightly import and health checks.
+- Vitest for unit and integration tests, Playwright and axe for end-to-end and accessibility tests.
+
+## How it fits together
+
+```
+museot.fi ──(nightly GitHub Action: scripts/import-museot.ts)──▶ D1
+                                                                 │
+browser ◀── Next.js on a Cloudflare Worker (tRPC, Auth.js) ◀─────┤
+                                                                 │
+                                    KV cache for public lists ◀──┘
+```
+
+- **Import:** a GitHub Action runs every night at 01:00 UTC and writes to D1 through the HTTP API. It isn't a Workers cron because parsing the listing needs more CPU time than a cron invocation gets. The importer reads museot.fi's server-rendered exhibition calendar at about 2 requests a second with an identifying User-Agent. It only fetches detail pages for new or changed exhibitions. Records are matched by source ID and never deleted when they go missing, and every run is logged in `import_run`.
+- **Cache:** regions, museums, categories and the current exhibition pool are cached in KV for an hour. Personal data is never cached.
+- **Design:** documented in [`docs/design.md`](docs/design.md). The original product spec is in [`docs/spec.md`](docs/spec.md).
+
+## Project layout
+
+```
+src/app/            routes (Finnish UI, English paths) and components
+src/domain/         pure logic: dates, urgency, relevance, ranking, savings, …
+src/server/api/     tRPC routers
+src/server/import/  museot.fi adapter, parsers, upserts
+src/server/db/      Drizzle schema
+src/i18n/fi.ts      every user-visible string
+drizzle/            SQL migrations
+e2e/                Playwright suite
+fixtures/museot/    museot.fi HTML snapshots used by parser tests and the E2E seed
+scripts/            importer CLI, E2E seed and health checks
+issues/             the ticket files the app was built from
+```
 
 ## Local development
 
+Requirements: Node 22+, [pnpm](https://pnpm.io) and a free Cloudflare account. The account is only needed for deploying; local development runs on Wrangler's local D1 and KV.
+
 ```sh
 pnpm install
-pnpm db:generate       # regenerate drizzle/ SQL from src/server/db/schema.ts
-pnpm db:migrate:local  # apply drizzle/ migrations to the local D1 database
-pnpm dev               # next dev, with Cloudflare bindings proxied in
+cp .env.example .env               # set AUTH_SECRET: `openssl rand -base64 32`
+cp .dev.vars.example .dev.vars     # local vars for `pnpm preview` (wrangler)
+pnpm db:migrate:local              # create the local D1 database
+pnpm import:museot                 # fill it from museot.fi (about 6 minutes, polite rate limit)
+pnpm dev                           # http://localhost:3000
 ```
 
-`pnpm dev` runs the Next.js dev server directly; `pnpm preview` builds the
-actual Worker bundle and serves it through `wrangler dev` for a closer-to-prod
-check. Both read from the same local D1 database under `.wrangler/state`.
+In development, `/sign-in` offers a "Kirjaudu kehityskäyttäjänä" form, so you don't need Google credentials. It only exists when `NODE_ENV=development`, or when the test server sets `E2E_TEST_AUTH`. To sign in with Google locally, create an OAuth client with `http://localhost:3000/api/auth/callback/google` as a redirect URI and put its ID and secret in `.env`.
 
-## Getting a database handle
+`pnpm dev` runs the Next.js dev server with the Cloudflare bindings proxied in. `pnpm preview` builds the real Worker bundle and serves it through `wrangler dev`, which catches code that works in Node but not on Workers.
 
-- **In tRPC / server components**: `getDb()` from `~/server/db` (async — the D1
-  binding only exists once a request reaches the Worker, so it can't be a
-  module-level singleton). `ctx.db` in tRPC procedures is already this.
-- **In a standalone Node script** (e.g. the importer): there is no Worker
-  request to piggyback on, so use `getPlatformProxy()` from the `wrangler`
-  package to get `{ env: { DB } }` against the same local D1 database, or the
-  D1 HTTP API for a remote run.
+### Useful scripts
 
-## Other scripts
+| Command | What it does |
+|---|---|
+| `pnpm test` | Vitest unit and integration tests (routers run against the real migrations) |
+| `pnpm test:e2e` | builds the Worker, seeds a local D1 from `fixtures/` without network access, runs Playwright; run `pnpm exec playwright install chromium` once first |
+| `pnpm typecheck` / `pnpm lint` / `pnpm format:check` | static checks |
+| `pnpm db:generate` | generate a migration from `src/server/db/schema.ts` |
+| `pnpm cf-typegen` | regenerate `cloudflare-env.d.ts` from `wrangler.jsonc` (runs on install) |
+| `pnpm preview` / `pnpm deploy` | build and run, or deploy, the Worker |
 
-- `pnpm test` — Vitest.
-- `pnpm test:e2e` — Playwright, against the real built Worker (`opennextjs-cloudflare build`,
-  then `wrangler dev`) with a local D1 seeded from `fixtures/museot/` through the real
-  importer code (`scripts/e2e-seed.ts`, no network). Requires `pnpm exec playwright install
-  chromium` once. See `playwright.config.ts` and `e2e/`.
-- `pnpm typecheck`, `pnpm lint`, `pnpm format:check` / `format:write`.
-- `pnpm cf-typegen` — regenerate `cloudflare-env.d.ts` from `wrangler.jsonc`
-  (runs automatically on `pnpm install` via `postinstall`).
-- `pnpm build` — plain Next.js build (fast feedback while coding).
-- `pnpm preview` / `pnpm deploy` — build and run/deploy the actual Worker.
+In development, D1 statements are logged with their row counts, with a warning when a request reads more than 5,000 rows. Keep pages under that.
 
 ## Deployment
 
-Pushes to `main` run `.github/workflows/deploy.yml`: install, typecheck, lint,
-test, a Playwright end-to-end suite against the built Worker (`pnpm test:e2e`),
-apply `drizzle/` migrations to the remote D1 database
-(`wrangler d1 migrations apply DB --remote`), then `pnpm run deploy`. Any
-failed step stops the run before the migration or deploy. It shares a
-`d1-remote` concurrency group with the nightly importer
-(`import.yml`) so a migration never runs alongside another migration, a
-deploy, or an import.
+A push to `main` runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): typecheck, lint, unit tests, the end-to-end suite, D1 migrations against production, then `pnpm run deploy`. Any failure stops the run before the database or the Worker is touched. Deploys, migrations and the importer share a concurrency group, so they never overlap.
 
-`CLOUDFLARE_API_TOKEN` (a repo secret) needs:
+To run your own copy:
 
-- **Workers Scripts: Edit** — upload the Worker bundle.
-- **D1: Edit** — apply migrations.
-- **Workers Routes: Edit** on zone `emialis.com` — keep the
-  `kuraattori.emialis.com` custom domain route attached.
-- **Account Settings: Read** — `wrangler` reads this on every command.
-- **Account Analytics: Read** — the daily D1 read check queries GraphQL
-  analytics.
+1. Create a D1 database (`wrangler d1 create kuraattori`) and a KV namespace (`wrangler kv namespace create CACHE`). Put their IDs in `wrangler.jsonc`, and change the custom domain route to yours.
+2. Set the Worker secrets: `wrangler secret put AUTH_SECRET`, `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`. Use a Google OAuth web client with `https://<your-domain>/api/auth/callback/google` as the redirect URI.
+3. Set `NEXT_PUBLIC_SITE_URL` in `.env.production`.
+4. Add the repository secrets `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID` and `CLOUDFLARE_API_TOKEN`. The token needs Workers Scripts: Edit, D1: Edit, Workers Routes: Edit on your zone, Account Settings: Read, and Account Analytics: Read (for the usage check).
 
-`AUTH_SECRET`, `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` are set directly on
-the Worker (`wrangler secret put`) and are never read or written by CI; the
-typecheck/lint/build steps run with `SKIP_ENV_VALIDATION=1` instead, since
-they only need `src/env.js`'s schema satisfied, not the real values.
+## Monitoring
 
-## Health checks
+[`.github/workflows/health.yml`](.github/workflows/health.yml) requests the main public routes every 30 minutes and fails if any of them is slow or returns an error. Once a day it also fails if D1 reads for the day exceed 2.5 million rows. The import fails loudly when museot.fi suddenly returns far fewer exhibitions than the previous run, because that usually means the markup changed. Failed scheduled runs notify the repository owner through GitHub.
 
-`.github/workflows/health.yml` checks the public site every 30 minutes and on
-manual dispatch. It requests the home page, exhibition list, an exhibition
-linked from `/sitemap.xml`, Auth.js providers, and `robots.txt`. Each request
-must return HTTP 2xx or 3xx within five seconds; the workflow summary shows
-each URL, status, and response time. GitHub emails the repository owner for
-failed scheduled runs when Actions notifications are enabled.
+Server errors are logged with context (route, tRPC procedure, D1 error code) to Workers Logs. Users see a Finnish error page, and one failing section no longer takes down the whole page.
 
-At 02:15 UTC each day, the same workflow also checks account-wide D1 rows read
-since 00:00 UTC. It fails above 2,500,000 rows, half the Workers Free daily
-limit. Manual dispatch runs both checks. The existing `CLOUDFLARE_API_TOKEN`
-repository secret needs **Account Analytics: Read** on the account for this
-check. Run `node scripts/check-health.mjs` locally to test the public route
-checks without credentials.
+## Data and privacy
 
-The nightly importer records fetched and failed counts in `import_run`. It
-marks a run failed after writing the fetched data if its fetched count falls
-below half the last successful run or failures exceed 5% of all attempted
-items. The GitHub run then fails so the source change is visible without
-discarding the imported data.
-
-## Notes
-
-- `wrangler.jsonc`'s `database_id` is a placeholder for local-only development.
-  Replace it with a real one from `wrangler d1 create` before any remote
-  deploy, and see `docs/design.md` for why the importer isn't a Workers cron.
-- Google OAuth isn't configured (`AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` are
-  empty in `.env.example`); sign-in wiring is a later ticket.
+Exhibition data comes from [museot.fi](https://www.museot.fi) and belongs to them and the museums. Kuraattori links back to the source for every exhibition. What the app stores about users, and why, is described on the [privacy page](https://kuraattori.emialis.com/privacy). The short version: your Google name and email, your preferences and statuses. There is no analytics or advertising.
 
 ## License
 
