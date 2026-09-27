@@ -88,6 +88,7 @@ export const t = {
       city: "Kaupunki",
       allCities: "Kaikki kaupungit",
       museums: "Museot",
+      museumFilter: "Hae museo",
       categories: "Aiheet",
       museumCardOnly: "Vain Museokortti-näyttelyt",
       endingWithin: "Päättyy pian",
