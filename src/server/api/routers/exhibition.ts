@@ -280,29 +280,50 @@ export const exhibitionRouter = createTRPCRouter({
       if (!source) return [];
 
       const today = todayInHelsinki();
-      const sharedCategories = sql<number>`(
-        select count(distinct candidate_category."categoryId")
-        from kuraattori_exhibition_category candidate_category
-        where candidate_category."exhibitionId" = ${exhibitions.id}
-          and exists (
-            select 1 from kuraattori_exhibition_category source_category
-            inner join kuraattori_exhibition source_exhibition
-              on source_exhibition.id = source_category."exhibitionId"
-            where source_category."categoryId" = candidate_category."categoryId"
-              and (source_exhibition.id = ${source.exhibition.id}
-                or (${source.exhibition.exhibitionGroup} is not null
-                  and source_exhibition."exhibitionGroup" = ${source.exhibition.exhibitionGroup}))
-          )
-      )`;
-      const score = sql<number>`(${sharedCategories} * 10
-        + case when ${museums.region} = ${source.museum.region} then 5 else 0 end
-        + case when ${museums.id} = ${source.museum.id} then 3 else 0 end)`;
+      const sourceGroup = source.exhibition.exhibitionGroup;
+      const sourceCategoryRows = await ctx.db
+        .selectDistinct({ categoryId: exhibitionCategories.categoryId })
+        .from(exhibitionCategories)
+        .innerJoin(
+          exhibitions,
+          eq(exhibitions.id, exhibitionCategories.exhibitionId),
+        )
+        .where(
+          sourceGroup
+            ? eq(exhibitions.exhibitionGroup, sourceGroup)
+            : eq(exhibitions.id, source.exhibition.id),
+        );
+      const sourceCategoryIds = sourceCategoryRows.map((row) => row.categoryId);
+      const sharedCounts = new Map<number, number>();
+      if (sourceCategoryIds.length > 0) {
+        const countRows = await batchedByIds(sourceCategoryIds, (batch) =>
+          ctx.db
+            .select({
+              exhibitionId: exhibitionCategories.exhibitionId,
+              shared: sql<number>`count(*)`,
+            })
+            .from(exhibitionCategories)
+            .where(inArray(exhibitionCategories.categoryId, batch))
+            .groupBy(exhibitionCategories.exhibitionId),
+        );
+        for (const row of countRows) {
+          sharedCounts.set(
+            row.exhibitionId,
+            (sharedCounts.get(row.exhibitionId) ?? 0) + row.shared,
+          );
+        }
+      }
+      const scoreOf = (
+        exhibition: typeof exhibitions.$inferSelect,
+        museum: typeof museums.$inferSelect,
+      ) =>
+        (sharedCounts.get(exhibition.id) ?? 0) * 10 +
+        (museum.region !== null && museum.region === source.museum.region
+          ? 5
+          : 0) +
+        (museum.id === source.museum.id ? 3 : 0);
       const candidates = await ctx.db
-        .select({
-          exhibition: exhibitions,
-          museum: museums,
-          score,
-        })
+        .select({ exhibition: exhibitions, museum: museums })
         .from(exhibitions)
         .innerJoin(museums, eq(exhibitions.museumId, museums.id))
         .where(
@@ -327,9 +348,11 @@ export const exhibitionRouter = createTRPCRouter({
               : sql`${exhibitions.id} != ${source.exhibition.id}`,
           ),
         )
-        .orderBy(
-          desc(score),
-          asc(sql`coalesce(${exhibitions.endDate}, '9999-12-31')`),
+        .then((rows) =>
+          rows.map((row) => ({
+            ...row,
+            score: scoreOf(row.exhibition, row.museum),
+          })),
         );
 
       const byGroup = new Map<string, typeof candidates>();
