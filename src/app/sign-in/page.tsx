@@ -26,7 +26,7 @@ export default async function SignInPage({
   if (session?.user) redirect(redirectTo);
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-8 py-12">
+    <div className="mx-auto flex max-w-sm flex-col gap-8 py-8">
       <h1 className="text-headline text-4xl">{t.auth.signIn.title}</h1>
 
       <form
@@ -36,10 +36,7 @@ export default async function SignInPage({
           await signIn("google", { redirectTo });
         }}
       >
-        <button
-          type="submit"
-          className="bg-fg text-bg w-full py-3 font-sans text-sm font-semibold"
-        >
+        <button type="submit" className="btn btn-primary w-full">
           {t.auth.signIn.google}
         </button>
       </form>
@@ -86,10 +83,7 @@ export default async function SignInPage({
               className="border-rule-soft bg-bg border px-2 py-2 text-base"
             />
           </label>
-          <button
-            type="submit"
-            className="border-rule border py-2 text-sm font-semibold"
-          >
+          <button type="submit" className="btn btn-secondary">
             {t.auth.signIn.devSubmit}
           </button>
         </form>

@@ -33,6 +33,36 @@
   text-transform: uppercase;
 }
 
+@utility btn {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  transition: background-color 150ms, color 150ms;
+}
+
+@utility btn-primary {
+  background-color: var(--fg);
+  color: var(--bg);
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--fg) 85%, var(--bg));
+  }
+}
+
+@utility btn-secondary {
+  border: 1px solid var(--rule);
+
+  &:hover:not(:disabled) {
+    background-color: var(--surface);
+  }
+}
+
 @utility rail {
   display: flex;
   overflow-x: auto;

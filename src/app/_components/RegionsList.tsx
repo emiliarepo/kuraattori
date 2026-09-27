@@ -18,11 +18,11 @@ export function RegionsList({
         .map((group, index) => (
           <ul
             key={index}
-            className={`flex flex-col gap-2 ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
+            className={`flex flex-col ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
           >
             {group.map((region) => (
               <li key={region}>
-                <label className="flex items-center gap-2.5 text-lg">
+                <label className="flex min-h-11 items-center gap-2.5 text-lg">
                   <input
                     type="checkbox"
                     checked={regions.includes(region)}

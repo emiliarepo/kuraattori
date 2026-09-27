@@ -96,3 +96,11 @@ export function browseFiltersToListInput(filters: BrowseFilters) {
     endingWithinDays: filters.endingWithinDays ?? undefined,
   };
 }
+
+/** A chosen city or museum is more specific than the masthead regions, so it replaces them instead of intersecting to nothing. */
+export function regionsForBrowse(
+  filters: BrowseFilters,
+  activeRegions: readonly string[],
+): readonly string[] {
+  return filters.city || filters.museumIds.length > 0 ? [] : activeRegions;
+}

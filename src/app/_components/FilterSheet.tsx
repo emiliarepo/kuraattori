@@ -49,13 +49,13 @@ function FilterFields({
           name="q"
           defaultValue={filters.search ?? ""}
           placeholder={t.pages.browse.searchPlaceholder}
-          className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
+          className="border-rule-soft bg-bg focus:border-fg min-h-11 border px-2 py-2 text-base font-normal tracking-normal normal-case"
         />
       </label>
 
       <fieldset className="flex flex-col gap-2">
         <legend className="text-kicker mb-1">{t.pages.browse.state}</legend>
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex min-h-11 items-center gap-2 text-sm sm:min-h-0">
           <input
             type="radio"
             name="state"
@@ -65,7 +65,7 @@ function FilterFields({
           />
           {t.pages.browse.stateCurrent}
         </label>
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex min-h-11 items-center gap-2 text-sm sm:min-h-0">
           <input
             type="radio"
             name="state"
@@ -82,7 +82,7 @@ function FilterFields({
         <select
           name="city"
           defaultValue={filters.city ?? ""}
-          className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
+          className="border-rule-soft bg-bg focus:border-fg min-h-11 border px-2 py-2 text-base font-normal tracking-normal normal-case"
         >
           <option value="">{t.pages.browse.allCities}</option>
           {cities.map((city) => (
@@ -98,7 +98,7 @@ function FilterFields({
         <select
           name="ending"
           defaultValue={filters.endingWithinDays?.toString() ?? ""}
-          className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
+          className="border-rule-soft bg-bg focus:border-fg min-h-11 border px-2 py-2 text-base font-normal tracking-normal normal-case"
         >
           <option value="">{t.pages.browse.endingWithinAny}</option>
           {ENDING_WITHIN_OPTIONS.map((days) => (
@@ -110,7 +110,7 @@ function FilterFields({
       </label>
 
       {showMuseumCardFilter && (
-        <label className="flex items-center gap-2 text-sm font-semibold">
+        <label className="flex min-h-11 items-center gap-2 text-sm font-semibold sm:min-h-0">
           <input
             type="checkbox"
             name="card"
@@ -131,15 +131,15 @@ function FilterFields({
             onChange={(event) => setMuseumFilter(event.target.value)}
             placeholder={t.pages.browse.museumFilter}
             aria-label={t.pages.browse.museumFilter}
-            className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
+            className="border-rule-soft bg-bg focus:border-fg min-h-11 border px-2 py-2 text-base font-normal tracking-normal normal-case"
           />
-          <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
+          <div className="flex max-h-48 flex-col overflow-y-auto sm:gap-2">
             {museums.map((museum) => (
               <label
                 key={museum.id}
                 className={
                   museum.label.toLowerCase().includes(normalizedMuseumFilter)
-                    ? "flex items-center gap-2 text-sm"
+                    ? "flex min-h-11 items-center gap-2 text-sm sm:min-h-0"
                     : "hidden"
                 }
               >
@@ -162,11 +162,11 @@ function FilterFields({
           <legend className="text-kicker mb-1">
             {t.pages.browse.categories}
           </legend>
-          <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
+          <div className="flex max-h-48 flex-col overflow-y-auto sm:gap-2">
             {categories.map((category) => (
               <label
                 key={category.id}
-                className="flex items-center gap-2 text-sm"
+                className="flex min-h-11 items-center gap-2 text-sm sm:min-h-0"
               >
                 <input
                   type="checkbox"
@@ -196,12 +196,20 @@ export function FilterSheet(props: {
   const pathname = usePathname();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  useBackToClose(sheetOpen, () => dialogRef.current?.close());
+  const releaseHistoryEntry = useBackToClose(sheetOpen, () =>
+    dialogRef.current?.close(),
+  );
 
   function apply(next: BrowseFilters) {
     const query = browseFiltersToParams(next).toString();
-    dialogRef.current?.close();
-    router.push(query ? `${pathname}?${query}` : pathname);
+    const href = query ? `${pathname}?${query}` : pathname;
+    if (sheetOpen) {
+      releaseHistoryEntry();
+      dialogRef.current?.close();
+      router.replace(href);
+    } else {
+      router.push(href);
+    }
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -233,10 +241,7 @@ export function FilterSheet(props: {
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <FilterFields {...props} />
           <div className="flex flex-col gap-2">
-            <button
-              type="submit"
-              className="bg-fg text-bg py-2.5 font-sans text-sm font-semibold"
-            >
+            <button type="submit" className="btn btn-primary">
               {t.pages.browse.applyFilters}
             </button>
             <button
@@ -257,7 +262,7 @@ export function FilterSheet(props: {
             dialogRef.current?.showModal();
             setSheetOpen(true);
           }}
-          className="border-rule w-full border py-2.5 font-sans text-sm font-semibold"
+          className="btn btn-secondary w-full"
         >
           {t.pages.browse.openFilters}
         </button>
@@ -271,10 +276,7 @@ export function FilterSheet(props: {
             <h2 className="text-headline text-2xl">{t.pages.browse.filters}</h2>
             <FilterFields {...props} />
             <div className="flex flex-col gap-2">
-              <button
-                type="submit"
-                className="bg-fg text-bg py-2.5 font-sans text-sm font-semibold"
-              >
+              <button type="submit" className="btn btn-primary">
                 {t.pages.browse.applyFilters}
               </button>
               <button

@@ -37,16 +37,12 @@ export default function GlobalError({
             {t.app.name}
           </span>
         </header>
-        <main className="mx-auto flex max-w-5xl flex-col items-start gap-4 px-4 py-16 sm:px-6">
+        <main className="mx-auto flex max-w-5xl flex-col items-start gap-4 px-4 py-8 sm:px-6">
           <h1 className="text-headline text-4xl sm:text-5xl">
             {t.pages.error.title}
           </h1>
           <p className="text-muted text-lg italic">{t.pages.error.body}</p>
-          <button
-            type="button"
-            onClick={reset}
-            className="bg-fg text-bg px-4 py-2.5 font-sans text-sm font-semibold"
-          >
+          <button type="button" onClick={reset} className="btn btn-primary">
             {t.pages.error.retry}
           </button>
         </main>

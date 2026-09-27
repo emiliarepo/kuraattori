@@ -4,7 +4,7 @@ import { t } from "~/i18n/fi";
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-start gap-4 py-16">
+    <div className="flex flex-col items-start gap-4 py-8">
       <h1 className="text-headline text-4xl sm:text-5xl">
         {t.pages.notFound.title}
       </h1>

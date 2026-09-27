@@ -26,6 +26,12 @@ export function RegionSelector({
   const [open, setOpen] = useState(false);
   useBackToClose(open, () => setOpen(false));
   const [selected, setSelected] = useState<readonly string[]>(initialSelected);
+  const initialKey = initialSelected.join(",");
+  const [syncedKey, setSyncedKey] = useState(initialKey);
+  if (syncedKey !== initialKey) {
+    setSyncedKey(initialKey);
+    setSelected(initialSelected);
+  }
   const panelId = useId();
   const groups = groupRegions(allRegions);
   const router = useRouter();
@@ -55,16 +61,18 @@ export function RegionSelector({
   }
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <button
         type="button"
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
-        className="hover:text-signal text-right font-sans text-xs font-semibold"
+        title={summary}
+        className="hover:text-signal -my-3.5 flex min-h-11 max-w-56 items-center gap-1 font-sans text-xs font-semibold"
       >
-        {summary} <span aria-hidden>▾</span>
+        <span className="truncate">{summary}</span>
+        <span aria-hidden>▾</span>
       </button>
       {open && (
         <>
@@ -81,7 +89,7 @@ export function RegionSelector({
             onKeyDown={(event) => {
               if (event.key === "Escape") setOpen(false);
             }}
-            className="border-rule bg-bg fixed inset-x-0 bottom-0 z-20 flex max-h-[85dvh] flex-col border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:absolute sm:top-full sm:right-0 sm:bottom-auto sm:mt-2 sm:max-h-[70vh] sm:w-64 sm:border sm:pb-4"
+            className="border-rule bg-bg fixed inset-x-0 bottom-0 z-20 flex max-h-[85dvh] flex-col border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:absolute sm:top-full sm:right-0 sm:bottom-auto sm:left-auto sm:mt-2 sm:max-h-[70vh] sm:w-64 sm:border sm:pb-4"
           >
             <p className="text-headline mb-3 text-xl">
               {t.ui.region.sheetTitle}
@@ -92,11 +100,11 @@ export function RegionSelector({
                 .map((group, index) => (
                   <ul
                     key={index}
-                    className={`flex flex-col gap-2 ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
+                    className={`flex flex-col ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
                   >
                     {group.map((region) => (
                       <li key={region}>
-                        <label className="flex items-center gap-2 py-0.5">
+                        <label className="flex min-h-11 items-center gap-2 sm:min-h-8">
                           <input
                             type="checkbox"
                             checked={selected.includes(region)}
@@ -113,7 +121,7 @@ export function RegionSelector({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="bg-fg text-bg mt-4 w-full py-2.5 font-sans text-sm font-semibold"
+              className="btn btn-primary mt-4 w-full"
             >
               {t.ui.region.apply}
             </button>

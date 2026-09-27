@@ -4,6 +4,7 @@ import {
   browseFiltersToListInput,
   browseFiltersToParams,
   parseBrowseFilters,
+  regionsForBrowse,
 } from "./browse-filters";
 
 describe("parseBrowseFilters", () => {
@@ -88,5 +89,25 @@ describe("browseFiltersToListInput", () => {
       state: "current",
       endingWithinDays: undefined,
     });
+  });
+});
+
+describe("regionsForBrowse", () => {
+  const regions = ["Pääkaupunkiseutu"];
+
+  it("keeps the masthead regions without a city or museum", () => {
+    expect(regionsForBrowse(parseBrowseFilters({}), regions)).toEqual(regions);
+  });
+
+  it("drops them for a chosen city", () => {
+    expect(
+      regionsForBrowse(parseBrowseFilters({ city: "Nurmijärvi" }), regions),
+    ).toEqual([]);
+  });
+
+  it("drops them for a chosen museum", () => {
+    expect(
+      regionsForBrowse(parseBrowseFilters({ museum: "74" }), regions),
+    ).toEqual([]);
   });
 });

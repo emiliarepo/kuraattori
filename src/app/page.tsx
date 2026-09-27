@@ -91,7 +91,7 @@ export default async function HomePage() {
   const [lead, ...forYouRest] = forYou;
 
   return (
-    <div className="pt-6 sm:pt-8">
+    <div className="pt-8">
       <h1 className="sr-only">{t.app.name}</h1>
 
       <div className="mb-4 flex justify-end">
@@ -154,7 +154,7 @@ export default async function HomePage() {
             <p className="text-muted py-6 italic">
               <Link
                 href="/profile"
-                className="text-signal font-sans text-sm font-semibold not-italic underline underline-offset-4"
+                className="text-fg hover:text-signal font-sans text-sm font-semibold not-italic underline underline-offset-4"
               >
                 {t.pages.home.chooseInterests}
               </Link>

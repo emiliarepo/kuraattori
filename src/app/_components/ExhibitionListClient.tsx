@@ -1,11 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useLayoutEffect, useRef, useTransition } from "react";
 
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
 import { toRowView, type ExhibitionWithDetails } from "~/app/_lib/row";
 import { t } from "~/i18n/fi";
+
+// With a loading.tsx boundary above the page, production Next.js resets
+// scroll and focus on this navigation despite `scroll: false`. The page
+// remounts, so the position to restore has to outlive this component.
+let pendingRestore: { href: string; scrollY: number } | null = null;
 
 /**
  * The loaded-pages count lives in `loadMoreHref`'s `page` param (see
@@ -28,9 +33,23 @@ export function ExhibitionListClient({
 }) {
   const router = useRouter();
   const [loading, startTransition] = useTransition();
+  const loadMoreRef = useRef<HTMLButtonElement>(null);
+
+  useLayoutEffect(() => {
+    const restore = pendingRestore;
+    if (!restore) return;
+    pendingRestore = null;
+    if (location.pathname + location.search !== restore.href) return;
+    // Next's scroll handler runs after this layout effect in the same commit.
+    queueMicrotask(() => {
+      window.scrollTo(0, restore.scrollY);
+      loadMoreRef.current?.focus({ preventScroll: true });
+    });
+  }, [items]);
 
   function loadMore() {
     if (!loadMoreHref) return;
+    pendingRestore = { href: loadMoreHref, scrollY: window.scrollY };
     // Keep scroll in place and reuse the same history entry: repeated
     // "Näytä lisää" clicks shouldn't stack up back-button stops.
     startTransition(() => router.replace(loadMoreHref, { scroll: false }));
@@ -45,10 +64,11 @@ export function ExhibitionListClient({
       />
       {loadMoreHref && (
         <button
+          ref={loadMoreRef}
           type="button"
           onClick={loadMore}
           disabled={loading}
-          className="border-rule hover:bg-surface mt-6 w-full border py-3 font-sans text-sm font-semibold disabled:opacity-60"
+          className="btn btn-secondary mt-6 w-full disabled:opacity-60"
         >
           {loading ? t.pages.browse.loading : t.pages.browse.loadMore}
         </button>

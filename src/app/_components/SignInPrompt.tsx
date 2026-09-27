@@ -8,7 +8,7 @@ export function SignInPrompt({ message }: { message: string }) {
       {message}{" "}
       <Link
         href="/sign-in"
-        className="text-signal font-sans text-sm font-semibold not-italic underline underline-offset-4"
+        className="text-fg hover:text-signal font-sans text-sm font-semibold not-italic underline underline-offset-4"
       >
         {t.pages.signIn.cta}
       </Link>

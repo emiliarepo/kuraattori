@@ -17,7 +17,7 @@ function RailSkeleton() {
 
 export default function HomeLoading() {
   return (
-    <div className="pt-6 sm:pt-8">
+    <div className="pt-8">
       <div className="grid gap-4 sm:grid-cols-[3fr_2fr] sm:items-end sm:gap-8">
         <Skeleton className="aspect-[3/2] w-full" />
         <div className="flex flex-col gap-2 sm:pb-1">

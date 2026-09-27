@@ -31,7 +31,7 @@ export function CalendarPanel({
         id="calendar-url"
         readOnly
         value={calendarUrl}
-        className="border-rule-soft bg-bg min-w-0 border px-3 py-2 font-sans text-sm"
+        className="border-rule-soft bg-bg min-h-11 min-w-0 border px-2 py-2 font-sans text-sm"
       />
       <div className="flex flex-wrap gap-x-5 gap-y-3 font-sans text-sm">
         <button

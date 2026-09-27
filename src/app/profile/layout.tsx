@@ -19,7 +19,7 @@ export default async function ProfileLayout({
   if (!session?.user) redirect("/sign-in?callbackUrl=/profile");
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-6 py-12">
+    <div className="mx-auto flex max-w-lg flex-col gap-6 py-8">
       <h1 className="text-headline text-4xl sm:text-5xl">{t.profile.title}</h1>
       <ProfileTabs />
       {children}

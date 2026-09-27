@@ -78,7 +78,7 @@ export function WelcomeFlow({
   }
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-6 py-12">
+    <div className="mx-auto flex max-w-lg flex-col gap-6 py-8">
       <div className="flex items-baseline justify-between gap-4">
         <h1 className="text-headline text-4xl">
           {step === "interests"
@@ -104,7 +104,7 @@ export function WelcomeFlow({
           <button
             type="button"
             onClick={() => setStep("regions")}
-            className="bg-fg text-bg w-full py-3 font-sans text-sm font-semibold"
+            className="btn btn-primary w-full"
           >
             {t.onboarding.next}
           </button>
@@ -119,7 +119,7 @@ export function WelcomeFlow({
           <button
             type="button"
             onClick={() => void finish()}
-            className="bg-fg text-bg w-full py-3 font-sans text-sm font-semibold"
+            className="btn btn-primary w-full"
           >
             {t.onboarding.finish}
           </button>
