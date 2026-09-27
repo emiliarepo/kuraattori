@@ -11,3 +11,4 @@ A second full pass of ticket 30 after all remaining features land: repeat ticket
 
 - Intermittent React #418 hydration mismatch on first load under parallel E2E load (see issues/41 notes): find the cause.
 - The dev sign-in form only appears with `E2E_TEST_AUTH`, but README and AGENTS.md say it appears in development: align the code or the docs.
+- Intermittent failure of `opening-hours.spec.ts` "exhibition page says whether the museum is open today" under full parallel load (1 in about 4 runs, passes alone): likely the same load-dependent race as the #418 flake.
