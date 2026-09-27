@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 const TRIP_KEYS = ["place", "from", "to"] as const;
 
 export function TripTabs() {
+  const { t } = useI18n();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const trip = new URLSearchParams();

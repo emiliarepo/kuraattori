@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { RegionsList } from "~/app/_components/RegionsList";
 import { refreshHeaderData } from "~/app/_components/refresh-header-action";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 import { api } from "~/trpc/react";
 
 export function RegionsTab({
@@ -15,6 +15,7 @@ export function RegionsTab({
   allRegions: readonly string[];
   initialRegions: readonly string[];
 }) {
+  const { t } = useI18n();
   const [regions, setRegions] = useState<readonly string[]>(initialRegions);
   const [announcement, setAnnouncement] = useState("");
   const router = useRouter();

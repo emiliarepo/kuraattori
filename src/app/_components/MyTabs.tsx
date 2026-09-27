@@ -7,16 +7,16 @@ import { useOptimistic } from "react";
 import { usePendingNavigation } from "~/app/_components/PendingNavigation";
 
 import { MY_SORTS, sortForStatus, type MyStatus } from "~/domain/my-sort";
-import { t } from "~/i18n/fi";
-
-const TABS = [
-  { href: "/my/interested", label: t.pages.my.interested },
-  { href: "/my/visited", label: t.pages.my.visited },
-  { href: "/my/passport", label: t.pages.my.passport.tab },
-  { href: "/my/hidden", label: t.pages.my.hidden },
-] as const;
+import { useI18n } from "~/i18n/client";
 
 export function MyTabs() {
+  const { t } = useI18n();
+  const TABS = [
+    { href: "/my/interested", label: t.pages.my.interested },
+    { href: "/my/visited", label: t.pages.my.visited },
+    { href: "/my/passport", label: t.pages.my.passport.tab },
+    { href: "/my/hidden", label: t.pages.my.hidden },
+  ] as const;
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();

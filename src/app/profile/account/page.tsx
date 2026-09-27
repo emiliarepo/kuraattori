@@ -2,7 +2,8 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { t } from "~/i18n/fi";
+import { LanguageSelector } from "~/app/_components/LanguageSelector";
+import { getI18n } from "~/i18n/server";
 import { deleteUserData } from "~/server/account";
 import { auth, signOut } from "~/server/auth";
 import { getDb } from "~/server/db";
@@ -12,6 +13,7 @@ export default async function ProfileAccountPage({
 }: {
   searchParams: Promise<{ delete?: string }>;
 }) {
+  const { t } = await getI18n();
   const [session, { delete: confirmDelete }] = await Promise.all([
     auth(),
     searchParams,
@@ -31,6 +33,8 @@ export default async function ProfileAccountPage({
           <dd>{user.email}</dd>
         </div>
       </dl>
+
+      <LanguageSelector />
 
       <div className="flex flex-wrap gap-3">
         <form

@@ -8,7 +8,7 @@ import { persistRegionsCookie } from "~/app/_components/region-cookie-action";
 import { refreshHeaderData } from "~/app/_components/refresh-header-action";
 import { useBackToClose } from "~/app/_lib/use-back-to-close";
 import { groupRegions } from "~/domain/regions";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 import { api } from "~/trpc/react";
 
 /**
@@ -24,6 +24,7 @@ export function RegionSelector({
   initialSelected: readonly string[];
   isSignedIn: boolean;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   useBackToClose(open, () => setOpen(false));
   const [selected, setSelected] = useState<readonly string[]>(initialSelected);
@@ -94,7 +95,7 @@ export function RegionSelector({
         <>
           <button
             type="button"
-            aria-label="Sulje"
+            aria-label={t.pages.browse.closeFilters}
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-10 sm:hidden"
           />

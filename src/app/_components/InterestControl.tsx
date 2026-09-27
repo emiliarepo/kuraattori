@@ -1,14 +1,17 @@
 "use client";
 
-import { t } from "~/i18n/fi";
+import type { Messages } from "~/i18n";
+import { useI18n } from "~/i18n/client";
 
 export type InterestWeight = -1 | 1 | 2;
 
-const OPTIONS: readonly {
+const options = (
+  t: Messages,
+): readonly {
   weight: InterestWeight | null;
   label: string;
   icon: string;
-}[] = [
+}[] => [
   { weight: null, label: t.ui.interest.none, icon: "–" },
   { weight: 1, label: t.ui.interest.interested, icon: "●" },
   { weight: 2, label: t.ui.interest.strong, icon: "★" },
@@ -24,13 +27,14 @@ export function InterestControl({
   value: InterestWeight | null;
   onChange: (weight: InterestWeight | null) => void;
 }) {
+  const { t } = useI18n();
   return (
     <div
       role="radiogroup"
       aria-label={categoryName}
       className="border-rule flex border font-sans"
     >
-      {OPTIONS.map((option, index) => {
+      {options(t).map((option, index) => {
         const selected = option.weight === value;
         return (
           <button

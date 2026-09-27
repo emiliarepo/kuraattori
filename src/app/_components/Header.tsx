@@ -6,7 +6,7 @@ import { RegionSelector } from "~/app/_components/RegionSelector";
 import { UserMenu } from "~/app/_components/UserMenu";
 import { formatWeekdayDate } from "~/app/_lib/exhibition-format";
 import { todayInHelsinki } from "~/domain/dates";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { auth, signOut } from "~/server/auth";
 import { getActiveRegions } from "~/server/regions-preference";
 import { api } from "~/trpc/server";
@@ -16,6 +16,7 @@ export async function Header({
 }: {
   omatEndingSoonCount?: number;
 }) {
+  const { t, locale } = await getI18n();
   const [session, allRegions, activeRegions] = await Promise.all([
     auth(),
     // Falls back to no regions rather than crashing the masthead; the
@@ -39,7 +40,11 @@ export async function Header({
           {session?.user ? (
             <div className="hidden sm:block">
               <UserMenu
-                label={session.user.name ?? session.user.email ?? "Tili"}
+                label={
+                  session.user.name ??
+                  session.user.email ??
+                  t.profile.tabs.account
+                }
                 signOutAction={async () => {
                   "use server";
                   revalidatePath("/", "layout");
@@ -59,7 +64,7 @@ export async function Header({
       </div>
       <div className="border-rule grid grid-cols-[1fr_auto_1fr] items-center gap-x-6 border-y py-2">
         <p className="text-kicker text-muted whitespace-nowrap">
-          {formatWeekdayDate(todayInHelsinki())}
+          {formatWeekdayDate(todayInHelsinki(), locale)}
         </p>
         <DesktopNav omatEndingSoonCount={omatEndingSoonCount} />
         <div className="col-start-3 flex min-w-0 justify-end">

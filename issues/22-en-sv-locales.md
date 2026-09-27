@@ -1,5 +1,5 @@
 # 22 English and Swedish UI
-Status: todo · Model: Opus 5.5 (low effort) · Blocked by: 13–21 (lowest priority, last)
+Status: done · Model: Opus 5.5 (low effort) · Blocked by: 13–21 (lowest priority, last)
 
 Add `en` and `sv` alongside `fi`, with a language choice on `/profile`.
 
@@ -17,3 +17,11 @@ Add `en` and `sv` alongside `fi`, with a language choice on `/profile`.
 - One pure helper does this (for example `localized(row, "title", locale)`), with unit tests: translation present, missing, empty or whitespace, and Swedish missing while English is present (Swedish falls back to Finnish, not English).
 - E2E: in the English locale, an exhibition with no English text still renders its Finnish title and description, not a blank or a key.
 - After this merges, the orchestrator triggers one manual import (`import.yml`) to fill in translations and runs a spot check on prod.
+
+## Outcome (27.9.2026)
+
+- **Import requests.** Every run adds 2 requests (the English and Swedish `kaikki=1` listings). Detail pages are fetched only for rows whose listing shows translated text and whose `translation_hash` changed, at the same ~2 req/s limit. In the 27.9.2026 snapshot (642 exhibitions), 425 have English and 264 have Swedish text, so the first full run after this merges makes about **691 extra requests** (≈ 6½ min). Later daily runs make 2 plus a few for new or changed exhibitions. Failed translated pages are retried the next run and don't count toward `items_failed`.
+- **Content coverage** (same snapshot): English text for 425 / 642 exhibitions, Swedish for 264 / 642; English museum names for most museums, English and Swedish names for every topic. The production numbers come after the first import.
+- **Stays Finnish:** cities, regions, opening-hour notes, admission text, stamp labels and the legal texts (marked `lang="fi"`), the offline page, the day-plan `.ics` download. The calendar feed and closing-soon pushes follow `users.locale`.
+- Migration `0012`: nullable `users.locale`, `museums/categories.name_en/sv`, `exhibitions.translation_hash`. The privacy page lists the new `kuraattori_locale` cookie (version 3).
+

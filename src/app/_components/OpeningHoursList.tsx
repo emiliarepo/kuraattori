@@ -4,10 +4,10 @@ import {
   weekdayIndex,
   type OpeningHours,
 } from "~/domain/opening-hours";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { formatDayMonth } from "~/i18n/format";
 
-export function OpeningHoursList({
+export async function OpeningHoursList({
   hours,
   freeDays,
   today,
@@ -16,6 +16,7 @@ export function OpeningHoursList({
   freeDays: readonly string[] | null;
   today: string;
 }) {
+  const { t, locale } = await getI18n();
   const freeDay = nextFreeDay(freeDays, today);
   if (!hours && !freeDay) return null;
   const todayIndex = weekdayIndex(today);
@@ -50,13 +51,16 @@ export function OpeningHoursList({
         </dl>
       )}
       {hours?.note && (
-        <p className="text-muted mt-2 font-sans text-xs break-words">
+        <p
+          lang={locale === "fi" ? undefined : "fi"}
+          className="text-muted mt-2 font-sans text-xs break-words"
+        >
           {hours.note}
         </p>
       )}
       {freeDay && (
         <p className="mt-2 font-sans text-sm">
-          {t.pages.hours.nextFreeDay(formatDayMonth(freeDay))}
+          {t.pages.hours.nextFreeDay(formatDayMonth(freeDay, locale))}
         </p>
       )}
     </section>

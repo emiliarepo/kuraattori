@@ -1,3 +1,5 @@
+import { INTL_LOCALE, type Locale } from "~/i18n/locales";
+
 export interface SavingsVisit {
   title: string;
   visitedAt: Date | null;
@@ -12,8 +14,8 @@ export interface Savings {
   unpricedTitles: string[];
 }
 
-export function formatEuros(cents: number): string {
-  return new Intl.NumberFormat("fi-FI", {
+export function formatEuros(cents: number, locale: Locale = "fi"): string {
+  return new Intl.NumberFormat(INTL_LOCALE[locale], {
     style: "currency",
     currency: "EUR",
     minimumFractionDigits: cents % 100 === 0 ? 0 : 2,

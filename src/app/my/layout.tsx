@@ -1,13 +1,18 @@
 import { type Metadata } from "next";
 
 import { MyTabs } from "~/app/_components/MyTabs";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function MyLayout({ children }: { children: React.ReactNode }) {
+export default async function MyLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { t } = await getI18n();
   return (
     <div className="py-8">
       <h1 className="text-headline mb-6 text-4xl sm:text-5xl">

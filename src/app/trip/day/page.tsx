@@ -22,16 +22,20 @@ import {
 } from "~/domain/day-plan";
 import { formatHours, formatTime, hoursOn } from "~/domain/opening-hours";
 import { partitionEndingSoon } from "~/domain/trip";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { formatWeekdayDate } from "~/i18n/format";
+import { INTL_LOCALE } from "~/i18n/locales";
 import { auth } from "~/server/auth";
 import { type RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/server";
 
-export const metadata: Metadata = {
-  title: `${t.pages.day.title} — ${t.app.name}`,
-  description: t.pages.meta.day,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return {
+    title: `${t.pages.day.title} — ${t.app.name}`,
+    description: t.pages.meta.day,
+  };
+}
 
 type Candidate = RouterOutputs["trip"]["day"][number];
 
@@ -49,7 +53,7 @@ function TripFields({ trip }: { trip: DayPlanParams["trip"] }) {
   );
 }
 
-function CandidateRow({
+async function CandidateRow({
   candidate,
   checked,
   urgency,
@@ -60,6 +64,7 @@ function CandidateRow({
   urgency: string | null;
   date: string;
 }) {
+  const { t } = await getI18n();
   const hours = hoursOn(candidate.openingHours, date);
   return (
     <li>
@@ -72,10 +77,16 @@ function CandidateRow({
           className="accent-signal mt-1.5 h-4 w-4 shrink-0"
         />
         <span className="flex flex-col">
-          <span className="font-serif text-lg leading-snug">
+          <span
+            lang={candidate.titleLang}
+            className="font-serif text-lg leading-snug"
+          >
             {candidate.title}
           </span>
-          <span className="text-muted font-serif italic">
+          <span
+            lang={candidate.museumLang}
+            className="text-muted font-serif italic"
+          >
             {candidate.museumName}
           </span>
           {hours === null ? (
@@ -105,6 +116,8 @@ export default async function DayPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const i18n = await getI18n();
+  const { t, locale } = i18n;
   const plan = parseDayPlan(await searchParams);
   const [museums, session] = await Promise.all([api.museum.list(), auth()]);
   const cities = [
@@ -174,7 +187,7 @@ export default async function DayPage({
     );
   const date = plan.date;
 
-  const candidates = await api.trip.day({ city, date });
+  const candidates = await api.trip.day({ city, date, locale });
   const byId = new Map(
     candidates.map((candidate) => [candidate.id, candidate]),
   );
@@ -196,7 +209,7 @@ export default async function DayPage({
     return [...endingSoon, ...rest].map((candidate) => ({
       candidate,
       urgency: endingSoon.includes(candidate)
-        ? urgencyLabelText(candidate, date)
+        ? urgencyLabelText(candidate, date, i18n)
         : null,
     }));
   };
@@ -252,7 +265,7 @@ export default async function DayPage({
       <h2 className="text-headline mb-6 text-3xl">
         {city}
         <span className="text-muted ml-3 font-serif text-xl italic">
-          {formatWeekdayDate(date)}
+          {formatWeekdayDate(date, locale)}
         </span>
       </h2>
 
@@ -304,10 +317,11 @@ export default async function DayPage({
                         className="hover:text-signal font-serif text-xl leading-snug"
                       >
                         <span className="sr-only">{`${index + 1}. `}</span>
-                        {stop.title}
+                        <span lang={stop.titleLang}>{stop.title}</span>
                       </Link>
                       <Link
                         href={`/museums/${stop.museumSlug}`}
+                        lang={stop.museumLang}
                         className="text-muted hover:text-signal font-serif italic"
                       >
                         {stop.museumName}
@@ -371,7 +385,9 @@ export default async function DayPage({
           <p className="border-rule-soft border-t pt-3 font-sans text-sm">
             {t.pages.day.total(
               totalMinutes,
-              totalKm.toLocaleString("fi-FI", { maximumFractionDigits: 1 }),
+              totalKm.toLocaleString(INTL_LOCALE[locale], {
+                maximumFractionDigits: 1,
+              }),
             )}
           </p>
           <p className="text-muted mt-1 font-sans text-xs">

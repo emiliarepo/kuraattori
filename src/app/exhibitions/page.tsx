@@ -2,7 +2,7 @@ import { type Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 import { ExhibitionListClient } from "~/app/_components/ExhibitionListClient";
-import { FilterSheet } from "~/app/_components/FilterSheet";
+import { FilterSheet, type FilterOption } from "~/app/_components/FilterSheet";
 import {
   browseFiltersToListInput,
   browseFiltersToParams,
@@ -11,15 +11,20 @@ import {
 } from "~/app/_lib/browse-filters";
 import { listAcrossRegionsPages } from "~/app/_lib/list-across-regions";
 import { todayInHelsinki } from "~/domain/dates";
-import { t } from "~/i18n/fi";
+import { localized, type Translatable } from "~/domain/localized";
+import { INTL_LOCALE, type Locale } from "~/i18n/locales";
+import { getI18n } from "~/i18n/server";
 import { auth } from "~/server/auth";
 import { getActiveRegions } from "~/server/regions-preference";
 import { api } from "~/trpc/server";
 
-export const metadata: Metadata = {
-  title: `${t.pages.browse.title} — ${t.app.name}`,
-  description: t.pages.meta.browse,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return {
+    title: `${t.pages.browse.title} — ${t.app.name}`,
+    description: t.pages.meta.browse,
+  };
+}
 
 const PAGE_SIZE = 20;
 
@@ -32,11 +37,25 @@ async function browsePageSize(): Promise<number> {
   return override > 0 ? override : PAGE_SIZE;
 }
 
+function filterOptions(
+  rows: readonly ({ id: number } & Translatable<"name">)[],
+  locale: Locale,
+): FilterOption[] {
+  const collator = new Intl.Collator(INTL_LOCALE[locale]);
+  return rows
+    .map((row) => {
+      const name = localized(row, "name", locale);
+      return { id: row.id, label: name.text, lang: name.lang };
+    })
+    .sort((a, b) => collator.compare(a.label, b.label));
+}
+
 export default async function ExhibitionsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const { t, locale } = await getI18n();
   const filters = parseBrowseFilters(await searchParams);
   const today = todayInHelsinki();
 
@@ -83,14 +102,8 @@ export default async function ExhibitionsPage({
         <FilterSheet
           filters={filters}
           cities={cities}
-          museums={museums.map((museum) => ({
-            id: museum.id,
-            label: museum.name,
-          }))}
-          categories={categories.map((category) => ({
-            id: category.id,
-            label: category.name,
-          }))}
+          museums={filterOptions(museums, locale)}
+          categories={filterOptions(categories, locale)}
           showMuseumCardFilter={showMuseumCardFilter}
         />
       </aside>

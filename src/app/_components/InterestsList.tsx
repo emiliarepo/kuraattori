@@ -3,9 +3,9 @@ import {
   type InterestWeight,
 } from "~/app/_components/InterestControl";
 import { groupBySelection } from "~/domain/categories";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
-export type Category = { id: number; name: string };
+export type Category = { id: number; name: string; lang?: "fi" };
 
 export function InterestsList({
   categories,
@@ -16,6 +16,7 @@ export function InterestsList({
   interests: ReadonlyMap<number, InterestWeight>;
   onChange: (categoryId: number, weight: InterestWeight | null) => void;
 }) {
+  const { t } = useI18n();
   const { selected, rest } = groupBySelection(
     categories,
     new Set(interests.keys()),
@@ -36,7 +37,9 @@ export function InterestsList({
                 key={category.id}
                 className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
               >
-                <span className="text-lg">{category.name}</span>
+                <span lang={category.lang} className="text-lg">
+                  {category.name}
+                </span>
                 <InterestControl
                   categoryName={category.name}
                   value={interests.get(category.id) ?? null}

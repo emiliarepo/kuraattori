@@ -1,15 +1,20 @@
 import { type Metadata } from "next";
 
 import { LegalPage } from "~/app/_components/LegalPage";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 
-export const metadata: Metadata = { title: t.legal.privacyTitle };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return { title: t.legal.privacyTitle };
+}
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const { t, locale } = await getI18n();
   return (
     <LegalPage
+      lang={locale === "fi" ? undefined : "fi"}
       title={t.legal.privacyTitle}
-      kicker="Versio 2 · Päivitetty 27.9.2026"
+      kicker="Versio 3 · Päivitetty 27.9.2026"
     >
       <p>
         Tämä seloste kertoo, mitä henkilötietoja Kuraattori käsittelee ja miksi
@@ -31,7 +36,8 @@ export default function PrivacyPage() {
         </li>
         <li>Kirjautumisistunto ja sen voimassaoloaika.</li>
         <li>
-          Valitsemasi alueet, aiheiden kiinnostuspainot ja seuraamasi museot.
+          Valitsemasi alueet, aiheiden kiinnostuspainot, seuraamasi museot ja
+          käyttöliittymän kieli.
         </li>
         <li>
           Näyttelymerkintäsi (kiinnostaa, käyty, piilotettu), käyntipäivät ja
@@ -138,6 +144,10 @@ export default function PrivacyPage() {
         <li>
           <code>kuraattori_regions</code>: valitut alueet kirjautumattomalle
           käyttäjälle (1 vuosi).
+        </li>
+        <li>
+          <code>kuraattori_locale</code>: valitsemasi käyttöliittymän kieli (1
+          vuosi).
         </li>
         <li>
           <code>kuraattori_onboarded</code>: tieto siitä, että aloitusohjeet on

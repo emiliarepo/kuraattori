@@ -18,6 +18,11 @@ import {
   parseMuseumPage,
   parseOpeningHours,
 } from "~/server/import/museot-fi/parse-museum";
+import {
+  collectTranslations,
+  distinctTranslation,
+  parseTranslatedListing,
+} from "~/server/import/museot-fi/translations";
 import { archiveImages } from "~/server/import/image-archive";
 import { runImport } from "~/server/import/run-import";
 import type {
@@ -43,7 +48,7 @@ const TOPIC_IDS = ["63", "71"] as const;
  */
 const CURATED_SOURCE_IDS = [
   "41732", // upcoming, Kiasma, real detail fixture
-  "44918", // current, ends in 14 days
+  "44918", // current, ends in 14 days, no English or Swedish text (the Finnish-fallback E2E case)
   "43651", // current, ends in 7 days
   "44638", // current, ends in 13 days, no region mapping (exercises the unmapped-city path)
   "42095", // current, opened yesterday, ends far in the future
@@ -206,10 +211,51 @@ async function main() {
     }),
   ];
 
+  // Real English/Swedish listing snapshots; a translated detail page comes
+  // from its fixture when there is one (41732), otherwise from the listing
+  // row's own translated excerpt.
+  const translatedListings = {
+    en: parseTranslatedListing(readFixture("listing-all-en.html")),
+    sv: parseTranslatedListing(readFixture("listing-all-sv.html")),
+  };
+  for (const category of categories) {
+    category.nameEn = distinctTranslation(
+      translatedListings.en.topics.get(category.sourceId),
+      category.name,
+    );
+    category.nameSv = distinctTranslation(
+      translatedListings.sv.topics.get(category.sourceId),
+      category.name,
+    );
+  }
+  const { translations } = await collectTranslations(
+    CURATED_SOURCE_IDS.map((sourceId) => byId.get(sourceId)!),
+    translatedListings,
+    new Map(),
+    (locale, sourceId) => {
+      const fixture = `detail-${sourceId}-${locale}.html`;
+      if (existsSync(join(FIXTURES_DIR, fixture)))
+        return Promise.resolve(readFixture(fixture));
+      const row = translatedListings[locale].items.get(sourceId);
+      return Promise.resolve(
+        row &&
+          `<h1>${row.title}</h1><div class="p_1"><p>${row.excerpt}</p></div>`,
+      );
+    },
+  );
+
   const adapter: ExhibitionSourceAdapter = {
     name: "museot.fi",
     fetchExhibitions: () =>
-      Promise.resolve({ categories, changed, unchanged: [], failedCount: 0 }),
+      Promise.resolve({
+        categories,
+        changed,
+        unchanged: [],
+        translations,
+        failedCount: 0,
+        translationsFailed: 0,
+        translationRequests: 0,
+      }),
     fetchMuseumPage: async (sourceId) => {
       const fixture = `museum-${sourceId}.html`;
       if (existsSync(join(FIXTURES_DIR, fixture))) {

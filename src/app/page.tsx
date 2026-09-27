@@ -17,20 +17,26 @@ import {
 } from "~/app/_lib/list-across-regions";
 import { forYouToRowView, toRowView } from "~/app/_lib/row";
 import { getDaysRemaining, todayInHelsinki } from "~/domain/dates";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { imageSources } from "~/domain/images";
+import { localized } from "~/domain/localized";
 import { auth } from "~/server/auth";
 import { getActiveRegions } from "~/server/regions-preference";
 import { api } from "~/trpc/server";
 
-export const metadata: Metadata = {
-  title: t.app.name,
-  description: t.pages.meta.home,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return {
+    title: t.app.name,
+    description: t.pages.meta.home,
+  };
+}
 
 const SECTION_LIMIT = 8;
 
 export default async function HomePage() {
+  const i18n = await getI18n();
+  const { t, locale } = i18n;
   const [session, activeRegions] = await Promise.all([
     auth(),
     getActiveRegions(),
@@ -65,7 +71,9 @@ export default async function HomePage() {
       () => [],
     ),
     signedIn
-      ? api.recommendation.forYou({ limit: SECTION_LIMIT + 1 }).catch(() => [])
+      ? api.recommendation
+          .forYou({ limit: SECTION_LIMIT + 1, locale })
+          .catch(() => [])
       : Promise.resolve([]),
     signedIn
       ? api.profile
@@ -90,21 +98,23 @@ export default async function HomePage() {
       Number(b.status === "interested") - Number(a.status === "interested"),
   );
   const [lead, ...forYouRest] = forYou;
+  const leadTitle = lead && localized(lead.exhibition, "title", locale);
+  const leadMuseum = lead && localized(lead.museum, "name", locale);
 
   return (
     <div className="pt-8">
       <h1 className="sr-only">{t.app.name}</h1>
 
-      {lead ? (
+      {lead && leadTitle && leadMuseum ? (
         <LeadStory
           href={`/exhibitions/${lead.exhibition.slug}`}
           imageSources={imageSources(lead.exhibition, today)}
-          imageAlt={imageAlt(lead.exhibition.titleFi, lead.museum.name)}
+          imageAlt={imageAlt(leadTitle.text, leadMuseum.text)}
           kicker={[t.pages.home.forYou, ...lead.reasons].join(" · ")}
-          title={lead.exhibition.titleFi}
-          museum={lead.museum.name}
+          title={leadTitle}
+          museum={leadMuseum}
           city={lead.museum.city ?? ""}
-          urgencyLabel={urgencyLabelText(lead.exhibition, today)}
+          urgencyLabel={urgencyLabelText(lead.exhibition, today, i18n)}
         />
       ) : (
         !signedIn && <SignInPrompt message={t.pages.signIn.home} />
@@ -118,11 +128,11 @@ export default async function HomePage() {
         items={endingSoonSorted.map((item) => {
           const daysRemaining = getDaysRemaining(item, today) ?? 0;
           return {
-            view: toRowView(item, today),
+            view: toRowView(item, today, i18n),
             lead: (
               <DaysNumeral
                 days={daysRemaining}
-                caption={dayCaption(daysRemaining)}
+                caption={dayCaption(daysRemaining, i18n)}
               />
             ),
           };
@@ -137,7 +147,7 @@ export default async function HomePage() {
               emptyMessage={t.pages.browse.empty}
               signedIn={signedIn}
               items={forYouRest.map((item) => ({
-                view: forYouToRowView(item, today),
+                view: forYouToRowView(item, today, i18n),
               }))}
             />
           )
@@ -160,7 +170,7 @@ export default async function HomePage() {
           emptyMessage={t.pages.browse.empty}
           signedIn={signedIn}
           items={followedExhibitions.map((item) => ({
-            view: toRowView(item, today),
+            view: toRowView(item, today, i18n),
           }))}
         />
       )}
@@ -169,7 +179,7 @@ export default async function HomePage() {
         title={t.pages.home.new}
         emptyMessage={t.pages.browse.empty}
         signedIn={signedIn}
-        items={freshest.map((item) => ({ view: toRowView(item, today) }))}
+        items={freshest.map((item) => ({ view: toRowView(item, today, i18n) }))}
       />
 
       <Rail
@@ -180,7 +190,9 @@ export default async function HomePage() {
           label: t.pages.home.seeAll,
         }}
         signedIn={signedIn}
-        items={upcoming.items.map((item) => ({ view: toRowView(item, today) }))}
+        items={upcoming.items.map((item) => ({
+          view: toRowView(item, today, i18n),
+        }))}
       />
     </div>
   );

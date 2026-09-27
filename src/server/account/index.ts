@@ -35,6 +35,7 @@ export async function exportUserData(db: Db, userId: string) {
         name: users.name,
         email: users.email,
         image: users.image,
+        locale: users.locale,
       })
       .from(users)
       .where(eq(users.id, userId)),

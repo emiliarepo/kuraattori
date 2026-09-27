@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 /**
  * Restores a rail's horizontal scroll position after back navigation:
@@ -20,6 +20,7 @@ export function RailScrollContainer({
   className?: string;
   children: React.ReactNode;
 }) {
+  const { t } = useI18n();
   const pathname = usePathname();
   const ref = useRef<HTMLUListElement>(null);
   const key = `rail-scroll:${pathname}:${title}`;

@@ -5,29 +5,33 @@ import { Inter, Newsreader } from "next/font/google";
 
 import { AppShell } from "~/app/_components/AppShell";
 import { ServiceWorkerRegistration } from "~/app/_components/ServiceWorkerRegistration";
-import { t } from "~/i18n/fi";
+import { I18nProvider } from "~/i18n/client";
+import { getI18n } from "~/i18n/server";
 import { TRPCReactProvider } from "~/trpc/react";
 import { siteUrl } from "~/app/_lib/site-url";
 
-export const metadata: Metadata = {
-  metadataBase: siteUrl,
-  title: t.app.name,
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "32x32" },
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
-    apple: "/apple-touch-icon.png",
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return {
+    metadataBase: siteUrl,
     title: t.app.name,
-  },
-  other: {
-    "apple-mobile-web-app-capable": "yes",
-  },
-};
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "32x32" },
+        { url: "/icon.svg", type: "image/svg+xml" },
+      ],
+      apple: "/apple-touch-icon.png",
+    },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: t.app.name,
+    },
+    other: {
+      "apple-mobile-web-app-capable": "yes",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   viewportFit: "cover",
@@ -49,15 +53,18 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const { locale } = await getI18n();
   return (
-    <html lang="fi" className={`${newsreader.variable} ${inter.variable}`}>
+    <html lang={locale} className={`${newsreader.variable} ${inter.variable}`}>
       <body className="bg-bg text-fg">
         <TRPCReactProvider>
-          <ServiceWorkerRegistration />
-          <AppShell>{children}</AppShell>
+          <I18nProvider locale={locale}>
+            <ServiceWorkerRegistration />
+            <AppShell>{children}</AppShell>
+          </I18nProvider>
         </TRPCReactProvider>
       </body>
     </html>

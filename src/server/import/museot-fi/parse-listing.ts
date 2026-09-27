@@ -37,8 +37,8 @@ function directTextContent(element: HTMLElement): string {
   return text.replace(/,\s*$/, "").trim();
 }
 
-/** One `<li>` from a listing page. Returns `undefined` for a row too malformed to use. */
-export function parseListingItem(li: HTMLElement): RawListingItem | undefined {
+/** The raw fields of one listing `<li>`, before validation. */
+export function listingItemFields(li: HTMLElement) {
   const link = li.querySelector("a.normaali");
   const href = link?.getAttribute("href");
   const sourceId = href ? /nayttely_id=(\d+)/.exec(href)?.[1] : undefined;
@@ -50,7 +50,7 @@ export function parseListingItem(li: HTMLElement): RawListingItem | undefined {
   const range = ajankohta ? parseDateRange(ajankohta) : undefined;
   const imageSrc = li.querySelector(".kuva")?.getAttribute("data-x-bg-src");
 
-  const candidate = {
+  return {
     sourceId,
     title: h2?.text.trim(),
     excerpt:
@@ -61,8 +61,11 @@ export function parseListingItem(li: HTMLElement): RawListingItem | undefined {
     startDate: range?.startDate,
     endDate: range?.endDate,
   };
+}
 
-  const result = listingItemSchema.safeParse(candidate);
+/** One `<li>` from a listing page. Returns `undefined` for a row too malformed to use. */
+export function parseListingItem(li: HTMLElement): RawListingItem | undefined {
+  const result = listingItemSchema.safeParse(listingItemFields(li));
   return result.success ? result.data : undefined;
 }
 
@@ -72,17 +75,12 @@ export interface ParsedListingPage {
   taxonomy: Taxonomy;
 }
 
-export function parseListingPage(html: string): ParsedListingPage {
-  const root = parse(html);
-  const items: RawListingItem[] = [];
-  let failedCount = 0;
-  for (const li of root.querySelectorAll("li[id^='li']")) {
-    const item = parseListingItem(li);
-    if (item) items.push(item);
-    else failedCount++;
-  }
+export function listingRows(root: HTMLElement): HTMLElement[] {
+  return root.querySelectorAll("li[id^='li']");
+}
 
-  const topics = root
+export function parseTopics(root: HTMLElement): Taxonomy["topics"] {
+  return root
     .querySelectorAll(".rastit_area input[id^='topic_']")
     .map((input) => {
       const sourceId = input.getAttribute("id")?.replace("topic_", "");
@@ -90,7 +88,19 @@ export function parseListingPage(html: string): ParsedListingPage {
       return sourceId && name ? { sourceId, name } : undefined;
     })
     .filter((topic) => topic !== undefined);
+}
 
+export function parseListingPage(html: string): ParsedListingPage {
+  const root = parse(html);
+  const items: RawListingItem[] = [];
+  let failedCount = 0;
+  for (const li of listingRows(root)) {
+    const item = parseListingItem(li);
+    if (item) items.push(item);
+    else failedCount++;
+  }
+
+  const topics = parseTopics(root);
   const maakuntas = root
     .querySelectorAll("#maakunta_id option[value]")
     .map((option) => {

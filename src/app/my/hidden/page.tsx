@@ -1,11 +1,12 @@
 import { MyStatusPage } from "~/app/my/_status-page";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 
-export default function MyHiddenPage({
+export default async function MyHiddenPage({
   searchParams,
 }: {
   searchParams: Promise<{ sort?: string | string[] }>;
 }) {
+  const { t } = await getI18n();
   return (
     <MyStatusPage
       status="hidden"

@@ -5,7 +5,9 @@ import { todayInHelsinki } from "~/domain/dates";
 import { getRelevance, type RelevanceReason } from "~/domain/relevance";
 import { getSinulleScore, isSinulleEligible } from "~/domain/ranking";
 import { getUrgency } from "~/domain/urgency";
-import { t } from "~/i18n/fi";
+import { localized } from "~/domain/localized";
+import { i18nFor, type Messages } from "~/i18n";
+import { LOCALES } from "~/i18n/locales";
 import { groupExhibitionRows } from "~/server/api/grouping";
 import { categoryRouter } from "~/server/api/routers/category";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -24,6 +26,7 @@ function reasonLabel(
     categoryNameById: ReadonlyMap<number, string>;
     region: string | null;
     museumName: string;
+    t: Messages;
   },
 ): string | null {
   switch (reason.type) {
@@ -35,9 +38,9 @@ function reasonLabel(
     case "region":
       return context.region;
     case "museum":
-      return t.pages.home.whyFollowed(context.museumName);
+      return context.t.pages.home.whyFollowed(context.museumName);
     case "new":
-      return t.pages.home.whyNew;
+      return context.t.pages.home.whyNew;
   }
 }
 
@@ -45,7 +48,10 @@ export const recommendationRouter = createTRPCRouter({
   forYou: protectedProcedure
     .input(
       z
-        .object({ limit: z.number().int().min(1).max(50).default(20) })
+        .object({
+          limit: z.number().int().min(1).max(50).default(20),
+          locale: z.enum(LOCALES).default("fi"),
+        })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
@@ -97,8 +103,13 @@ export const recommendationRouter = createTRPCRouter({
       const categoryIdsByExhibition = new Map(
         pool.map((entry) => [entry.exhibition.id, entry.categoryIds]),
       );
+      const locale = input?.locale ?? "fi";
+      const { t } = i18nFor(locale);
       const categoryNameById = new Map(
-        allCategories.map((category) => [category.id, category.name]),
+        allCategories.map((category) => [
+          category.id,
+          localized(category, "name", locale).text,
+        ]),
       );
       const interestWeights = new Map<number, 1 | 2>();
       const excludedCategoryIds = new Set<number>();
@@ -146,7 +157,8 @@ export const recommendationRouter = createTRPCRouter({
               reasonLabel(reason, {
                 categoryNameById,
                 region: museum.region,
-                museumName: museum.name,
+                museumName: localized(museum, "name", locale).text,
+                t,
               }),
             )
             .filter((label): label is string => label !== null);

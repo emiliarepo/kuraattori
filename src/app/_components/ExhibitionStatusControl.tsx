@@ -11,14 +11,8 @@ import { VisitRating } from "~/app/_components/VisitRating";
 import { type VisitRating as Rating } from "~/domain/rating-nudges";
 import { api } from "~/trpc/react";
 import { todayInHelsinki } from "~/domain/dates";
-import { t } from "~/i18n/fi";
-
-const visitDateFormat = new Intl.DateTimeFormat("fi-FI", {
-  timeZone: "Europe/Helsinki",
-  day: "numeric",
-  month: "numeric",
-  year: "numeric",
-});
+import { useI18n } from "~/i18n/client";
+import { INTL_LOCALE } from "~/i18n/locales";
 
 export function ExhibitionStatusControl({
   exhibitionId,
@@ -35,6 +29,13 @@ export function ExhibitionStatusControl({
   initialNote: string | null;
   initialRating: Rating | null;
 }) {
+  const { t, locale } = useI18n();
+  const visitDateFormat = new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+    timeZone: "Europe/Helsinki",
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  });
   const [status, setStatus] = useState(initialStatus);
   const [visitedOn, setVisitedOn] = useState(
     initialVisitedAt ? todayInHelsinki(initialVisitedAt) : todayInHelsinki(),

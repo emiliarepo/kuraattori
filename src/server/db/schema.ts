@@ -28,6 +28,7 @@ export const users = createTable("user", (d) => ({
   email: d.text({ length: 255 }).notNull(),
   emailVerified: d.integer({ mode: "timestamp" }).default(sql`(unixepoch())`),
   image: d.text({ length: 255 }),
+  locale: d.text({ enum: ["fi", "en", "sv"] }),
 }));
 
 export const accounts = createTable(
@@ -126,6 +127,8 @@ export const museums = createTable(
     source: d.text().notNull(),
     sourceId: d.text().notNull(),
     name: d.text().notNull(),
+    nameEn: d.text(),
+    nameSv: d.text(),
     slug: d.text().notNull().unique(),
     city: d.text(),
     region: d.text(),
@@ -190,6 +193,8 @@ export const exhibitions = createTable(
     admissionText: d.text(),
     admissionAdultCents: d.integer(),
     sourcePayloadHash: d.text().notNull(),
+    /** Hash of the English and Swedish listing rows; the translated detail pages are refetched only when it changes. */
+    translationHash: d.text(),
     /**
      * Same-exhibition-at-several-venues key (normalized title + start + end +
      * description hash), computed by the importer. Null until an import run
@@ -232,6 +237,8 @@ export const categories = createTable(
     source: d.text().notNull(),
     sourceId: d.text().notNull(),
     name: d.text().notNull(),
+    nameEn: d.text(),
+    nameSv: d.text(),
     slug: d.text().notNull().unique(),
     createdAt: d
       .integer({ mode: "timestamp" })

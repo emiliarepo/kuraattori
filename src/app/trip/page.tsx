@@ -8,23 +8,28 @@ import { hasValidTripRange, parseTripFilters } from "~/app/_lib/trip-filters";
 import { datesInRange, todayInHelsinki } from "~/domain/dates";
 import { groupRegions } from "~/domain/regions";
 import { partitionEndingSoon } from "~/domain/trip";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { formatWeekdayDate } from "~/i18n/format";
 import { SaveTripButton } from "~/app/trip/SaveTripButton";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 import type { RouterOutputs } from "~/trpc/react";
 
-export const metadata: Metadata = {
-  title: `${t.pages.trip.title} — ${t.app.name}`,
-  description: t.pages.meta.trip,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return {
+    title: `${t.pages.trip.title} — ${t.app.name}`,
+    description: t.pages.meta.trip,
+  };
+}
 
 export default async function TripPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const i18n = await getI18n();
+  const { t, locale } = i18n;
   const filters = parseTripFilters(await searchParams);
   const [regions, museums, session] = await Promise.all([
     api.system.regions(),
@@ -186,7 +191,7 @@ export default async function TripPage({
                   >
                     {tripDays.map((day) => (
                       <option key={day} value={day}>
-                        {formatWeekdayDate(day)}
+                        {formatWeekdayDate(day, locale)}
                       </option>
                     ))}
                   </select>
@@ -211,7 +216,14 @@ export default async function TripPage({
               <Section title={t.pages.trip.endingSoon}>
                 <ExhibitionList
                   items={groups.endingSoon.map((item) =>
-                    tripToRowView(item, today, range.from, range.to, true),
+                    tripToRowView(
+                      item,
+                      today,
+                      range.from,
+                      range.to,
+                      true,
+                      i18n,
+                    ),
                   )}
                   emptyMessage={t.pages.trip.empty}
                   signedIn={signedIn}
@@ -221,7 +233,14 @@ export default async function TripPage({
                 <Section title={t.pages.trip.otherOpen}>
                   <ExhibitionList
                     items={groups.rest.map((item) =>
-                      tripToRowView(item, today, range.from, range.to, false),
+                      tripToRowView(
+                        item,
+                        today,
+                        range.from,
+                        range.to,
+                        false,
+                        i18n,
+                      ),
                     )}
                     emptyMessage={t.pages.trip.empty}
                     signedIn={signedIn}
@@ -232,7 +251,7 @@ export default async function TripPage({
           ) : (
             <ExhibitionList
               items={items.map((item) =>
-                tripToRowView(item, today, range.from, range.to, false),
+                tripToRowView(item, today, range.from, range.to, false, i18n),
               )}
               emptyMessage={t.pages.trip.empty}
               signedIn={signedIn}

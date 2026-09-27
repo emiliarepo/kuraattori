@@ -30,7 +30,7 @@ export function ExhibitionCard({
         <ImageFallback
           sources={item.imageSources}
           alt={item.imageAlt}
-          title={item.title}
+          title={item.title.text}
           aspectRatio="4 / 5"
         />
         {lead}
@@ -40,13 +40,14 @@ export function ExhibitionCard({
           </p>
         )}
         <p
-          title={item.title}
+          lang={item.title.lang}
+          title={item.title.text}
           className="line-clamp-2 text-base leading-tight font-medium group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4 sm:text-lg sm:leading-tight"
         >
-          {item.title}
+          {item.title.text}
         </p>
         <p className="text-muted truncate font-sans text-xs leading-snug">
-          {item.museum}
+          <span lang={item.museum.lang}>{item.museum.text}</span>
           {item.city && `, ${item.city}`}
         </p>
         {item.categories.length > 0 ? (
@@ -68,7 +69,7 @@ export function ExhibitionCard({
       {signedIn && (
         <StatusHeart
           exhibitionId={item.exhibitionId}
-          title={item.title}
+          title={item.title.text}
           status={item.status}
           className="absolute top-1 right-1 z-10"
         />

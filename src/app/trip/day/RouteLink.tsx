@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 
 import { isApplePlatform, routeHref, type RoutePoint } from "~/app/_lib/maps";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 export function RouteLink({
   points,
-  label = t.pages.day.showRoute,
+  label,
   ariaLabel,
   className = "btn btn-primary",
 }: {
@@ -16,6 +16,7 @@ export function RouteLink({
   ariaLabel?: string;
   className?: string;
 }) {
+  const { t } = useI18n();
   const [apple, setApple] = useState(false);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export function RouteLink({
       aria-label={ariaLabel}
       className={className}
     >
-      {label}
+      {label ?? t.pages.day.showRoute}
     </a>
   );
 }

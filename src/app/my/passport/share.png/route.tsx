@@ -14,7 +14,7 @@ import {
   visitYear,
   type StampedMuseum,
 } from "~/domain/passport";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { siteUrl } from "~/app/_lib/site-url";
 import { todayInHelsinki } from "~/domain/dates";
 import { auth } from "~/server/auth";
@@ -205,6 +205,7 @@ function ShareStamp({
 }
 
 export async function GET(request: Request) {
+  const { t } = await getI18n();
   const session = await auth();
   if (!session?.user) return new Response(null, { status: 401 });
 

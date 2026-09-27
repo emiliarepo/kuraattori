@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { ImageFallback } from "~/app/_components/ImageFallback";
 import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
+import { type LocalizedText } from "~/domain/localized";
 
 export function LeadStory({
   href,
@@ -17,8 +18,8 @@ export function LeadStory({
   imageSources: readonly string[];
   imageAlt: string;
   kicker: string;
-  title: string;
-  museum: string;
+  title: LocalizedText;
+  museum: LocalizedText;
   city: string;
   urgencyLabel?: string | null;
 }) {
@@ -30,17 +31,20 @@ export function LeadStory({
       <ImageFallback
         sources={imageSources}
         alt={imageAlt}
-        title={title}
+        title={title.text}
         aspectRatio="3 / 2"
         priority
       />
       <div className="flex flex-col gap-2 sm:pb-1">
         <p className="text-kicker text-signal">{kicker}</p>
-        <h2 className="text-headline text-[2rem] group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4 sm:text-5xl">
-          {title}
+        <h2
+          lang={title.lang}
+          className="text-headline text-[2rem] group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4 sm:text-5xl"
+        >
+          {title.text}
         </h2>
         <p className="text-muted text-lg italic">
-          {museum}
+          <span lang={museum.lang}>{museum.text}</span>
           {city && `, ${city}`}
         </p>
         {urgencyLabel && (

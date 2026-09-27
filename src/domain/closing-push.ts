@@ -1,3 +1,6 @@
+import { i18nFor, type Messages } from "~/i18n";
+import type { Locale } from "~/i18n/locales";
+
 import { daysBetween } from "./dates";
 
 export const CLOSING_PUSH_DAYS = 7;
@@ -9,6 +12,7 @@ export interface InterestedEnding {
   readonly museum: string;
   readonly slug: string;
   readonly endDate: string;
+  readonly locale: Locale;
 }
 
 export interface SentLogEntry {
@@ -25,10 +29,10 @@ export interface ClosingPush {
   readonly url: string;
 }
 
-function endingIn(days: number): string {
-  if (days === CLOSING_PUSH_DAYS) return "Päättyy viikon päästä";
-  if (days === 1) return "Päättyy huomenna";
-  return `Päättyy ${days} päivän päästä`;
+function endingIn(days: number, t: Messages): string {
+  if (days === CLOSING_PUSH_DAYS) return t.notifications.endsInWeek;
+  if (days === 1) return t.notifications.endsTomorrow;
+  return t.notifications.endsInDays(days);
 }
 
 /**
@@ -61,18 +65,19 @@ export function selectClosingPushes(
     due.sort((a, b) => a.endDate.localeCompare(b.endDate));
     const exhibitionIds = due.map((item) => item.exhibitionId);
     const [first] = due as [InterestedEnding];
+    const { t } = i18nFor(first.locale);
     if (due.length === 1)
       return {
         userId,
         exhibitionIds,
-        title: `${endingIn(daysBetween(today, first.endDate))}: ${first.title}, ${first.museum}`,
-        body: "Kiinnostava näyttely päättyy pian.",
+        title: `${endingIn(daysBetween(today, first.endDate), t)}: ${first.title}, ${first.museum}`,
+        body: t.notifications.singleBody,
         url: `/exhibitions/${first.slug}`,
       };
     return {
       userId,
       exhibitionIds,
-      title: `${due.length} kiinnostavaa näyttelyä päättyy viikon sisällä`,
+      title: t.notifications.bundleTitle(due.length),
       body: due.map((item) => item.title).join(" · "),
       url: "/my/interested",
     };

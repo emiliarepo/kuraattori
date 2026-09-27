@@ -3,13 +3,17 @@
 import "~/styles/globals.css";
 import { Inter, Newsreader } from "next/font/google";
 
-import { t } from "~/i18n/fi";
+import { useState } from "react";
+
+import { i18nFor } from "~/i18n";
+import { LOCALE_COOKIE, resolveLocale } from "~/i18n/locales";
 
 /**
  * Replaces the root layout, so it can't reuse `AppShell`/`Header` (which
  * fetch session and region data) or anything else that could itself fail —
  * only a static masthead and self-hosted fonts, loaded the same way
- * `RootLayout` does.
+ * `RootLayout` does. The locale comes from the cookie alone, for the same
+ * reason.
  */
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -29,8 +33,20 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [{ t, locale }] = useState(() =>
+    i18nFor(
+      resolveLocale(
+        null,
+        typeof document === "undefined"
+          ? null
+          : new RegExp(`(?:^|; )${LOCALE_COOKIE}=([^;]*)`).exec(
+              document.cookie,
+            )?.[1],
+      ),
+    ),
+  );
   return (
-    <html lang="fi" className={`${newsreader.variable} ${inter.variable}`}>
+    <html lang={locale} className={`${newsreader.variable} ${inter.variable}`}>
       <body className="bg-bg text-fg">
         <header className="mx-auto max-w-5xl px-4 pt-4 pb-2 text-center sm:px-6 sm:pt-7">
           <span className="font-serif text-[2rem] leading-none tracking-tight italic sm:text-5xl">

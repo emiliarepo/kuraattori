@@ -188,7 +188,15 @@ export async function withDetails(
       (categoryId) => {
         const category = categoryById.get(categoryId);
         return category
-          ? [{ id: category.id, name: category.name, slug: category.slug }]
+          ? [
+              {
+                id: category.id,
+                name: category.name,
+                nameEn: category.nameEn,
+                nameSv: category.nameSv,
+                slug: category.slug,
+              },
+            ]
           : [];
       },
     ),
@@ -238,7 +246,11 @@ async function listExhibitions(ctx: ApiContext, input: ListInput) {
     filters.push(
       or(
         like(exhibitions.titleFi, `%${input.search}%`),
+        like(exhibitions.titleEn, `%${input.search}%`),
+        like(exhibitions.titleSv, `%${input.search}%`),
         like(museums.name, `%${input.search}%`),
+        like(museums.nameEn, `%${input.search}%`),
+        like(museums.nameSv, `%${input.search}%`),
         like(museums.city, `%${input.search}%`),
       ),
     );

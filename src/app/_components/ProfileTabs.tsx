@@ -3,17 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { t } from "~/i18n/fi";
-
-const TABS = [
-  { href: "/profile/interests", label: t.profile.tabs.interests },
-  { href: "/profile/regions", label: t.profile.tabs.regions },
-  { href: "/profile/calendar", label: t.profile.tabs.calendar },
-  { href: "/profile/year", label: t.profile.tabs.year },
-  { href: "/profile/account", label: t.profile.tabs.account },
-] as const;
+import { useI18n } from "~/i18n/client";
 
 export function ProfileTabs() {
+  const { t } = useI18n();
+  const TABS = [
+    { href: "/profile/interests", label: t.profile.tabs.interests },
+    { href: "/profile/regions", label: t.profile.tabs.regions },
+    { href: "/profile/calendar", label: t.profile.tabs.calendar },
+    { href: "/profile/year", label: t.profile.tabs.year },
+    { href: "/profile/account", label: t.profile.tabs.account },
+  ] as const;
   const pathname = usePathname();
 
   return (

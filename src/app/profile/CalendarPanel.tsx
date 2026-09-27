@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 import { api } from "~/trpc/react";
 
 export function CalendarPanel({
@@ -10,6 +10,7 @@ export function CalendarPanel({
 }: {
   initialCalendarUrl: string;
 }) {
+  const { t } = useI18n();
   const [calendarUrl, setCalendarUrl] = useState(initialCalendarUrl);
   const [copied, setCopied] = useState(false);
   const rotateCalendarFeed = api.profile.rotateCalendarFeed.useMutation({

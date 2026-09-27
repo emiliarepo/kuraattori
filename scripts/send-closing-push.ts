@@ -5,6 +5,8 @@ import { getPlatformProxy } from "wrangler";
 
 import { CLOSING_PUSH_DAYS, selectClosingPushes } from "~/domain/closing-push";
 import { addDays, todayInHelsinki } from "~/domain/dates";
+import { localized } from "~/domain/localized";
+import { resolveLocale } from "~/i18n/locales";
 import { type Db } from "~/server/db";
 import * as schema from "~/server/db/schema";
 import {
@@ -87,12 +89,18 @@ async function sendClosingPushes(db: Db, today: string) {
       .select({
         userId: userExhibitions.userId,
         exhibitionId: exhibitions.id,
-        title: exhibitions.titleFi,
-        museum: museums.name,
+        titleFi: exhibitions.titleFi,
+        titleEn: exhibitions.titleEn,
+        titleSv: exhibitions.titleSv,
+        name: museums.name,
+        nameEn: museums.nameEn,
+        nameSv: museums.nameSv,
         slug: exhibitions.slug,
         endDate: exhibitions.endDate,
+        locale: users.locale,
       })
       .from(userExhibitions)
+      .innerJoin(users, eq(users.id, userExhibitions.userId))
       .innerJoin(exhibitions, eq(exhibitions.id, userExhibitions.exhibitionId))
       .innerJoin(museums, eq(museums.id, exhibitions.museumId))
       .where(
@@ -107,7 +115,18 @@ async function sendClosingPushes(db: Db, today: string) {
   ]);
 
   const pushes = selectClosingPushes(
-    interested.map((row) => ({ ...row, endDate: row.endDate! })),
+    interested.map((row) => {
+      const locale = resolveLocale(row.locale, null);
+      return {
+        userId: row.userId,
+        exhibitionId: row.exhibitionId,
+        title: localized(row, "title", locale).text,
+        museum: localized(row, "name", locale).text,
+        slug: row.slug,
+        endDate: row.endDate!,
+        locale,
+      };
+    }),
     sent,
     today,
   );

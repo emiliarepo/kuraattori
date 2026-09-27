@@ -12,6 +12,13 @@ import {
   parseMuseumPage,
   parseOpeningHours,
 } from "./parse-museum";
+import {
+  collectTranslations,
+  distinctTranslation,
+  parseTranslatedListing,
+  translatedDetailPath,
+  translatedListingPath,
+} from "./translations";
 
 const LISTING_PATH = "/nayttelykalenteri/index.php?kaikki=1";
 
@@ -65,9 +72,20 @@ export function createMuseotFiAdapter(): ExhibitionSourceAdapter {
         freeDays: parseFreeDays(html),
       };
     },
-    async fetchExhibitions(knownHashes): Promise<FetchExhibitionsResult> {
+    async fetchExhibitions(
+      knownHashes,
+      knownTranslationHashes,
+    ): Promise<FetchExhibitionsResult> {
       const listingHtml = await client.getText(LISTING_PATH);
       const listing = parseListingPage(listingHtml);
+      const translatedListings = {
+        en: parseTranslatedListing(
+          await client.getText(translatedListingPath("en")),
+        ),
+        sv: parseTranslatedListing(
+          await client.getText(translatedListingPath("sv")),
+        ),
+      };
 
       const [topicMembership, maakuntaByCity] = await Promise.all([
         fetchTopicMembership(client, listing.taxonomy.topics),
@@ -78,6 +96,14 @@ export function createMuseotFiAdapter(): ExhibitionSourceAdapter {
         (topic) => ({
           sourceId: topic.sourceId,
           name: topic.name,
+          nameEn: distinctTranslation(
+            translatedListings.en.topics.get(topic.sourceId),
+            topic.name,
+          ),
+          nameSv: distinctTranslation(
+            translatedListings.sv.topics.get(topic.sourceId),
+            topic.name,
+          ),
         }),
       );
 
@@ -124,7 +150,23 @@ export function createMuseotFiAdapter(): ExhibitionSourceAdapter {
         }
       }
 
-      return { categories, changed, unchanged, failedCount };
+      const translationRun = await collectTranslations(
+        listing.items,
+        translatedListings,
+        knownTranslationHashes,
+        (locale, sourceId) =>
+          client.getText(translatedDetailPath(locale, sourceId)),
+      );
+
+      return {
+        categories,
+        changed,
+        unchanged,
+        translations: translationRun.translations,
+        failedCount,
+        translationsFailed: translationRun.failed,
+        translationRequests: 2 + translationRun.requests,
+      };
     },
   };
 }

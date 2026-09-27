@@ -4,13 +4,16 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { withDetails } from "~/server/api/routers/exhibition";
 import { todayInHelsinki } from "~/domain/dates";
+import { localized } from "~/domain/localized";
 import { MY_SORTS, type MySort } from "~/domain/my-sort";
+import { INTL_LOCALE, LOCALES } from "~/i18n/locales";
 import { exhibitions, museums, userExhibitions } from "~/server/db/schema";
 
 const ENDING_SOON_WITHIN_DAYS = 7;
 const sortInput = z
   .object({
     status: z.enum(["interested", "visited", "hidden"]),
+    locale: z.enum(LOCALES).default("fi"),
     sort: z
       .enum([
         "ending",
@@ -27,8 +30,6 @@ const sortInput = z
     ({ status, sort }) =>
       !sort || (MY_SORTS[status] as readonly string[]).includes(sort),
   );
-
-const collator = new Intl.Collator("fi-FI");
 
 function compareDates(a: Date | null, b: Date | null, descending = false) {
   const difference = (a?.getTime() ?? 0) - (b?.getTime() ?? 0);
@@ -105,6 +106,7 @@ export const myRouter = createTRPCRouter({
       ];
     });
     const today = todayInHelsinki();
+    const collator = new Intl.Collator(INTL_LOCALE[input.locale]);
     sorted.sort((a, b) => {
       let order = 0;
       switch (sort) {
@@ -127,7 +129,10 @@ export const myRouter = createTRPCRouter({
             a.startDate.localeCompare(b.startDate);
           break;
         case "name":
-          order = collator.compare(a.titleFi, b.titleFi);
+          order = collator.compare(
+            localized(a, "title", input.locale).text,
+            localized(b, "title", input.locale).text,
+          );
           break;
         case "visited-newest":
           order = compareDates(a.visitedAt, b.visitedAt, true);

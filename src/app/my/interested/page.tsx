@@ -1,6 +1,6 @@
 import { CalendarPrompt } from "~/app/my/interested/CalendarPrompt";
 import { MyStatusPage } from "~/app/my/_status-page";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -9,6 +9,7 @@ export default async function MyInterestedPage({
 }: {
   searchParams: Promise<{ sort?: string | string[] }>;
 }) {
+  const { t } = await getI18n();
   const session = await auth();
   const feed = session?.user
     ? await api.profile.getExistingCalendarFeed()

@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 import { siteUrl } from "~/app/_lib/site-url";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 
-export function CalendarPrompt({ token }: { token: string | null }) {
+export async function CalendarPrompt({ token }: { token: string | null }) {
+  const { t } = await getI18n();
   if (!token)
     return (
       <p className="mb-4 font-sans text-sm">

@@ -1,6 +1,6 @@
 "use client";
 
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 export default function ErrorBoundary({
   reset,
@@ -8,6 +8,7 @@ export default function ErrorBoundary({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-col items-start gap-4 py-8">
       <h1 className="text-headline text-4xl sm:text-5xl">

@@ -1,6 +1,6 @@
 /**
- * All UI strings live here, accessed through this typed object. Formatting
- * (dates, numbers) uses `Intl` with the `fi-FI` locale, not string templates.
+ * Finnish UI strings, the source of truth for the shape of `en.ts` and
+ * `sv.ts`. Formatting (dates, numbers) goes through `Intl`, not templates.
  */
 export const t = {
   app: {
@@ -20,6 +20,7 @@ export const t = {
       next: (title: string) => `Seuraavat: ${title}`,
     },
     nav: {
+      main: "Päänavigaatio",
       home: "Koti",
       browse: "Selaa",
       trip: "Matkalla",
@@ -144,6 +145,7 @@ export const t = {
     },
     accountName: "Nimi",
     accountEmail: "Sähköposti",
+    language: "Kieli / Language / Språk",
     museums: {
       heading: "Museot",
       empty: "Et seuraa vielä yhtään museota.",
@@ -296,6 +298,8 @@ export const t = {
       clearVisitConfirm: "Poistetaanko käyntipäivä ja muistiinpano?",
       showMore: "Näytä lisää",
       showLess: "Näytä vähemmän",
+      similar: "Samankaltaisia",
+      similarEmpty: "Ei samankaltaisia näyttelyitä.",
     },
     hours: {
       title: "Aukioloajat",
@@ -408,9 +412,29 @@ export const t = {
       day: "Suunnittele museopäivä: valitse näyttelyt ja saat kävelyreitin.",
     },
   },
+  notifications: {
+    calendarEnds: (title: string) => `Päättyy: ${title}`,
+    endsInWeek: "Päättyy viikon päästä",
+    endsTomorrow: "Päättyy huomenna",
+    endsInDays: (days: number) => `Päättyy ${days} päivän päästä`,
+    singleBody: "Kiinnostava näyttely päättyy pian.",
+    bundleTitle: (count: number) =>
+      `${count} kiinnostavaa näyttelyä päättyy viikon sisällä`,
+  },
   legal: {
     terms: "Käyttöehdot",
     privacy: "Tietosuoja",
     privacyTitle: "Tietosuojaseloste",
   },
 } as const;
+
+type Widen<T> = T extends string
+  ? string
+  : T extends (...args: infer A) => infer R
+    ? (...args: A) => Widen<R>
+    : T extends readonly (infer U)[]
+      ? readonly Widen<U>[]
+      : { readonly [K in keyof T]: Widen<T[K]> };
+
+/** The shape every locale's strings must match exactly. */
+export type Messages = Widen<typeof t>;

@@ -2,13 +2,21 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 import { LegalPage } from "~/app/_components/LegalPage";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 
-export const metadata: Metadata = { title: t.legal.terms };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return { title: t.legal.terms };
+}
 
-export default function TermsPage() {
+export default async function TermsPage() {
+  const { t, locale } = await getI18n();
   return (
-    <LegalPage title={t.legal.terms} kicker="Voimassa 27.9.2026 alkaen">
+    <LegalPage
+      title={t.legal.terms}
+      kicker="Voimassa 27.9.2026 alkaen"
+      lang={locale === "fi" ? undefined : "fi"}
+    >
       <p>
         Kuraattori on Emilia Repon yksityishenkilönä ylläpitämä maksuton
         harrastepalvelu museoiden näyttelyiden löytämiseen ja seuraamiseen.

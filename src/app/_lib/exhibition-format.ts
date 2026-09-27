@@ -6,50 +6,30 @@ import {
 } from "~/domain/dates";
 import { ENDING_SOON_DAYS } from "~/domain/urgency";
 import type { TimeBarProps } from "~/app/_components/TimeBar";
-import { t } from "~/i18n/fi";
+import type { I18n } from "~/i18n";
+import { formatDate, formatDayMonth, formatWeekday } from "~/i18n/format";
+import type { Locale } from "~/i18n/locales";
 
-const shortDate = new Intl.DateTimeFormat("fi-FI", {
-  day: "numeric",
-  month: "numeric",
-});
-const longDate = new Intl.DateTimeFormat("fi-FI", {
-  day: "numeric",
-  month: "numeric",
-  year: "numeric",
-});
-
-const weekday = new Intl.DateTimeFormat("fi-FI", { weekday: "long" });
-
-function parseLocalDate(isoDate: string): Date {
-  return new Date(`${isoDate}T00:00:00`);
-}
-
-export function formatShortDate(isoDate: string): string {
-  return shortDate.format(parseLocalDate(isoDate));
-}
-
-export function formatLongDate(isoDate: string): string {
-  return longDate.format(parseLocalDate(isoDate));
-}
-
-/** `sunnuntai 27.9.2026`: `Intl` alone would inflect the weekday ("sunnuntaina"). */
-export function formatWeekdayDate(isoDate: string): string {
-  const date = parseLocalDate(isoDate);
-  return `${weekday.format(date)} ${longDate.format(date)}`;
+/** `sunnuntai 27.9.2026`: `Intl` alone would inflect the Finnish weekday ("sunnuntaina"). */
+export function formatWeekdayDate(isoDate: string, locale: Locale): string {
+  return `${formatWeekday(isoDate, locale)} ${formatDate(isoDate, locale)}`;
 }
 
 /** `12.9.–31.1.2027`: the start date drops the year when both fall in the same one. */
-function dateRangeLabels(startIso: string, endIso: string) {
-  const sameYear =
-    parseLocalDate(startIso).getFullYear() ===
-    parseLocalDate(endIso).getFullYear();
+function dateRangeLabels(startIso: string, endIso: string, locale: Locale) {
+  const sameYear = startIso.slice(0, 4) === endIso.slice(0, 4);
   return {
-    startLabel: sameYear ? formatShortDate(startIso) : formatLongDate(startIso),
-    endLabel: formatLongDate(endIso),
+    startLabel: sameYear
+      ? formatDayMonth(startIso, locale)
+      : formatDate(startIso, locale),
+    endLabel: formatDate(endIso, locale),
   };
 }
 
-function remainingDaysLabel(daysRemaining: number): {
+function remainingDaysLabel(
+  daysRemaining: number,
+  t: I18n["t"],
+): {
   label: string;
   urgent: boolean;
 } {
@@ -65,6 +45,7 @@ function remainingDaysLabel(daysRemaining: number): {
 export function timeBarProps(
   exhibition: ExhibitionDates,
   today: string,
+  { t, locale }: I18n,
 ): TimeBarProps {
   const phase = getPhase(exhibition, today);
 
@@ -75,7 +56,7 @@ export function timeBarProps(
       endLabel: "",
       remainingLabel:
         phase === "upcoming"
-          ? t.time.startsOn(formatShortDate(exhibition.startDate))
+          ? t.time.startsOn(formatDayMonth(exhibition.startDate, locale))
           : t.time.indefinite,
       urgent: false,
     };
@@ -85,6 +66,7 @@ export function timeBarProps(
   const { startLabel, endLabel } = dateRangeLabels(
     exhibition.startDate,
     exhibition.endDate,
+    locale,
   );
 
   if (phase === "upcoming") {
@@ -92,7 +74,9 @@ export function timeBarProps(
       progress,
       startLabel,
       endLabel,
-      remainingLabel: t.time.startsOn(formatShortDate(exhibition.startDate)),
+      remainingLabel: t.time.startsOn(
+        formatDayMonth(exhibition.startDate, locale),
+      ),
       urgent: false,
     };
   }
@@ -101,13 +85,16 @@ export function timeBarProps(
       progress,
       startLabel,
       endLabel,
-      remainingLabel: t.pages.timeBar.ended(formatLongDate(exhibition.endDate)),
+      remainingLabel: t.pages.timeBar.ended(
+        formatDate(exhibition.endDate, locale),
+      ),
       urgent: false,
     };
   }
 
   const { label, urgent } = remainingDaysLabel(
     getDaysRemaining(exhibition, today)!,
+    t,
   );
   return { progress, startLabel, endLabel, remainingLabel: label, urgent };
 }
@@ -120,11 +107,12 @@ export function timeBarProps(
 export function urgencyLabelText(
   exhibition: ExhibitionDates,
   today: string,
+  { t, locale }: I18n,
 ): string | null {
   const phase = getPhase(exhibition, today);
   if (phase === "ended") return null;
   if (phase === "upcoming")
-    return t.time.startsOn(formatShortDate(exhibition.startDate));
+    return t.time.startsOn(formatDayMonth(exhibition.startDate, locale));
   if (exhibition.endDate === null) return null;
 
   const daysRemaining = getDaysRemaining(exhibition, today)!;
@@ -141,20 +129,25 @@ export function tripWhyLabel(
   exhibition: ExhibitionDates,
   from: string,
   to: string,
+  { t, locale }: I18n,
   endingSoon = false,
 ): string | null {
   if (exhibition.endDate !== null && exhibition.endDate >= from) {
     if (exhibition.endDate <= to) return t.pages.trip.endsDuringTrip;
     if (endingSoon)
-      return t.pages.trip.endsAfterTrip(formatShortDate(exhibition.endDate));
+      return t.pages.trip.endsAfterTrip(
+        formatDayMonth(exhibition.endDate, locale),
+      );
   }
   if (exhibition.startDate >= from && exhibition.startDate <= to) {
-    return t.pages.trip.opensDuringTrip(formatShortDate(exhibition.startDate));
+    return t.pages.trip.opensDuringTrip(
+      formatDayMonth(exhibition.startDate, locale),
+    );
   }
   return null;
 }
 
-export function dayCaption(days: number): string {
+export function dayCaption(days: number, { t }: I18n): string {
   return t.pages.days.caption(days);
 }
 

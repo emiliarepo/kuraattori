@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { refreshStatusData } from "~/app/_components/refresh-status-action";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 import { api } from "~/trpc/react";
 
 export function FollowToggle({
@@ -19,6 +19,7 @@ export function FollowToggle({
   onChange?: (following: boolean) => void;
   className?: string;
 }) {
+  const { t } = useI18n();
   const [following, setFollowing] = useState(initialFollowing);
   const [announcement, setAnnouncement] = useState("");
   const follow = api.museum.follow.useMutation();

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 import { VAPID_PUBLIC_KEY } from "~/push/vapid";
 import { api } from "~/trpc/react";
 
@@ -37,6 +37,7 @@ function base64UrlToBytes(value: string) {
 }
 
 export function PushToggle() {
+  const { t } = useI18n();
   const [state, setState] = useState<State>("checking");
   const [failed, setFailed] = useState(false);
   const subscribe = api.push.subscribe.useMutation();

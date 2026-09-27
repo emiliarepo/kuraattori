@@ -1,16 +1,17 @@
 import Link from "next/link";
 
 import { formatEuros, type Savings } from "~/domain/savings";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 
-export function SavingsHeader({
+export async function SavingsHeader({
   savings,
   sort,
 }: {
   savings: Savings;
   sort: string | undefined;
 }) {
-  const amount = formatEuros(savings.savedCents);
+  const { t, locale } = await getI18n();
+  const amount = formatEuros(savings.savedCents, locale);
   return (
     <section
       aria-label={t.pages.my.savings.label}

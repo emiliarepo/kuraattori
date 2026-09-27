@@ -16,13 +16,13 @@ import {
   visitYear,
   type StampedMuseum,
 } from "~/domain/passport";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
-const copy = t.pages.my.passport;
-
 export default async function MyPassportPage() {
+  const { t } = await getI18n();
+  const copy = t.pages.my.passport;
   const session = await auth();
   if (!session?.user) return <SignInPrompt message={t.pages.signIn.my} />;
 
@@ -116,7 +116,8 @@ export default async function MyPassportPage() {
   );
 }
 
-function PassportStamp({ museum }: { museum: StampedMuseum }) {
+async function PassportStamp({ museum }: { museum: StampedMuseum }) {
+  const copy = (await getI18n()).t.pages.my.passport;
   const look = stampLook(museum.id);
   return (
     <li style={{ transform: `rotate(${look.rotation}deg)` }}>

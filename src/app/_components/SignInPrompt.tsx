@@ -1,8 +1,9 @@
 import Link from "next/link";
 
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 
-export function SignInPrompt({ message }: { message: string }) {
+export async function SignInPrompt({ message }: { message: string }) {
+  const { t } = await getI18n();
   return (
     <p className="text-muted py-6 text-lg italic">
       {message}{" "}

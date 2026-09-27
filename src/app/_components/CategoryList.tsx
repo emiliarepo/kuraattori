@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export type Category = { label: string; href?: string };
+export type Category = { label: string; lang?: "fi"; href?: string };
 
 export function CategoryList({
   categories,
@@ -14,7 +14,7 @@ export function CategoryList({
   return (
     <p className={`text-muted font-sans ${className}`}>
       {categories.map((category, index) => (
-        <span key={category.label}>
+        <span key={category.label} lang={category.lang}>
           {index > 0 && " · "}
           {category.href ? (
             <Link

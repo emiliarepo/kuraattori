@@ -153,6 +153,8 @@ export const museumRouter = createTRPCRouter({
       .select({
         id: museums.id,
         name: museums.name,
+        nameEn: museums.nameEn,
+        nameSv: museums.nameSv,
         slug: museums.slug,
         city: museums.city,
       })

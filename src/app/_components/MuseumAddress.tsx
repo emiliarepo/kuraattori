@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { isApplePlatform, mapHref } from "~/app/_lib/maps";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 export function MuseumAddress({
   name,
@@ -12,6 +12,7 @@ export function MuseumAddress({
   name: string;
   address: string;
 }) {
+  const { t } = useI18n();
   const [apple, setApple] = useState(false);
 
   useEffect(() => {
