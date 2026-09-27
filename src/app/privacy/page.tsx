@@ -19,8 +19,8 @@ export default function PrivacyPage() {
       <h2>Rekisterinpitäjä</h2>
       <p>
         Emilia Repo (yksityishenkilö),{" "}
-        <a href="mailto:emilia@repo.codes">emilia@repo.codes</a>. Tietosuojaa
-        koskevat pyynnöt voi lähettää samaan osoitteeseen.
+        <a href="mailto:hi@emialis.com">hi@emialis.com</a>. Tietosuojaa koskevat
+        pyynnöt voi lähettää samaan osoitteeseen.
       </p>
 
       <h2>Käsiteltävät tiedot</h2>
