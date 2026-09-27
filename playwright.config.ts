@@ -1,6 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 
-import { APP_BASE_URL, APP_LOG_PATH, PROD_CHECK_BASE_URL } from "./e2e/env";
+import {
+  APP_BASE_URL,
+  APP_LOG_PATH,
+  APP_PORT,
+  PROD_CHECK_BASE_URL,
+  PROD_CHECK_PORT,
+} from "./e2e/env";
 
 const APP_PERSIST_DIR = ".wrangler/state-e2e";
 const PROD_CHECK_PERSIST_DIR = ".wrangler/state-e2e-prodcheck";
@@ -51,7 +57,7 @@ export default defineConfig({
   webServer: [
     {
       name: "app",
-      command: `tsx scripts/e2e-server.ts ${APP_LOG_PATH} -- --port 8788 --persist-to ${APP_PERSIST_DIR} --var E2E_TEST_AUTH:1 --var NEXTJS_ENV:development --var AUTH_SECRET:${TEST_AUTH_SECRET}`,
+      command: `tsx scripts/e2e-server.ts ${APP_LOG_PATH} -- --port ${APP_PORT} --persist-to ${APP_PERSIST_DIR} --var E2E_TEST_AUTH:1 --var NEXTJS_ENV:development --var AUTH_SECRET:${TEST_AUTH_SECRET}`,
       url: `${APP_BASE_URL}/api/auth/providers`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
@@ -61,7 +67,7 @@ export default defineConfig({
       name: "prod-check",
       // No `E2E_TEST_AUTH` or `NEXTJS_ENV`: this mirrors the real deployed
       // Worker as closely as a local build can, for `auth-providers.spec.ts`.
-      command: `wrangler dev --port 8789 --persist-to ${PROD_CHECK_PERSIST_DIR} --var AUTH_SECRET:${TEST_AUTH_SECRET}`,
+      command: `wrangler dev --port ${PROD_CHECK_PORT} --persist-to ${PROD_CHECK_PERSIST_DIR} --var AUTH_SECRET:${TEST_AUTH_SECRET}`,
       url: `${PROD_CHECK_BASE_URL}/api/auth/providers`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
