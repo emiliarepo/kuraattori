@@ -19,9 +19,6 @@
 	},
 	"d1_databases": [
 		{
-			// Local dev only: this id is a placeholder, not a real Cloudflare
-			// database. Replace it with the id from `wrangler d1 create` before
-			// any remote deploy.
 			"binding": "DB",
 			"database_name": "kuraattori",
 			"database_id": "04d53796-2160-455d-ba5e-0fb4f6bee0b7",
@@ -30,14 +27,11 @@
 	],
 	"kv_namespaces": [
 		{
-			// Local dev only: this id is a placeholder, not a real Cloudflare KV
-			// namespace. Replace it with the id from
-			// `wrangler kv namespace create CACHE` before any remote deploy.
 			// Caches public reads (regions, museums, categories, the active-
 			// exhibition pool); see src/server/cache/kv-cache.ts. Code degrades
 			// to uncached reads if this binding is ever absent.
 			"binding": "CACHE",
-			"id": "0000000000000000000000000000c6"
+			"id": "90ab6e16443148e0a8ab33f924c64fea"
 		}
 	],
 	"services": [
