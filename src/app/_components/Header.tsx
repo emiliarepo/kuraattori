@@ -11,7 +11,11 @@ import { auth, signOut } from "~/server/auth";
 import { getActiveRegions } from "~/server/regions-preference";
 import { api } from "~/trpc/server";
 
-export async function Header() {
+export async function Header({
+  omatEndingSoonCount = 0,
+}: {
+  omatEndingSoonCount?: number;
+}) {
   const [session, allRegions, activeRegions] = await Promise.all([
     auth(),
     api.system.regions(),
@@ -51,7 +55,7 @@ export async function Header() {
         <p className="text-kicker text-muted">
           {formatWeekdayDate(todayInHelsinki())}
         </p>
-        <DesktopNav />
+        <DesktopNav omatEndingSoonCount={omatEndingSoonCount} />
         <RegionSelector
           key={`${session?.user?.id ?? "anon"}:${activeRegions.join(",")}`}
           allRegions={allRegions}

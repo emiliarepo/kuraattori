@@ -1,8 +1,13 @@
+import { and, count, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { exhibitionRouter } from "~/server/api/routers/exhibition";
 import { userExhibitionRouter } from "~/server/api/routers/user-exhibition";
+import { todayInHelsinki } from "~/domain/dates";
+import { exhibitions, userExhibitions } from "~/server/db/schema";
+
+const ENDING_SOON_WITHIN_DAYS = 7;
 
 /**
  * `userExhibition.listByStatus` returns bare exhibition rows (no museum join
@@ -39,4 +44,23 @@ export const myRouter = createTRPCRouter({
         return true;
       });
     }),
+  /** Drives the Omat tab dot: interested exhibitions ending within a week. */
+  endingSoonCount: protectedProcedure.query(async ({ ctx }) => {
+    const today = todayInHelsinki();
+    const until = new Date(`${today}T00:00:00Z`);
+    until.setUTCDate(until.getUTCDate() + ENDING_SOON_WITHIN_DAYS);
+    const [row] = await ctx.db
+      .select({ count: count() })
+      .from(userExhibitions)
+      .innerJoin(exhibitions, eq(exhibitions.id, userExhibitions.exhibitionId))
+      .where(
+        and(
+          eq(userExhibitions.userId, ctx.session.user.id),
+          eq(userExhibitions.status, "interested"),
+          gte(exhibitions.endDate, today),
+          lte(exhibitions.endDate, until.toISOString().slice(0, 10)),
+        ),
+      );
+    return row?.count ?? 0;
+  }),
 });

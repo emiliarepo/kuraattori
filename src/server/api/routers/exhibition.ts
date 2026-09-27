@@ -62,6 +62,19 @@ export const whereVisible = (userId: string | null) =>
       )`
     : undefined;
 
+/** Same shape as `whereVisible`, for "new": visited exhibitions are still on Päättyy pian and in lists, just not here. */
+const whereNotVisited = (userId: string | null) =>
+  userId
+    ? sql`not exists (
+        select 1 from ${userExhibitions} ue
+        inner join ${exhibitions} e2 on e2.id = ue.exhibitionId
+        where ue.userId = ${userId}
+          and ue.status = 'visited'
+          and (e2.id = ${exhibitions.id}
+            or (${exhibitions.exhibitionGroup} is not null and e2.exhibitionGroup = ${exhibitions.exhibitionGroup}))
+      )`
+    : undefined;
+
 type ApiContext = Awaited<ReturnType<typeof createTRPCContext>>;
 type ListInput = z.infer<typeof listInput>;
 
@@ -414,6 +427,7 @@ export const exhibitionRouter = createTRPCRouter({
       const filters = [
         onlyExhibitions,
         whereVisible(ctx.session?.user?.id ?? null),
+        whereNotVisited(ctx.session?.user?.id ?? null),
         gte(exhibitions.startDate, openedSince.toISOString().slice(0, 10)),
         lte(exhibitions.startDate, today),
       ];

@@ -135,6 +135,62 @@ describe("my.list", () => {
   });
 });
 
+describe("my.endingSoonCount", () => {
+  it("counts interested exhibitions ending within 7 days, ignoring other statuses and dates", async () => {
+    await db.insert(schema.museums).values({
+      id: 1,
+      source: "test",
+      sourceId: "m1",
+      name: "Ateneum",
+      slug: "ateneum",
+      city: "Helsinki",
+    });
+    await db.insert(schema.exhibitions).values([
+      {
+        id: 1,
+        source: "test",
+        sourceId: "e1",
+        museumId: 1,
+        slug: "soon",
+        titleFi: "Pian päättyvä",
+        startDate: "2026-01-01",
+        endDate: "2026-10-02",
+        sourcePayloadHash: "a",
+      },
+      {
+        id: 2,
+        source: "test",
+        sourceId: "e2",
+        museumId: 1,
+        slug: "later",
+        titleFi: "Myöhemmin päättyvä",
+        startDate: "2026-01-01",
+        endDate: "2026-12-31",
+        sourcePayloadHash: "b",
+      },
+      {
+        id: 3,
+        source: "test",
+        sourceId: "e3",
+        museumId: 1,
+        slug: "visited-soon",
+        titleFi: "Käyty, pian päättyvä",
+        startDate: "2026-01-01",
+        endDate: "2026-10-02",
+        sourcePayloadHash: "c",
+      },
+    ]);
+    await db.insert(schema.userExhibitions).values([
+      { userId, exhibitionId: 1, status: "interested" },
+      { userId, exhibitionId: 2, status: "interested" },
+      { userId, exhibitionId: 3, status: "visited" },
+    ]);
+
+    const count = await createCaller(ctx).my.endingSoonCount();
+    expect(count).toBe(1);
+  });
+});
+
 describe("userExhibition.updateVisit", () => {
   it("validates exhibition date bounds and clears date and note when status changes", async () => {
     await db.insert(schema.museums).values({

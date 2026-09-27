@@ -10,11 +10,13 @@ export function Rail({
   items,
   emptyMessage,
   more,
+  signedIn = false,
 }: {
   title: string;
   items: readonly RailItem[];
   emptyMessage: string;
   more?: { href: string; label: string };
+  signedIn?: boolean;
 }) {
   return (
     <Section title={title} more={more}>
@@ -27,7 +29,7 @@ export function Rail({
         >
           {items.map(({ view, lead }) => (
             <li key={view.href} className="flex w-[40vw] sm:w-52">
-              <ExhibitionCard item={view} lead={lead} />
+              <ExhibitionCard item={view} lead={lead} signedIn={signedIn} />
             </li>
           ))}
         </ul>

@@ -23,6 +23,7 @@ export async function MyStatusPage({
     <ExhibitionList
       items={items.map((item) => toRowView(item, today))}
       emptyMessage={emptyMessage}
+      signedIn
     />
   );
 }

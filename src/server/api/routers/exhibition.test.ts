@@ -198,6 +198,44 @@ describe("exhibition API", () => {
       expect(result.map((item) => item.slug)).toEqual(["newest", "recent"]);
     });
 
+    it("excludes exhibitions the signed-in user has visited", async () => {
+      await db
+        .insert(schema.users)
+        .values({ id: "u1", email: "u1@example.com" });
+      await db.insert(schema.museums).values({
+        id: 1,
+        source: "test",
+        sourceId: "m1",
+        name: "Ateneum",
+        slug: "ateneum",
+        city: "Helsinki",
+        region: "Pääkaupunkiseutu",
+      });
+      await db.insert(schema.exhibitions).values(
+        [1, 2].map((id) => ({
+          id,
+          source: "test",
+          sourceId: `e${id}`,
+          museumId: 1,
+          slug: `e${id}`,
+          titleFi: `Näyttely ${id}`,
+          startDate: "2026-09-20",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "x",
+        })),
+      );
+      await db
+        .insert(schema.userExhibitions)
+        .values({ userId: "u1", exhibitionId: 1, status: "visited" });
+
+      const signedIn = {
+        ...ctx,
+        session: { user: { id: "u1" }, expires: "2099-01-01" },
+      } as typeof ctx;
+      const result = await createCaller(signedIn).exhibition.new({});
+      expect(result.map((item) => item.slug)).toEqual(["e2"]);
+    });
+
     it("filters by region", async () => {
       await db.insert(schema.museums).values([
         {

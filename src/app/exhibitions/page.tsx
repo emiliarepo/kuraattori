@@ -11,6 +11,7 @@ import {
 import { listAcrossRegions } from "~/app/_lib/list-across-regions";
 import { todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
+import { auth } from "~/server/auth";
 import { getActiveRegions } from "~/server/regions-preference";
 import { api } from "~/trpc/server";
 
@@ -35,13 +36,16 @@ export default async function ExhibitionsPage({
     categories,
     showMuseumCardFilter,
     lastImportAt,
+    session,
   ] = await Promise.all([
     getActiveRegions(),
     api.museum.list(),
     api.category.list(),
     api.meta.hasIneligibleExhibitions(),
     api.meta.lastImportAt(),
+    auth(),
   ]);
+  const signedIn = Boolean(session?.user);
 
   const listInputBase = {
     ...browseFiltersToListInput(filters),
@@ -102,6 +106,7 @@ export default async function ExhibitionsPage({
           input={listInput}
           today={today}
           emptyMessage={t.pages.browse.empty}
+          signedIn={signedIn}
         />
         <div className="mt-8">
           <StaleDataNotice lastImportAt={lastImportAt} />

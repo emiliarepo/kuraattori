@@ -7,6 +7,7 @@ import { hasValidTripRange, parseTripFilters } from "~/app/_lib/trip-filters";
 import { todayInHelsinki } from "~/domain/dates";
 import { groupRegions } from "~/domain/regions";
 import { t } from "~/i18n/fi";
+import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 import type { RouterOutputs } from "~/trpc/react";
 
@@ -21,10 +22,12 @@ export default async function TripPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const filters = parseTripFilters(await searchParams);
-  const [regions, museums] = await Promise.all([
+  const [regions, museums, session] = await Promise.all([
     api.system.regions(),
     api.museum.list(),
+    auth(),
   ]);
+  const signedIn = Boolean(session?.user);
   const { cities: cityRegions, others: otherRegions } = groupRegions(regions);
   const freeCities = [
     ...new Set(
@@ -138,6 +141,7 @@ export default async function TripPage({
             tripToRowView(item, today, range.from, range.to),
           )}
           emptyMessage={t.pages.trip.empty}
+          signedIn={signedIn}
         />
       )}
     </div>

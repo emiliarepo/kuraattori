@@ -4,8 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { isNavItemActive, NAV_ITEMS } from "~/app/_components/nav";
+import { t } from "~/i18n/fi";
 
-export function BottomTabBar() {
+export function BottomTabBar({
+  omatEndingSoonCount = 0,
+}: {
+  omatEndingSoonCount?: number;
+}) {
   const pathname = usePathname();
 
   return (
@@ -15,11 +20,15 @@ export function BottomTabBar() {
     >
       {NAV_ITEMS.map((item) => {
         const active = isNavItemActive(item.href, pathname);
+        const showDot = item.key === "mine" && omatEndingSoonCount > 0;
         return (
           <Link
             key={item.key}
             href={item.href}
             aria-current={active ? "page" : undefined}
+            aria-label={
+              showDot ? t.ui.nav.omatEndingSoon(omatEndingSoonCount) : undefined
+            }
             className={`flex-1 border-t-2 px-2 py-3 text-center text-[0.8125rem] transition-colors duration-150 ${
               active
                 ? "border-t-signal text-signal font-semibold"
@@ -27,6 +36,12 @@ export function BottomTabBar() {
             }`}
           >
             {item.label}
+            {showDot && (
+              <span
+                aria-hidden="true"
+                className="bg-signal ml-1 inline-block h-1.5 w-1.5 rounded-full align-middle"
+              />
+            )}
           </Link>
         );
       })}
