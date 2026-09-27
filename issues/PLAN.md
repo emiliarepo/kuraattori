@@ -8,7 +8,7 @@ Migrations are serialized (one migration-adding ticket in flight at a time): 14 
 1b. After 12 lands: reread tickets 13–21 against the new docs/design.md and components (rails, serif tokens, card names); update wording, file references and UI instructions before launching them.
 2. Wave A (parallel, no migrations): 13 weights (Sonnet), 17 PWA (Luna), 19 similar (Luna) + 14 dedupe (Sonnet, migration).
 3. Wave B: 15 visit date/note (Luna, migration), 18 travel mode (Sonnet).
-4. Wave C: 16 calendar (Luna, migration).
+4. Wave C: 23 performance + back navigation (Sonnet, broad; run with only 16 in parallel), 16 calendar (Luna, migration).
 5. Wave D: 20 savings (Sonnet, migration), then 21 year in review (Sonnet).
 6. 22 en/sv locales (lowest priority; adds a migration, so after 20).
 7. Design consistency review (Opus) across all screens, fixes, final deploy and browser check.
