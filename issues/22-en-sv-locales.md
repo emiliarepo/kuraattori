@@ -10,3 +10,10 @@ Add `en` and `sv` alongside `fi`, with a language choice on `/profile`.
 - **Content:** where an exhibition has `title_en`/`title_sv` or `description_en`/`description_sv`, show them in that locale, otherwise fall back to Finnish with `lang="fi"` on the element. Report how many exhibitions have en/sv content in the current data.
 - **URLs stay the same** (no `/en/` prefixes). Metadata uses the resolved locale; the sitemap stays Finnish.
 - Tests: the type-level key parity (a `satisfies` check compiled in CI is enough), the resolution order, and the date/relative-time formatting for each locale.
+
+## Finnish fallback (added 27.9.2026)
+
+- Every piece of imported content falls back to Finnish on its own when a translation is missing or empty (whitespace only counts as empty): exhibition title, description, museum name, category name and anything else imported. A translated title with a Finnish description is expected and fine. The Finnish element carries `lang="fi"`.
+- One pure helper does this (for example `localized(row, "title", locale)`), with unit tests: translation present, missing, empty or whitespace, and Swedish missing while English is present (Swedish falls back to Finnish, not English).
+- E2E: in the English locale, an exhibition with no English text still renders its Finnish title and description, not a blank or a key.
+- After this merges, the orchestrator triggers one manual import (`import.yml`) to fill in translations and runs a spot check on prod.
