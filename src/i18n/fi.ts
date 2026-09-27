@@ -14,6 +14,10 @@ export const t = {
     indefinite: "Toistaiseksi",
   },
   ui: {
+    rail: {
+      previous: (title: string) => `Edelliset: ${title}`,
+      next: (title: string) => `Seuraavat: ${title}`,
+    },
     nav: {
       home: "Koti",
       browse: "Selaa",
