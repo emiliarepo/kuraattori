@@ -6,6 +6,7 @@ import { toRowView } from "~/app/_lib/row";
 import { todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
 import { api } from "~/trpc/server";
+import { siteUrl } from "~/app/_lib/site-url";
 
 export async function generateMetadata({
   params,
@@ -15,7 +16,21 @@ export async function generateMetadata({
   const { slug } = await params;
   const museum = await api.museum.bySlug({ slug });
   if (!museum) return {};
-  return { title: `${museum.name} — ${t.app.name}` };
+  return {
+    title: `${museum.name} — ${t.app.name}`,
+    description: [museum.name, museum.city, t.pages.meta.museums]
+      .filter(Boolean)
+      .join(". "),
+    alternates: { canonical: `/museums/${museum.slug}` },
+    openGraph: {
+      type: "website",
+      title: `${museum.name} — ${t.app.name}`,
+      description: [museum.name, museum.city, t.pages.meta.museums]
+        .filter(Boolean)
+        .join(". "),
+      url: new URL(`/museums/${museum.slug}`, siteUrl),
+    },
+  };
 }
 
 export default async function MuseumDetailPage({

@@ -6,8 +6,10 @@ import { Archivo } from "next/font/google";
 import { AppShell } from "~/app/_components/AppShell";
 import { t } from "~/i18n/fi";
 import { TRPCReactProvider } from "~/trpc/react";
+import { siteUrl } from "~/app/_lib/site-url";
 
 export const metadata: Metadata = {
+  metadataBase: siteUrl,
   title: t.app.name,
   icons: {
     icon: [
