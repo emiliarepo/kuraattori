@@ -116,7 +116,7 @@ async function sendClosingPushes(db: Db, today: string) {
 
   const pushes = selectClosingPushes(
     interested.map((row) => {
-      const locale = resolveLocale(row.locale, null);
+      const locale = resolveLocale(row.locale, null, null);
       return {
         userId: row.userId,
         exhibitionId: row.exhibitionId,

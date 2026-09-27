@@ -1,21 +1,36 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveLocale } from "./locales";
+import { localeFromAcceptLanguage, resolveLocale } from "./locales";
 
 describe("resolveLocale", () => {
   it("prefers the signed-in user's saved choice over the cookie", () => {
-    expect(resolveLocale("sv", "en")).toBe("sv");
+    expect(resolveLocale("sv", "en", "fi")).toBe("sv");
   });
 
   it("uses the cookie when there is no saved choice", () => {
-    expect(resolveLocale(null, "en")).toBe("en");
+    expect(resolveLocale(null, "en", "sv-FI")).toBe("en");
   });
 
-  it("defaults to Finnish", () => {
-    expect(resolveLocale(undefined, undefined)).toBe("fi");
+  it("falls back to the browser language", () => {
+    expect(resolveLocale(undefined, undefined, "sv-SE,sv;q=0.9")).toBe("sv");
   });
 
-  it("ignores unknown values", () => {
-    expect(resolveLocale("de", "xx")).toBe("fi");
+  it("ignores unknown saved and cookie values", () => {
+    expect(resolveLocale("de", "xx", "fi-FI")).toBe("fi");
+  });
+});
+
+describe("localeFromAcceptLanguage", () => {
+  it.each([
+    ["fi-FI,fi;q=0.9,en;q=0.8", "fi"],
+    ["sv-FI", "sv"],
+    ["en-GB,en;q=0.9", "en"],
+    ["de-DE,de;q=0.9,fi;q=0.5", "en"],
+    ["en;q=0.4,fi;q=0.8", "fi"],
+    ["*", "fi"],
+    ["", "fi"],
+    [null, "fi"],
+  ])("%s → %s", (header, locale) => {
+    expect(localeFromAcceptLanguage(header)).toBe(locale);
   });
 });

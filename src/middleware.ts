@@ -11,7 +11,11 @@ export default async function middleware(request: NextRequest) {
   if (flag)
     return buildMaintenanceResponse(
       flag,
-      resolveLocale(null, request.cookies.get(LOCALE_COOKIE)?.value),
+      resolveLocale(
+        null,
+        request.cookies.get(LOCALE_COOKIE)?.value,
+        request.headers.get("accept-language"),
+      ),
     );
   return NextResponse.next();
 }

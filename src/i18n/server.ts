@@ -1,7 +1,7 @@
 import "server-only";
 
 import { eq } from "drizzle-orm";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { cache } from "react";
 
 import { auth } from "~/server/auth";
@@ -23,9 +23,17 @@ async function savedLocale(userId: string): Promise<string | null> {
 
 /** The request's locale and strings, resolved once per request. */
 export const getI18n = cache(async (): Promise<I18n> => {
-  const [session, cookieStore] = await Promise.all([auth(), cookies()]);
+  const [session, cookieStore, headerList] = await Promise.all([
+    auth(),
+    cookies(),
+    headers(),
+  ]);
   const userLocale = session?.user ? await savedLocale(session.user.id) : null;
   return i18nFor(
-    resolveLocale(userLocale, cookieStore.get(LOCALE_COOKIE)?.value),
+    resolveLocale(
+      userLocale,
+      cookieStore.get(LOCALE_COOKIE)?.value,
+      headerList.get("accept-language"),
+    ),
   );
 });

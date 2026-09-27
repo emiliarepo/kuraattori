@@ -27,6 +27,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
+    locale: "fi-FI",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },

@@ -42,6 +42,7 @@ export default function GlobalError({
           : new RegExp(`(?:^|; )${LOCALE_COOKIE}=([^;]*)`).exec(
               document.cookie,
             )?.[1],
+        typeof navigator === "undefined" ? null : navigator.language,
       ),
     ),
   );

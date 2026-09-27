@@ -83,7 +83,7 @@ export async function GET(
         )),
     );
   }
-  const locale = resolveLocale(feed.locale, null);
+  const locale = resolveLocale(feed.locale, null, null);
   const events = groupExhibitionRows(rows)
     .filter(({ exhibition }) => exhibition.endDate !== null)
     .map(({ exhibition, museum }) => ({
