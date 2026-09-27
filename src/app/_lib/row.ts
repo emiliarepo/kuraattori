@@ -6,6 +6,7 @@ import {
 import { type Category } from "~/app/_components/CategoryList";
 import { type ExhibitionStatus } from "~/app/_components/StatusActions";
 import { type TimeBarProps } from "~/app/_components/TimeBar";
+import { imageSources } from "~/domain/images";
 import type { Venue } from "~/server/api/grouping";
 import type { RouterOutputs } from "~/trpc/react";
 
@@ -24,7 +25,7 @@ export interface ExhibitionRowView {
   title: string;
   museum: string;
   city: string;
-  imageUrl: string | null;
+  imageSources: string[];
   imageAlt: string;
   categories: Category[];
   timeBar: TimeBarProps;
@@ -51,7 +52,7 @@ export function toRowView(
     title: item.titleFi,
     museum: venueNames(item.venues),
     city: item.museum.city ?? "",
-    imageUrl: item.imageUrl,
+    imageSources: imageSources(item, today),
     imageAlt: imageAlt(item.titleFi, item.museum.name),
     categories: categoryLabels(item.categories),
     timeBar: timeBarProps(item, today),
@@ -83,7 +84,7 @@ export function forYouToRowView(
     title: item.exhibition.titleFi,
     museum: venueNames(item.venues),
     city: item.museum.city ?? "",
-    imageUrl: item.exhibition.imageUrl,
+    imageSources: imageSources(item.exhibition, today),
     imageAlt: imageAlt(item.exhibition.titleFi, item.museum.name),
     categories: [],
     timeBar: timeBarProps(item.exhibition, today),

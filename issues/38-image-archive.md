@@ -1,5 +1,5 @@
 # 38 Archive exhibition images to R2
-Status: todo · Model: Sonnet 5 · Blocked by: 30
+Status: done · Model: Sonnet 5 · Blocked by: 30
 
 museot.fi images will disappear once exhibitions leave the source, which would leave past exhibitions, Käydyt, Museopassi and the year in review without images. Keep a resized copy of every exhibition image.
 

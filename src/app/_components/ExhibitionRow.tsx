@@ -15,7 +15,7 @@ export function ExhibitionRow({
   title,
   museum,
   city,
-  imageUrl,
+  imageSources,
   imageAlt,
   categories,
   timeBar,
@@ -30,7 +30,7 @@ export function ExhibitionRow({
   title: string;
   museum: string;
   city: string;
-  imageUrl?: string | null;
+  imageSources: readonly string[];
   imageAlt: string;
   categories: readonly Category[];
   timeBar: TimeBarProps;
@@ -49,7 +49,7 @@ export function ExhibitionRow({
         <Link href={href} className="group flex gap-4 py-5 sm:gap-6">
           <div className="w-24 flex-shrink-0 sm:w-40">
             <ImageFallback
-              src={imageUrl}
+              sources={imageSources}
               alt={imageAlt}
               title={title}
               aspectRatio="4 / 3"

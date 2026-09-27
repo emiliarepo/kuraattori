@@ -35,6 +35,7 @@ browser ◀── Next.js on a Cloudflare Worker (tRPC, Auth.js) ◀────
 ```
 
 - **Import:** a GitHub Action runs every night at 01:00 UTC and writes to D1 through the HTTP API. It isn't a Workers cron because parsing the listing needs more CPU time than a cron invocation gets. The importer reads museot.fi's server-rendered exhibition calendar at about 2 requests a second with an identifying User-Agent. It only fetches detail pages for new or changed exhibitions. Records are matched by source ID and never deleted when they go missing, and every run is logged in `import_run`.
+- **Images:** after each import, the importer downloads every exhibition image it hasn't archived yet (same rate limit), resizes it to 1200 px WebP with `sharp`, and stores it in the R2 bucket `kuraattori-images` under `exhibitions/<id>/<sha1 of source URL>.webp`. The Worker serves those copies from `/img/<key>`. Current and upcoming exhibitions show the museot.fi image and fall back to the copy; ended exhibitions use the copy directly, since museot.fi drops their images. To remove an image on request, run `pnpm exec tsx scripts/remove-image.ts <exhibition id>` with `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` and `D1_DATABASE_ID` set; the importer won't archive it again.
 - **Cache:** regions, museums, categories and the current exhibition pool are cached in KV for an hour. Personal data is never cached.
 - **Design:** documented in [`docs/design.md`](docs/design.md). The original product spec is in [`docs/spec.md`](docs/spec.md).
 
@@ -90,10 +91,10 @@ A push to `main` runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.
 
 To run your own copy:
 
-1. Create a D1 database (`wrangler d1 create kuraattori`) and a KV namespace (`wrangler kv namespace create CACHE`). Put their IDs in `wrangler.jsonc`, and change the custom domain route to yours.
+1. Create a D1 database (`wrangler d1 create kuraattori`), a KV namespace (`wrangler kv namespace create CACHE`) and an R2 bucket (`wrangler r2 bucket create kuraattori-images`). Put their IDs in `wrangler.jsonc`, and change the custom domain route to yours.
 2. Set the Worker secrets: `wrangler secret put AUTH_SECRET`, `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`. Use a Google OAuth web client with `https://<your-domain>/api/auth/callback/google` as the redirect URI.
 3. Set `NEXT_PUBLIC_SITE_URL` in `.env.production`.
-4. Add the repository secrets `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID` and `CLOUDFLARE_API_TOKEN`. The token needs Workers Scripts: Edit, D1: Edit, Workers Routes: Edit on your zone, Account Settings: Read, Account Analytics: Read (for the usage check) and Workers KV Storage: Edit (for the cost guardrail's kill switch, below).
+4. Add the repository secrets `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID` and `CLOUDFLARE_API_TOKEN`. The token needs Workers Scripts: Edit, D1: Edit, Workers Routes: Edit on your zone, Account Settings: Read, Account Analytics: Read (for the usage check) Workers KV Storage: Edit (for the cost guardrail's kill switch, below) and Workers R2 Storage: Edit (the importer uploads archived images with it).
 5. Add the repository variables listed under [Cost guardrails](#cost-guardrails) below, so the kill switch has budgets to compare against.
 
 ## Monitoring

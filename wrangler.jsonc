@@ -34,6 +34,14 @@
 			"id": "90ab6e16443148e0a8ab33f924c64fea"
 		}
 	],
+	"r2_buckets": [
+		{
+			// Resized copies of exhibition images, written by the nightly import
+			// and served from /img/<key>.
+			"binding": "IMAGES_ARCHIVE",
+			"bucket_name": "kuraattori-images"
+		}
+	],
 	"services": [
 		{
 			// Self-reference service binding, the service name must match the worker name
