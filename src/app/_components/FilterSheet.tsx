@@ -9,6 +9,7 @@ import {
   parseBrowseFilters,
   type BrowseFilters,
 } from "~/app/_lib/browse-filters";
+import { usePendingNavigation } from "~/app/_components/PendingNavigation";
 import { useBackToClose } from "~/app/_lib/use-back-to-close";
 import { t } from "~/i18n/fi";
 
@@ -194,6 +195,7 @@ export function FilterSheet(props: {
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { pending, start } = usePendingNavigation();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const releaseHistoryEntry = useBackToClose(sheetOpen, () =>
@@ -206,9 +208,9 @@ export function FilterSheet(props: {
     if (sheetOpen) {
       releaseHistoryEntry();
       dialogRef.current?.close();
-      router.replace(href);
+      start(() => router.replace(href));
     } else {
-      router.push(href);
+      start(() => router.push(href));
     }
   }
 
@@ -241,8 +243,12 @@ export function FilterSheet(props: {
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <FilterFields {...props} />
           <div className="flex flex-col gap-2">
-            <button type="submit" className="btn btn-primary">
-              {t.pages.browse.applyFilters}
+            <button
+              type="submit"
+              disabled={pending}
+              className="btn btn-primary disabled:opacity-60"
+            >
+              {pending ? t.ui.updating : t.pages.browse.applyFilters}
             </button>
             <button
               type="button"
@@ -264,7 +270,7 @@ export function FilterSheet(props: {
           }}
           className="btn btn-secondary w-full"
         >
-          {t.pages.browse.openFilters}
+          {pending ? t.ui.updating : t.pages.browse.openFilters}
         </button>
         <dialog
           ref={dialogRef}

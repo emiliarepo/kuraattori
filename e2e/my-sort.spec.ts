@@ -2,7 +2,7 @@ import { expect, test } from "./fixtures";
 import { devSignIn, uniqueEmail } from "./dev-sign-in";
 import { t } from "../src/i18n/fi";
 
-test("the chosen sort stays selected while the list reloads", async ({
+test("the chosen sort stays selected and shows progress while the list reloads", async ({
   page,
 }) => {
   await devSignIn(page, uniqueEmail("my-sort"), "/my/interested");
@@ -22,8 +22,11 @@ test("the chosen sort stays selected while the list reloads", async ({
   await select.selectOption("name");
   await page.waitForTimeout(500);
   await expect(select).toHaveValue("name");
+  await expect(page.getByRole("status")).toHaveText(t.ui.updating);
+  await expect(page.locator('main [aria-busy="true"]')).toHaveCount(1);
 
   release();
   await expect(page).toHaveURL(/sort=name/);
   await expect(select).toHaveValue("name");
+  await expect(page.locator('main [aria-busy="true"]')).toHaveCount(0);
 });

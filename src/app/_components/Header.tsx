@@ -57,17 +57,19 @@ export async function Header({
           )}
         </div>
       </div>
-      <div className="border-rule flex items-center justify-between gap-x-6 border-y py-2">
-        <p className="text-kicker text-muted shrink-0 whitespace-nowrap">
+      <div className="border-rule grid grid-cols-[1fr_auto_1fr] items-center gap-x-6 border-y py-2">
+        <p className="text-kicker text-muted whitespace-nowrap">
           {formatWeekdayDate(todayInHelsinki())}
         </p>
         <DesktopNav omatEndingSoonCount={omatEndingSoonCount} />
-        <RegionSelector
-          key={session?.user?.id ?? "anon"}
-          allRegions={allRegions}
-          initialSelected={activeRegions}
-          isSignedIn={!!session?.user}
-        />
+        <div className="col-start-3 flex min-w-0 justify-end">
+          <RegionSelector
+            key={session?.user?.id ?? "anon"}
+            allRegions={allRegions}
+            initialSelected={activeRegions}
+            isSignedIn={!!session?.user}
+          />
+        </div>
       </div>
     </header>
   );
