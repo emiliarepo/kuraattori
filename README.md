@@ -81,16 +81,26 @@ In development, `/sign-in` offers a "Kirjaudu kehityskäyttäjänä" form, so yo
 |---|---|
 | `pnpm test` | Vitest unit and integration tests (routers run against the real migrations) |
 | `pnpm test:e2e` | builds the Worker, seeds a local D1 from `fixtures/` without network access, runs Playwright; run `pnpm exec playwright install chromium` once first |
+| `pnpm test:visual` | screenshot comparison of the key pages at 390 and 1280 px, light and dark, inside the pinned Playwright Docker image (see below) |
+| `pnpm test:visual:update` | the same run with `--update-snapshots`, rewriting the baselines |
 | `pnpm typecheck` / `pnpm lint` / `pnpm format:check` | static checks |
 | `pnpm db:generate` | generate a migration from `src/server/db/schema.ts` |
 | `pnpm cf-typegen` | regenerate `cloudflare-env.d.ts` from `wrangler.jsonc` (runs on install) |
 | `pnpm preview` / `pnpm deploy` | build and run, or deploy, the Worker |
 
+### Visual regression
+
+`e2e/visual/` screenshots about ten pages as a seeded user in Finnish. The baselines in `e2e/visual/__screenshots__/linux/` only match renders from the `mcr.microsoft.com/playwright` image at the lockfile's `@playwright/test` version, so both scripts run inside it through `scripts/visual-docker.sh` and need Docker. The container keeps its own Linux `node_modules`, `.next` and `.open-next` in named volumes.
+
+The run is pinned in time. The visual server sets `E2E_FROZEN_NOW` (see `src/server/frozen-clock.ts`), the browser uses `page.clock` at the same instant, and `scripts/visual-seed-user.ts` writes the user's statuses and interests straight into a fresh D1. External images become one local placeholder, and the "Tiedot päivitetty" timestamp is masked because it comes from the seed's real clock.
+
+After an intentional UI change, run `pnpm test:visual:update` and commit the new PNGs with the change. Without Docker, run the Deploy workflow by hand with `update_baselines` ticked on your branch and commit the `visual-baselines` artifact into `e2e/visual/__screenshots__/linux/`. That run skips the deploy. On a diff, the `visual` job fails the deploy and uploads `visual-diffs` with the expected, actual and diff images.
+
 In development, D1 statements are logged with their row counts, with a warning when a request reads more than 5,000 rows. Keep pages under that.
 
 ## Deployment
 
-A push to `main` runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): typecheck, lint, unit tests, the end-to-end suite, D1 migrations against production, then `pnpm run deploy`. Any failure stops the run before the database or the Worker is touched. Deploys, migrations and the importer share a concurrency group, so they never overlap.
+A push to `main` runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): typecheck, lint, unit tests, the end-to-end suite, the visual regression job, D1 migrations against production, then `pnpm run deploy`. Any failure stops the run before the database or the Worker is touched. Deploys, migrations and the importer share a concurrency group, so they never overlap.
 
 To run your own copy:
 

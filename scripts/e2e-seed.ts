@@ -38,7 +38,11 @@ import type {
 import { createBindingArchiveStore, resizeImage } from "./image-archive-store";
 
 const FIXTURES_DIR = join(import.meta.dirname, "..", "fixtures", "museot");
-const PERSIST_PATH = join(import.meta.dirname, "..", ".wrangler", "state-e2e");
+const PERSIST_PATH = join(
+  import.meta.dirname,
+  "..",
+  process.env.E2E_PERSIST_DIR ?? ".wrangler/state-e2e",
+);
 const TOPIC_IDS = ["63", "71"] as const;
 
 /**

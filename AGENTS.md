@@ -37,6 +37,8 @@ the README covers setup and scripts. Read `docs/design.md` before any UI work.
 All of these pass: `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test`,
 `SKIP_ENV_VALIDATION=1 pnpm opennextjs-cloudflare build`, `pnpm test:e2e`. UI changes are also
 seen in the browser at 390 px and 1280 px, light and dark. Behaviour bugs get a Playwright assertion.
+Intentional UI changes update the visual baselines (`pnpm test:visual:update`, or the Deploy
+workflow's `update_baselines` run without Docker) in the same commit; see the README.
 
 ## Tickets and git
 

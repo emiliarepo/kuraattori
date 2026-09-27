@@ -38,6 +38,7 @@ export default defineConfig({
         "**/accessibility.spec.ts",
         "**/auth-providers.spec.ts",
         "**/maintenance.spec.ts",
+        "**/visual/**",
       ],
       use: {
         ...devices["Desktop Chrome"],
