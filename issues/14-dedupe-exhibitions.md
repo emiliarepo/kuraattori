@@ -1,5 +1,5 @@
 # 14 Duplicate and non-exhibition listings
-Status: todo · Model: Sonnet 5 · Blocked by: 12
+Status: done · Model: Sonnet 5 · Blocked by: 12
 
 Two data-quality problems in the museot.fi feed:
 
