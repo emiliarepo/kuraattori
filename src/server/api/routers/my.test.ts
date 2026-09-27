@@ -422,3 +422,41 @@ describe("userExhibition.updateVisit", () => {
     });
   });
 });
+
+describe("my.stamps", () => {
+  it("returns the first visit per museum, ignoring other statuses", async () => {
+    await db.insert(schema.museums).values([
+      { id: 1, source: "test", sourceId: "m1", name: "A", slug: "a" },
+      { id: 2, source: "test", sourceId: "m2", name: "B", slug: "b" },
+    ]);
+    await db.insert(schema.exhibitions).values(
+      [1, 2, 3].map((id) => ({
+        id,
+        source: "test",
+        sourceId: `e${id}`,
+        museumId: id === 3 ? 2 : 1,
+        slug: `e${id}`,
+        titleFi: `E${id}`,
+        startDate: "2026-01-01",
+        sourcePayloadHash: String(id),
+      })),
+    );
+    await db.insert(schema.userExhibitions).values([
+      {
+        userId,
+        exhibitionId: 1,
+        status: "visited",
+        visitedAt: new Date("2026-05-01T10:00:00Z"),
+      },
+      {
+        userId,
+        exhibitionId: 2,
+        status: "visited",
+        visitedAt: new Date("2026-03-01T10:00:00Z"),
+      },
+      { userId, exhibitionId: 3, status: "interested" },
+    ]);
+    const stamps = await createCaller(ctx).my.stamps();
+    expect([...stamps]).toEqual([[1, new Date("2026-03-01T10:00:00Z")]]);
+  });
+});
