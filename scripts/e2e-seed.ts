@@ -12,6 +12,7 @@ import {
   type RawListingItem,
 } from "~/server/import/museot-fi/parse-listing";
 import { normalizeExhibition } from "~/server/import/museot-fi/normalize";
+import { parseMuseumPage } from "~/server/import/museot-fi/parse-museum";
 import { runImport } from "~/server/import/run-import";
 import type {
   ExhibitionSourceAdapter,
@@ -191,6 +192,10 @@ async function main() {
     name: "museot.fi",
     fetchExhibitions: () =>
       Promise.resolve({ categories, changed, unchanged: [], failedCount: 0 }),
+    fetchMuseumLocation: async (sourceId) =>
+      sourceId === "21118"
+        ? parseMuseumPage(readFixture("museum-21118.html"))
+        : undefined,
   };
 
   // `wrangler dev --persist-to X` (and `d1 migrations apply --persist-to X`)

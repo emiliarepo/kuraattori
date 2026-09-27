@@ -14,11 +14,14 @@ import type {
   NormalizedCategory,
   NormalizedExhibition,
   NormalizedMuseum,
+  MuseumLocation,
 } from "./types";
 
 export interface ExistingRow {
   id: number;
   slug: string;
+  address?: string | null;
+  city?: string | null;
 }
 
 export interface ExistingExhibitionRow extends ExistingRow {
@@ -34,12 +37,36 @@ export async function loadExistingMuseums(
   source: string,
 ): Promise<Map<string, ExistingRow>> {
   const rows = await db
-    .select({ sourceId: museums.sourceId, id: museums.id, slug: museums.slug })
+    .select({
+      sourceId: museums.sourceId,
+      id: museums.id,
+      slug: museums.slug,
+      address: museums.address,
+      city: museums.city,
+    })
     .from(museums)
     .where(eq(museums.source, source));
   return new Map(
-    rows.map((row) => [row.sourceId, { id: row.id, slug: row.slug }]),
+    rows.map((row) => [
+      row.sourceId,
+      { id: row.id, slug: row.slug, address: row.address, city: row.city },
+    ]),
   );
+}
+
+export async function updateMuseumLocation(
+  db: Db,
+  id: number,
+  location: MuseumLocation,
+): Promise<void> {
+  await db
+    .update(museums)
+    .set({
+      address: location.address,
+      latitude: location.latitude ?? null,
+      longitude: location.longitude ?? null,
+    })
+    .where(eq(museums.id, id));
 }
 
 export async function loadExistingExhibitions(
@@ -115,6 +142,7 @@ export async function upsertMuseum(
         lastSeenAt: now,
       })
       .where(eq(museums.id, found.id));
+    found.city = museum.city;
     return found.id;
   }
 
@@ -139,7 +167,7 @@ export async function upsertMuseum(
     .returning({ id: museums.id });
   if (!row) throw new Error(`Failed to insert museum ${museum.sourceId}`);
 
-  existing.set(museum.sourceId, { id: row.id, slug });
+  existing.set(museum.sourceId, { id: row.id, slug, city: museum.city });
   return row.id;
 }
 

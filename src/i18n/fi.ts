@@ -161,6 +161,7 @@ export const t = {
       categories: "Aiheet",
       museum: "Museo",
       city: "Kaupunki",
+      address: "Osoite",
       open: "Avoinna",
       museumCard: "Museokortti",
       noMuseumCard: "Ei Museokorttia",
@@ -178,6 +179,7 @@ export const t = {
     },
     museums: {
       title: "Museot",
+      showOnMap: "Näytä kartalla",
       current: "Käynnissä",
       upcoming: "Tulossa",
       past: "Päättyneet",

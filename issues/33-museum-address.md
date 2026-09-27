@@ -1,5 +1,5 @@
 # 33 Museum address and map link
-Status: todo · Model: GPT-6 Sol · Blocked by: 20
+Status: done · Model: GPT-6 Sol · Blocked by: 20
 
 `museums.address`, `latitude` and `longitude` exist but are never filled. museot.fi museum pages (`/museohaku/index.php?museo_id=N`, linked from exhibition detail pages) list a street address.
 

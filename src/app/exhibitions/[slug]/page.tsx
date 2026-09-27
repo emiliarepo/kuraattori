@@ -7,6 +7,7 @@ import { CategoryList } from "~/app/_components/CategoryList";
 import { ExhibitionDescription } from "~/app/_components/ExhibitionDescription";
 import { ExhibitionStatusControl } from "~/app/_components/ExhibitionStatusControl";
 import { ImageFallback } from "~/app/_components/ImageFallback";
+import { MuseumAddress } from "~/app/_components/MuseumAddress";
 import { Rail } from "~/app/_components/Rail";
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import { TimeBar } from "~/app/_components/TimeBar";
@@ -156,6 +157,19 @@ export default async function ExhibitionDetailPage({
             </dd>
             <dt className="text-kicker text-muted">{t.pages.detail.city}</dt>
             <dd>{city}</dd>
+            {exhibition.museum.address && (
+              <>
+                <dt className="text-kicker text-muted">
+                  {t.pages.detail.address}
+                </dt>
+                <dd>
+                  <MuseumAddress
+                    name={exhibition.museum.name}
+                    address={exhibition.museum.address}
+                  />
+                </dd>
+              </>
+            )}
             <dt className="text-kicker text-muted">{t.pages.detail.open}</dt>
             <dd className="tabular-nums">{openLabel}</dd>
             {!exhibition.museumCardEligible && (
