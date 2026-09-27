@@ -182,6 +182,13 @@ export const t = {
       emptyHidden: "Ei piilotettuja näyttelyitä.",
       calendarPrompt: "Päättymispäivät kalenteriisi →",
       calendarSettings: "Asetukset",
+      savings: {
+        label: "Museokorttisäästöt",
+        years: "Vuosi",
+        sentence: (amount: string, year: number) =>
+          `Olet säästänyt ${amount} Museokortilla vuonna ${year}`,
+        unpriced: "Hinta ei tiedossa",
+      },
     },
     timeBar: {
       daysCompact: (days: number) => `${days} pv`,
