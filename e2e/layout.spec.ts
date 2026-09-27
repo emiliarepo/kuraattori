@@ -1,3 +1,4 @@
+import { e2eToday } from "./clock";
 import type { Page } from "@playwright/test";
 
 import { expect, test } from "./fixtures";
@@ -103,7 +104,7 @@ for (const viewport of VIEWPORTS) {
       page.getByRole("button", { name: t.ui.status.visited, exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
 
-    const year = new Date().getFullYear();
+    const year = Number(e2eToday().slice(0, 4));
     const paths = [
       "/",
       "/feed",
@@ -172,7 +173,7 @@ test("tab pages start their content 24 px below the tab rule", async ({
     await expect(button).toHaveAttribute("aria-pressed", "true");
   }
 
-  const year = new Date().getFullYear();
+  const year = Number(e2eToday().slice(0, 4));
   await page.goto(`/my/year/${year}`);
   const kicker = page.getByText(t.profile.year.kicker);
   const rule = await page

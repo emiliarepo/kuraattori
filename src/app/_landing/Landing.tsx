@@ -122,8 +122,8 @@ export async function Landing() {
   ].join("\n");
 
   return (
-    <div className="pt-8">
-      <section className="grid items-center gap-8 sm:min-h-[calc(100svh-15rem)] sm:grid-cols-[3fr_2fr] sm:gap-12">
+    <div className="pt-10 sm:pt-12">
+      <section className="grid items-center gap-8 sm:grid-cols-[3fr_2fr] sm:gap-12">
         <div
           className="landing-rise flex flex-col items-center gap-4 text-center sm:items-start sm:gap-6 sm:text-left"
           style={{ "--i": 1 } as React.CSSProperties}
@@ -178,7 +178,7 @@ export async function Landing() {
         )}
       </section>
 
-      <Feature index={1} copy={t.landing.forYou}>
+      <Feature copy={t.landing.forYou}>
         <div className="flex flex-col gap-8">
           {picks.length > 0 && (
             <ul className="grid grid-cols-2 gap-4 sm:gap-6">
@@ -195,7 +195,7 @@ export async function Landing() {
         </div>
       </Feature>
 
-      <Feature index={2} copy={t.landing.reminders}>
+      <Feature copy={t.landing.reminders}>
         {reminder && (
           <div className="flex flex-col gap-4 font-sans">
             <div className="bg-surface flex gap-3 p-4">
@@ -243,7 +243,7 @@ export async function Landing() {
         )}
       </Feature>
 
-      <Feature index={3} copy={t.landing.passport}>
+      <Feature copy={t.landing.passport}>
         <div className="flex flex-col gap-8">
           <ul className="bg-surface grid grid-cols-5 gap-2 p-4 sm:gap-4 sm:p-6">
             {stamps.map(({ rotation, ...stamp }) => (
@@ -289,7 +289,7 @@ export async function Landing() {
         </ul>
       </Reveal>
 
-      <Reveal className="border-rule mt-12 flex flex-col items-center gap-6 border-t pt-12 text-center">
+      <Reveal className="border-rule-soft mt-12 flex flex-col items-center gap-6 border-t py-16 text-center sm:py-20">
         <p className="text-headline text-3xl sm:text-5xl">{t.landing.end}</p>
         <Actions t={t} />
       </Reveal>
@@ -298,20 +298,15 @@ export async function Landing() {
 }
 
 function Feature({
-  index,
   copy,
   children,
 }: {
-  index: number;
-  copy: { kicker: string; title: string; body: string };
+  copy: { title: string; body: string };
   children: React.ReactNode;
 }) {
   return (
     <Reveal className="border-rule-soft mt-12 border-t pt-12">
       <div className="mx-auto flex max-w-xl flex-col items-center gap-3 text-center">
-        <p className="text-kicker text-signal">
-          {String(index).padStart(2, "0")} · {copy.kicker}
-        </p>
         <h2 className="text-headline text-4xl sm:text-5xl">{copy.title}</h2>
         <p className="text-muted text-lg leading-snug">{copy.body}</p>
       </div>

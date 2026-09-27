@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { e2eToday, fixtureShiftDays, rotateWeek } from "./clock";
+import { addDays } from "../src/domain/dates";
 import { expect, test } from "./fixtures";
-import { todayInHelsinki } from "../src/domain/dates";
 import {
   formatHours,
   hoursOn,
@@ -20,20 +21,21 @@ const kiasmaHtml = readFileSync(
   join(import.meta.dirname, "../fixtures/museot/museum-21118.html"),
   "utf-8",
 );
-const kiasmaHours = parseOpeningHours(kiasmaHtml)!;
-const kiasmaFreeDays = parseFreeDays(kiasmaHtml);
-
-function nextMonday(from: string): string {
-  const date = new Date(`${from}T00:00:00Z`);
-  date.setUTCDate(date.getUTCDate() + 7 - weekdayIndex(from));
-  return date.toISOString().slice(0, 10);
-}
+const fixtureHours = parseOpeningHours(kiasmaHtml)!;
+const kiasmaHours = {
+  ...fixtureHours,
+  days: rotateWeek(fixtureHours.days, fixtureShiftDays()),
+};
+// The seed shifts free days with the rest of the fixtures (e2e/clock.ts).
+const kiasmaFreeDays = parseFreeDays(kiasmaHtml).map((day) =>
+  addDays(day, fixtureShiftDays()),
+);
 
 test("museum page lists the week's hours with today marked", async ({
   page,
   assertPageClean,
 }) => {
-  const today = todayInHelsinki();
+  const today = e2eToday();
   await page.goto("/museums/nykytaiteen-museo-kiasma");
 
   const hours = page.getByRole("region", { name: t.pages.hours.title });
@@ -59,7 +61,7 @@ test("exhibition page says whether the museum is open today", async ({
   page,
   assertPageClean,
 }) => {
-  const today = todayInHelsinki();
+  const today = e2eToday();
   await page.goto("/museums/nykytaiteen-museo-kiasma");
   await page
     .getByRole("link", { name: /Edith Karlson/ })
@@ -88,10 +90,13 @@ test("day planner leaves out a museum that is closed that day", async ({
   page,
   assertPageClean,
 }) => {
-  // Kiasma's seeded exhibitions are open again from 9.10.2026 on.
-  const today = todayInHelsinki();
-  const monday = nextMonday(today > "2026-10-09" ? today : "2026-10-09");
-  await page.goto(`/trip/day?city=Helsinki&date=${monday}`);
+  // Kiasma's seeded exhibitions are open again from 9.10.2026 (shifted) on.
+  const reopens = addDays("2026-10-09", fixtureShiftDays());
+  const from = e2eToday() > reopens ? e2eToday() : reopens;
+  const closedDay = [0, 1, 2, 3, 4, 5, 6]
+    .map((offset) => addDays(from, offset))
+    .find((date) => !hoursOn(kiasmaHours.days, date))!;
+  await page.goto(`/trip/day?city=Helsinki&date=${closedDay}`);
 
   const candidates = page.getByRole("listitem");
   const kiasma = candidates.filter({ hasText: "Nykytaiteen museo Kiasma" });

@@ -1,24 +1,17 @@
 "use client";
 
-import Link from "next/link";
-
+import { FeedShortcut } from "~/app/_components/FeedShortcut";
 import { useI18n } from "~/i18n/client";
 import { requestLocateOnArrival } from "./locate-intent";
 
 export function NearbyBanner() {
   const { t } = useI18n();
   return (
-    <Link
+    <FeedShortcut
       href="/nearby"
+      title={t.pages.nearby.banner}
+      hint={t.pages.nearby.bannerHint}
       onClick={requestLocateOnArrival}
-      className="group flex min-h-11 items-center gap-3"
-    >
-      <span className="text-headline group-hover:text-signal text-lg italic sm:text-xl">
-        {t.pages.nearby.banner} →
-      </span>
-      <span className="text-muted hidden font-sans text-sm sm:inline">
-        {t.pages.nearby.bannerHint}
-      </span>
-    </Link>
+    />
   );
 }

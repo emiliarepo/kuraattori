@@ -167,7 +167,8 @@ export const t = {
       my: "Kirjaudu sisään nähdäksesi omat näyttelysi.",
     },
     home: {
-      thisWeeksEdition: "Tämän viikon numero →",
+      thisWeeksEdition: "Tämän viikon numero",
+      thisWeeksEditionHint: "Viikon näyttelyt koottuna sunnuntaisin",
       endingSoon: "Päättyy pian",
       forYou: "Sinulle",
       new: "Uudet näyttelyt",
@@ -482,21 +483,18 @@ export const t = {
     browse: "Selaa näyttelyitä",
     signIn: "Kirjaudu Googlella",
     forYou: {
-      kicker: "Sinulle",
       title: "Poiminnat, joissa lukee miksi.",
       body: "Painota aiheita, niin poiminnat kertovat syynsä. Käynnin jälkeinen 👍 tai 👎 tarkentaa seuraavia.",
       weights: "Kiinnostukset",
       rating: "Kävitkö? Kerro, osuiko.",
     },
     reminders: {
-      kicker: "Muistutukset",
       title: "Ei enää viime päivän ryntäystä.",
       body: "Tallenna näyttely, niin saat ilmoituksen viikkoa ennen kuin se päättyy. Päättymispäivät tulevat myös kalenteriisi.",
       now: "nyt",
       calendar: "Kalenteri",
     },
     passport: {
-      kicker: "Museopassi",
       title: "Leima jokaisesta museosta.",
       body: "Merkitse käynti, niin saat museon leiman. Kun passi täyttyy, jaa se.",
       share: "Jaettava teksti",

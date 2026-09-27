@@ -1,6 +1,6 @@
+import { e2eToday } from "./clock";
 import { expect, test } from "./fixtures";
 import { devSignIn, uniqueEmail } from "./dev-sign-in";
-import { todayInHelsinki } from "../src/domain/dates";
 import { t } from "../src/i18n/fi";
 
 test("plan a museum day from the trip tab and save it", async ({
@@ -8,7 +8,7 @@ test("plan a museum day from the trip tab and save it", async ({
   assertPageClean,
   resetPageClean,
 }) => {
-  const today = todayInHelsinki();
+  const today = e2eToday();
   await devSignIn(page, uniqueEmail("day-planner"), "/");
   resetPageClean();
 

@@ -32,7 +32,7 @@ export async function Header({
       <LandingSwitch
         signedIn={!!session?.user}
         landing={
-          <div className="flex flex-col items-center pt-10 sm:pt-16">
+          <div className="flex flex-col items-center pt-16 sm:pt-24">
             <h1 className="landing-rise text-headline text-center text-[20vw] leading-[0.85] tracking-[-0.04em] italic sm:text-[9.5rem]">
               {t.app.name}
             </h1>

@@ -4,6 +4,7 @@ import { DaysNumeral } from "~/app/_components/DaysNumeral";
 import { LeadStory } from "~/app/_components/LeadStory";
 import { Rail } from "~/app/_components/Rail";
 import { Section } from "~/app/_components/Section";
+import { FeedShortcut } from "~/app/_components/FeedShortcut";
 import { NearbyBanner } from "~/app/nearby/NearbyBanner";
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import {
@@ -96,23 +97,19 @@ export async function HomeFeed() {
   const leadTitle = lead && localized(lead.exhibition, "title", locale);
   const leadMuseum = lead && localized(lead.museum, "name", locale);
   const editionSlug =
-    activeRegions.map(editionSlugForRegion).find(Boolean) ??
-    (signedIn ? undefined : "paakaupunkiseutu");
+    activeRegions.map(editionSlugForRegion).find(Boolean) ?? "paakaupunkiseutu";
 
   return (
     <div className="pt-8 [&>h1+section]:mt-0">
       <h1 className="sr-only">{t.app.name}</h1>
 
-      <div className="border-rule-soft mb-5 flex flex-wrap items-center justify-between gap-x-6 border-b">
+      <div className="border-rule-soft mb-5 grid gap-x-8 border-b sm:grid-cols-2">
         <NearbyBanner />
-        {editionSlug && (
-          <Link
-            href={`/edition/${editionSlug}`}
-            className="text-fg hover:text-signal inline-flex min-h-11 items-center font-sans text-sm font-semibold underline underline-offset-4"
-          >
-            {t.pages.home.thisWeeksEdition}
-          </Link>
-        )}
+        <FeedShortcut
+          href={`/edition/${editionSlug}`}
+          title={t.pages.home.thisWeeksEdition}
+          hint={t.pages.home.thisWeeksEditionHint}
+        />
       </div>
 
       {lead && leadTitle && leadMuseum ? (

@@ -1,8 +1,8 @@
 import type { Page } from "@playwright/test";
 
+import { e2eToday } from "./clock";
 import { expect, test } from "./fixtures";
 import { devSignIn, uniqueEmail } from "./dev-sign-in";
-import { todayInHelsinki } from "../src/domain/dates";
 import { t } from "../src/i18n/fi";
 
 async function holdServer(page: Page): Promise<() => void> {
@@ -45,7 +45,7 @@ test("a profile sub-tab marks itself and dims the page on the first click", asyn
 test("the trip form shows its pending state instead of reloading", async ({
   page,
 }) => {
-  const today = todayInHelsinki();
+  const today = e2eToday();
   await page.goto(`/trip?place=Helsinki&from=${today}&to=${today}`);
   const release = await holdServer(page);
 

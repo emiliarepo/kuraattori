@@ -1,6 +1,8 @@
 import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { signInHereUrl } from "~/server/request-path";
+
 import { ProfileTabs } from "~/app/_components/ProfileTabs";
 import { TabbedPage } from "~/app/_components/TabbedPage";
 import { getI18n } from "~/i18n/server";
@@ -21,7 +23,7 @@ export default async function ProfileLayout({
 }) {
   const { t } = await getI18n();
   const session = await auth();
-  if (!session?.user) redirect("/sign-in?callbackUrl=/profile");
+  if (!session?.user) redirect(await signInHereUrl("/settings"));
 
   return (
     <TabbedPage

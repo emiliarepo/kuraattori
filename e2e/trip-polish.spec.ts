@@ -1,12 +1,12 @@
+import { e2eToday } from "./clock";
 import { expect, test } from "./fixtures";
-import { todayInHelsinki } from "../src/domain/dates";
 import { t } from "../src/i18n/fi";
 
 test("trip lists ending-soon exhibitions first, highlighted", async ({
   page,
   assertPageClean,
 }) => {
-  const today = todayInHelsinki();
+  const today = e2eToday();
   await page.goto(`/trip?from=${today}&to=${today}`);
 
   const headings = page.getByRole("heading", { level: 2 });
@@ -31,7 +31,7 @@ test("day planner puts ending-soon candidates first and walking legs between sto
   page,
   assertPageClean,
 }) => {
-  const today = todayInHelsinki();
+  const today = e2eToday();
   await page.goto(`/trip/day?city=Helsinki&date=${today}`);
 
   const candidates = page

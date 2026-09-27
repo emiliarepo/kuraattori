@@ -100,7 +100,9 @@ export function RatingButtons({
               index > 0 ? "border-l" : ""
             } ${pressed ? "bg-signal" : "hover:bg-surface"}`}
           >
-            <span aria-hidden>{glyph}</span>
+            <span aria-hidden className="block translate-y-0.5 leading-none">
+              {glyph}
+            </span>
           </button>
         );
       })}

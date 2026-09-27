@@ -165,7 +165,8 @@ export const t = {
       my: "Logga in för att se dina utställningar.",
     },
     home: {
-      thisWeeksEdition: "Veckans nummer →",
+      thisWeeksEdition: "Veckans nummer",
+      thisWeeksEditionHint: "Veckans utställningar varje söndag",
       endingSoon: "Slutar snart",
       forYou: "För dig",
       new: "Nya utställningar",
@@ -480,21 +481,18 @@ export const t = {
     browse: "Bläddra bland utställningar",
     signIn: "Logga in med Google",
     forYou: {
-      kicker: "För dig",
       title: "Tips som säger varför.",
       body: "Vikta ämnen du gillar så visar varje tips sitt skäl. En 👍 eller 👎 efter besöket skärper nästa.",
       weights: "Intressen",
       rating: "Varit där? Säg om det träffade.",
     },
     reminders: {
-      kicker: "Påminnelser",
       title: "Ingen rusning sista dagen.",
       body: "Spara en utställning och få en avisering en vecka innan den slutar. Slutdatumen hamnar också i din kalender.",
       now: "nu",
       calendar: "Kalender",
     },
     passport: {
-      kicker: "Museipass",
       title: "En stämpel från varje museum.",
       body: "Markera ett besök och få museets stämpel. Dela passet när det fylls.",
       share: "Delningstext",

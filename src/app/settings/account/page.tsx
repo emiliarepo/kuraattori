@@ -2,6 +2,8 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { signInHereUrl } from "~/server/request-path";
+
 import { LanguageSelector } from "~/app/_components/LanguageSelector";
 import { getI18n } from "~/i18n/server";
 import { deleteUserData } from "~/server/account";
@@ -18,7 +20,7 @@ export default async function ProfileAccountPage({
     auth(),
     searchParams,
   ]);
-  if (!session?.user) redirect("/sign-in?callbackUrl=/profile");
+  if (!session?.user) redirect(await signInHereUrl("/settings/account"));
   const user = session.user;
 
   return (

@@ -1,10 +1,13 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import sharp from "sharp";
 import { getPlatformProxy } from "wrangler";
 
+import { addDays } from "~/domain/dates";
+import { fixtureShiftDays, rotateWeek } from "../e2e/clock";
 import * as schema from "~/server/db/schema";
 import { type Db } from "~/server/db";
 import { parseDetailPage } from "~/server/import/museot-fi/parse-detail";
@@ -316,9 +319,46 @@ async function main() {
       },
     );
     console.log(JSON.stringify({ imageArchive }, null, 2));
+
+    if (process.env.E2E_SHIFT_DATES === "1") {
+      const days = await shiftDatesToToday(db);
+      console.log(JSON.stringify({ shiftedDays: days }));
+    }
   } finally {
     await proxy.dispose();
   }
+}
+
+/** Moves the fixtures' world onto today (e2e/clock.ts): dates, free days and weekly hours. */
+async function shiftDatesToToday(db: Db): Promise<number> {
+  const days = fixtureShiftDays();
+  if (days === 0) return 0;
+  const offset = `${days >= 0 ? "+" : ""}${days} days`;
+  await db.update(schema.exhibitions).set({
+    startDate: sql`date(${schema.exhibitions.startDate}, ${offset})`,
+    endDate: sql`date(${schema.exhibitions.endDate}, ${offset})`,
+  });
+  const museums = await db
+    .select({
+      id: schema.museums.id,
+      freeDays: schema.museums.freeDays,
+      openingHours: schema.museums.openingHours,
+    })
+    .from(schema.museums);
+  for (const museum of museums) {
+    if (!museum.freeDays?.length && !museum.openingHours) continue;
+    await db
+      .update(schema.museums)
+      .set({
+        freeDays: museum.freeDays?.map((day) => addDays(day, days)) ?? null,
+        openingHours: museum.openingHours && {
+          ...museum.openingHours,
+          days: rotateWeek(museum.openingHours.days, days),
+        },
+      })
+      .where(eq(schema.museums.id, museum.id));
+  }
+  return days;
 }
 
 await main();

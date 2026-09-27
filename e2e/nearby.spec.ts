@@ -3,8 +3,9 @@ import { join } from "node:path";
 
 import type { Page } from "@playwright/test";
 
+import { e2eToday, fixtureShiftDays, rotateWeek } from "./clock";
 import { expect, test } from "./fixtures";
-import { addDays, todayInHelsinki } from "../src/domain/dates";
+import { addDays } from "../src/domain/dates";
 import { helsinkiClock } from "../src/domain/nearby";
 import { formatTime, hoursOn, toMinutes } from "../src/domain/opening-hours";
 import { t } from "../src/i18n/fi";
@@ -17,14 +18,17 @@ const kiasmaHtml = readFileSync(
   join(import.meta.dirname, "../fixtures/museot/museum-21118.html"),
   "utf-8",
 );
-const kiasmaHours = parseOpeningHours(kiasmaHtml)!.days;
+const kiasmaHours = rotateWeek(
+  parseOpeningHours(kiasmaHtml)!.days,
+  fixtureShiftDays(),
+);
 const kiasma = parseMuseumPage(kiasmaHtml)!;
 const kiasmaAt = { latitude: kiasma.latitude!, longitude: kiasma.longitude! };
 const KIASMA = "Nykytaiteen museo Kiasma";
 
 /** The first day from today on which Kiasma is open. */
 const openDay = [0, 1, 2, 3, 4, 5, 6]
-  .map((offset) => addDays(todayInHelsinki(), offset))
+  .map((offset) => addDays(e2eToday(), offset))
   .find((date) => hoursOn(kiasmaHours, date))!;
 const openDayHours = hoursOn(kiasmaHours, openDay)!;
 

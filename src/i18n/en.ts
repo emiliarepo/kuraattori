@@ -165,7 +165,8 @@ export const t = {
       my: "Sign in to see your exhibitions.",
     },
     home: {
-      thisWeeksEdition: "This week's edition →",
+      thisWeeksEdition: "This week's edition",
+      thisWeeksEditionHint: "The week in exhibitions, every Sunday",
       endingSoon: "Ending soon",
       forYou: "For you",
       new: "New exhibitions",
@@ -479,21 +480,18 @@ export const t = {
     browse: "Browse exhibitions",
     signIn: "Sign in with Google",
     forYou: {
-      kicker: "For you",
       title: "Picks that say why.",
       body: "Weight the topics you like and every pick shows its reason. A 👍 or 👎 after a visit sharpens the next ones.",
       weights: "Interests",
       rating: "Been there? Say if it hit.",
     },
     reminders: {
-      kicker: "Reminders",
       title: "No more last-day rush.",
       body: "Save an exhibition and get a notification a week before it closes. Closing dates go to your calendar too.",
       now: "now",
       calendar: "Calendar",
     },
     passport: {
-      kicker: "Museum passport",
       title: "A stamp from every museum.",
       body: "Mark a visit and get the museum's stamp. Share the passport as it fills up.",
       share: "Share text",

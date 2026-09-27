@@ -1,3 +1,4 @@
+import { e2eToday } from "./clock";
 import { expect, test } from "./fixtures";
 import { devSignIn, uniqueEmail } from "./dev-sign-in";
 import { t } from "../src/i18n/fi";
@@ -8,7 +9,7 @@ test("old profile paths redirect to settings and the year review", async ({
   await devSignIn(page, uniqueEmail("settings-routes"), "/");
   await page.goto("/profile/regions");
   await expect(page).toHaveURL(/\/settings\/regions$/);
-  await page.goto(`/profile/year/${new Date().getFullYear()}`);
+  await page.goto(`/profile/year/${Number(e2eToday().slice(0, 4))}`);
   await expect(page).toHaveURL(/\/my\/year\/\d{4}$/);
 });
 
