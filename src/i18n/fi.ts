@@ -297,6 +297,7 @@ export const t = {
         shareTitle: "Museopassini",
         shareFailed: "Jakaminen epäonnistui.",
         shareCopied: "Kopioitu",
+        sharePreparing: "Valmistellaan…",
         shareImageTotal: (total: number) => `/ ${total} museota`,
         shareText: {
           headline: (year: number, stamped: number, total: number) =>

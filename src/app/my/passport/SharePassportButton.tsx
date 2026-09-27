@@ -37,6 +37,7 @@ export function SharePassportButton({
 }) {
   const image = useRef<Promise<File | null>>(null);
   const [busy, setBusy] = useState(false);
+  const [preparing, setPreparing] = useState(false);
   const [message, setMessage] = useState<"copied" | "failed" | null>(null);
 
   useEffect(() => {
@@ -49,12 +50,21 @@ export function SharePassportButton({
     return () => clearTimeout(timer);
   }, [message]);
 
+  async function awaitImage() {
+    setPreparing(true);
+    try {
+      return await image.current;
+    } finally {
+      setPreparing(false);
+    }
+  }
+
   async function share() {
     setBusy(true);
     setMessage(null);
     try {
       if (typeof navigator.share === "function") {
-        const file = await image.current;
+        const file = await awaitImage();
         const withImage = file ? { files: [file], text, url } : null;
         await navigator.share(
           withImage && navigator.canShare?.(withImage)
@@ -63,7 +73,7 @@ export function SharePassportButton({
         );
       } else {
         const copied = navigator.clipboard.writeText(`${text}\n${url}`);
-        const file = await image.current;
+        const file = await awaitImage();
         await copied;
         if (file) download(file);
         setMessage("copied");
@@ -77,11 +87,12 @@ export function SharePassportButton({
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center">
       <p role="status" className="font-sans text-sm">
-        {message === "copied" && copy.shareCopied}
-        {message === "failed" && (
-          <span className="text-signal">{copy.shareFailed}</span>
+        {message && (
+          <span className={`mr-3 ${message === "failed" ? "text-signal" : ""}`}>
+            {message === "copied" ? copy.shareCopied : copy.shareFailed}
+          </span>
         )}
       </p>
       <button
@@ -90,7 +101,14 @@ export function SharePassportButton({
         disabled={busy}
         className="btn btn-secondary"
       >
-        {copy.share}
+        <span className="grid justify-items-center">
+          <span className="[grid-area:1/1]">
+            {preparing ? copy.sharePreparing : copy.share}
+          </span>
+          <span aria-hidden className="invisible [grid-area:1/1]">
+            {copy.sharePreparing}
+          </span>
+        </span>
       </button>
     </div>
   );

@@ -39,11 +39,20 @@ test("without Web Share, Jaa passi copies the text and downloads the image", asy
   await markIntervallumVisited(page, uniqueEmail("passport-share"));
   resetPageClean();
 
+  let releaseImage = () => {};
+  const imageHeld = new Promise<void>((resolve) => (releaseImage = resolve));
+  await page.route("**/my/passport/share.png", async (route) => {
+    await imageHeld;
+    await route.continue();
+  });
   await page.goto("/my/passport");
-  const [download] = await Promise.all([
-    page.waitForEvent("download"),
-    page.getByRole("button", { name: t.pages.my.passport.share }).click(),
-  ]);
+  const downloaded = page.waitForEvent("download");
+  await page.getByRole("button", { name: t.pages.my.passport.share }).click();
+  await expect(
+    page.getByRole("button", { name: t.pages.my.passport.sharePreparing }),
+  ).toBeDisabled();
+  releaseImage();
+  const download = await downloaded;
   expect(download.suggestedFilename()).toBe("museopassi.png");
   await expect(
     page
