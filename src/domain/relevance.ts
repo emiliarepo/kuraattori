@@ -27,7 +27,8 @@ export interface RelevanceExhibition {
   readonly categoryIds: readonly number[];
   readonly region: string | null;
   readonly museumId: number;
-  readonly firstSeenAt: string;
+  /** Null when "first seen" carries no signal, e.g. right after the initial import. */
+  readonly firstSeenAt: string | null;
 }
 
 export interface UserPreferences {
@@ -66,7 +67,10 @@ export function getRelevance(
     reasons.push({ type: "museum", points: MUSEUM_POINTS });
   }
 
-  if (daysBetween(exhibition.firstSeenAt, today) <= NEW_WITHIN_DAYS) {
+  if (
+    exhibition.firstSeenAt !== null &&
+    daysBetween(exhibition.firstSeenAt, today) <= NEW_WITHIN_DAYS
+  ) {
     reasons.push({ type: "new", points: NEW_POINTS });
   }
 

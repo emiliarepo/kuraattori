@@ -135,4 +135,119 @@ describe("exhibition API", () => {
       code: "UNAUTHORIZED",
     });
   });
+
+  describe("new", () => {
+    it("lists exhibitions opened within the last 30 days, newest first, excluding upcoming ones", async () => {
+      await db.insert(schema.museums).values({
+        id: 1,
+        source: "test",
+        sourceId: "m1",
+        name: "Ateneum",
+        slug: "ateneum",
+        city: "Helsinki",
+        region: "Pääkaupunkiseutu",
+      });
+      await db.insert(schema.exhibitions).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "recent",
+          museumId: 1,
+          slug: "recent",
+          titleFi: "Vasta avattu",
+          startDate: "2026-09-20",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "a",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "older",
+          museumId: 1,
+          slug: "older",
+          titleFi: "Kauan sitten avattu",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "b",
+        },
+        {
+          id: 3,
+          source: "test",
+          sourceId: "upcoming",
+          museumId: 1,
+          slug: "upcoming",
+          titleFi: "Tuleva",
+          startDate: "2026-10-15",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "c",
+        },
+        {
+          id: 4,
+          source: "test",
+          sourceId: "newest",
+          museumId: 1,
+          slug: "newest",
+          titleFi: "Tuorein",
+          startDate: "2026-09-25",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "d",
+        },
+      ]);
+
+      const result = await createCaller(ctx).exhibition.new({});
+      expect(result.map((item) => item.slug)).toEqual(["newest", "recent"]);
+    });
+
+    it("filters by region", async () => {
+      await db.insert(schema.museums).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "m1",
+          name: "Ateneum",
+          slug: "ateneum",
+          city: "Helsinki",
+          region: "Pääkaupunkiseutu",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "m2",
+          name: "Sara Hildén",
+          slug: "sara",
+          city: "Tampere",
+          region: "Tampere",
+        },
+      ]);
+      await db.insert(schema.exhibitions).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "helsinki",
+          museumId: 1,
+          slug: "helsinki-new",
+          titleFi: "Helsinki",
+          startDate: "2026-09-20",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "a",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "tampere",
+          museumId: 2,
+          slug: "tampere-new",
+          titleFi: "Tampere",
+          startDate: "2026-09-20",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "b",
+        },
+      ]);
+
+      const result = await createCaller(ctx).exhibition.new({
+        region: "Tampere",
+      });
+      expect(result.map((item) => item.slug)).toEqual(["tampere-new"]);
+    });
+  });
 });

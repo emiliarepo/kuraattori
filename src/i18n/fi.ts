@@ -71,6 +71,7 @@ export const t = {
       forYou: "Sinulle",
       new: "Uudet näyttelyt",
       upcoming: "Tulossa",
+      whyNew: "Uusi",
     },
     browse: {
       title: "Selaa",
@@ -87,6 +88,7 @@ export const t = {
       city: "Kaupunki",
       allCities: "Kaikki kaupungit",
       museums: "Museot",
+      museumFilter: "Hae museo",
       categories: "Aiheet",
       museumCardOnly: "Vain Museokortti-näyttelyt",
       endingWithin: "Päättyy pian",
@@ -103,6 +105,8 @@ export const t = {
       museumCard: "Museokortti",
       noMuseumCard: "Ei Museokorttia",
       source: "Lähde museot.fi:ssä",
+      showMore: "Näytä lisää",
+      showLess: "Näytä vähemmän",
     },
     museums: {
       title: "Museot",

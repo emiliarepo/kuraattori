@@ -22,6 +22,7 @@ export function ExhibitionRow({
   categories,
   timeBar,
   status,
+  whyLabel,
 }: {
   href: string;
   title: string;
@@ -32,6 +33,7 @@ export function ExhibitionRow({
   categories: readonly Category[];
   timeBar: TimeBarProps;
   status?: ExhibitionStatus | null;
+  whyLabel?: string | null;
 }) {
   return (
     <li className="border-rule-soft border-t first:border-t-0">
@@ -49,6 +51,9 @@ export function ExhibitionRow({
           <p className="text-muted text-sm">
             {museum}, {city}
           </p>
+          {whyLabel && (
+            <p className="text-signal text-xs font-semibold">{whyLabel}</p>
+          )}
           <CategoryList categories={categories} />
           <div className="mt-1">
             <TimeBar {...timeBar} />

@@ -13,7 +13,10 @@ import {
   imageAlt,
   urgencyLabelText,
 } from "~/app/_lib/exhibition-format";
-import { listAcrossRegions } from "~/app/_lib/list-across-regions";
+import {
+  listAcrossRegions,
+  listNewAcrossRegions,
+} from "~/app/_lib/list-across-regions";
 import { forYouToRowView, toRowView } from "~/app/_lib/row";
 import { getDaysRemaining, todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
@@ -62,7 +65,7 @@ export default async function HomePage() {
         state: "upcoming",
         limit: SECTION_LIMIT,
       }),
-      api.exhibition.new({ limit: SECTION_LIMIT }),
+      listNewAcrossRegions(activeRegions, { limit: SECTION_LIMIT }),
       signedIn
         ? api.recommendation.forYou({ limit: SECTION_LIMIT })
         : Promise.resolve([]),

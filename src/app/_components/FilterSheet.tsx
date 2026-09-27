@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useRef, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import {
   browseFiltersToParams,
@@ -36,6 +36,9 @@ function FilterFields({
   categories: readonly FilterOption[];
   showMuseumCardFilter: boolean;
 }) {
+  const [museumFilter, setMuseumFilter] = useState("");
+  const normalizedMuseumFilter = museumFilter.trim().toLowerCase();
+
   return (
     <div className="flex flex-col gap-6">
       <label className="flex flex-col gap-1 text-sm font-semibold">
@@ -125,11 +128,23 @@ function FilterFields({
           <legend className="mb-1 text-sm font-semibold">
             {t.pages.browse.museums}
           </legend>
+          <input
+            type="search"
+            value={museumFilter}
+            onChange={(event) => setMuseumFilter(event.target.value)}
+            placeholder={t.pages.browse.museumFilter}
+            aria-label={t.pages.browse.museumFilter}
+            className="border-rule border px-2 py-1 text-sm font-normal"
+          />
           <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
             {museums.map((museum) => (
               <label
                 key={museum.id}
-                className="flex items-center gap-2 text-sm"
+                className={
+                  museum.label.toLowerCase().includes(normalizedMuseumFilter)
+                    ? "flex items-center gap-2 text-sm"
+                    : "hidden"
+                }
               >
                 <input
                   type="checkbox"

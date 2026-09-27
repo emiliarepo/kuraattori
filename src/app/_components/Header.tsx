@@ -35,7 +35,7 @@ export async function Header() {
         </nav>
         <div className="flex items-center gap-4">
           <RegionSelector
-            key={session?.user?.id ?? "anon"}
+            key={`${session?.user?.id ?? "anon"}:${activeRegions.join(",")}`}
             allRegions={allRegions}
             initialSelected={activeRegions}
             isSignedIn={!!session?.user}

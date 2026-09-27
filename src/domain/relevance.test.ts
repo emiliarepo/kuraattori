@@ -92,4 +92,13 @@ describe("getRelevance", () => {
     );
     expect(result).toEqual({ score: 0, reasons: [] });
   });
+
+  it("does not add a recency reason when firstSeenAt is null (initial import)", () => {
+    const result = getRelevance(
+      { categoryIds: [], region: null, museumId: 1, firstSeenAt: null },
+      noPreferences,
+      today,
+    );
+    expect(result).toEqual({ score: 0, reasons: [] });
+  });
 });
