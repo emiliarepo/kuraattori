@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { usePendingNavigation } from "~/app/_components/PendingNavigation";
 import { persistRegionsCookie } from "~/app/_components/region-cookie-action";
@@ -34,6 +34,15 @@ export function RegionSelector({
     setSelected(initialSelected);
   }
   const panelId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    function closeOnOutside(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    document.addEventListener("pointerdown", closeOnOutside);
+    return () => document.removeEventListener("pointerdown", closeOnOutside);
+  }, [open]);
   const groups = groupRegions(allRegions);
   const router = useRouter();
   const updateRegions = api.profile.updateRegions.useMutation();
@@ -68,7 +77,7 @@ export function RegionSelector({
   }
 
   return (
-    <div className="relative min-w-0">
+    <div ref={rootRef} className="relative min-w-0">
       <button
         type="button"
         aria-haspopup="dialog"

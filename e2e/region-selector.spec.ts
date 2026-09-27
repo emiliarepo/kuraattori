@@ -46,3 +46,12 @@ test("masthead region label follows a change on the profile page", async ({
     page.locator("header").getByRole("button", { name: new RegExp(name) }),
   ).toBeVisible();
 });
+
+test("clicking outside the region popover closes it", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: t.ui.region.allRegions }).click();
+  const dialog = page.getByRole("dialog", { name: t.ui.region.sheetTitle });
+  await expect(dialog).toBeVisible();
+  await page.locator("main").click({ position: { x: 10, y: 10 } });
+  await expect(dialog).toBeHidden();
+});
