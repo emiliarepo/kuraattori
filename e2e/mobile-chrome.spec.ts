@@ -16,7 +16,7 @@ test("profile tabs scroll sideways only", async ({ page }) => {
 test("the bottom bar adds no extra padding outside the installed app", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/feed");
   const paddingBottom = await page
     .locator("nav")
     .filter({ has: page.getByRole("link", { name: t.ui.nav.browse }) })

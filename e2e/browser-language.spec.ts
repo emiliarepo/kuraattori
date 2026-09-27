@@ -12,7 +12,7 @@ for (const [browserLocale, lang] of [
       page,
       context,
     }) => {
-      await page.goto("/");
+      await page.goto("/feed");
       await expect(page.locator("html")).toHaveAttribute("lang", lang);
 
       await context.addCookies([
@@ -28,7 +28,7 @@ test.describe("an English browser", () => {
   test.use({ locale: "en-GB" });
 
   test("sees the capital region under its English name", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/feed");
     await page.locator("header button[aria-haspopup]").first().click();
     await expect(
       page.getByRole("dialog").getByText("Helsinki region", { exact: true }),

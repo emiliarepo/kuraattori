@@ -4,7 +4,7 @@ import { t } from "../src/i18n/fi";
 
 const personalHeading = { name: t.landing.hero };
 
-test("anonymous / is the landing page, with its actions above the fold on a phone", async ({
+test("anonymous / is the landing page, without the app navigation and with its actions above the fold on a phone", async ({
   page,
   assertPageClean,
 }) => {
@@ -17,15 +17,13 @@ test("anonymous / is the landing page, with its actions above the fold on a phon
   ).toBeVisible();
   await expect(page.getByRole("heading", personalHeading)).toBeAttached();
 
-  const tabBarTop = (await page
-    .getByRole("navigation", { name: t.ui.nav.main })
-    .boundingBox())!.y;
+  await expect(
+    page.getByRole("navigation", { name: t.ui.nav.main }),
+  ).toHaveCount(0);
   for (const name of [t.landing.browse, t.landing.signIn]) {
-    const box = (await page
-      .getByRole("link", { name, exact: true })
-      .first()
-      .boundingBox())!;
-    expect(box.y + box.height).toBeLessThanOrEqual(tabBarTop);
+    await expect(
+      page.getByRole("link", { name, exact: true }).first(),
+    ).toBeInViewport({ ratio: 1 });
   }
 
   assertPageClean();

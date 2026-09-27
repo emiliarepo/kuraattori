@@ -48,7 +48,10 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           <StaleDataNotice lastImportAt={lastImportAt} />
         </footer>
       </main>
-      <BottomTabBar omatEndingSoonCount={omatEndingSoonCount} />
+      <BottomTabBar
+        omatEndingSoonCount={omatEndingSoonCount}
+        signedIn={!!session?.user}
+      />
     </PendingNavigationProvider>
   );
 }

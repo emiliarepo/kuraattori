@@ -6,7 +6,7 @@ test("region popover stays open and anchored while toggling regions", async ({
   page,
   assertPageClean,
 }) => {
-  await page.goto("/");
+  await page.goto("/feed");
   const nav = page.locator("header nav").first();
   const navX = (await nav.boundingBox())!.x;
   await page.getByRole("button", { name: t.ui.region.allRegions }).click();
@@ -48,7 +48,7 @@ test("masthead region label follows a change on the profile page", async ({
 });
 
 test("clicking outside the region popover closes it", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/feed");
   await page.getByRole("button", { name: t.ui.region.allRegions }).click();
   const dialog = page.getByRole("dialog", { name: t.ui.region.sheetTitle });
   await expect(dialog).toBeVisible();

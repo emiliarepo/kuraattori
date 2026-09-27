@@ -3,16 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useIsLanding } from "~/app/_components/LandingSwitch";
 import { isNavItemActive, NAV_ITEMS } from "~/app/_components/nav";
 import { useI18n } from "~/i18n/client";
 
 export function BottomTabBar({
   omatEndingSoonCount = 0,
+  signedIn,
 }: {
   omatEndingSoonCount?: number;
+  signedIn: boolean;
 }) {
   const { t } = useI18n();
   const pathname = usePathname();
+  if (useIsLanding(signedIn)) return null;
 
   return (
     <nav
