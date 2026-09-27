@@ -5,7 +5,7 @@ import { z } from "zod";
 import { transitionStatus } from "~/domain/status";
 import { todayInHelsinki } from "~/domain/dates";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { exhibitions, userExhibitions } from "~/server/db/schema";
+import { exhibitions, museums, userExhibitions } from "~/server/db/schema";
 
 export const userExhibitionRouter = createTRPCRouter({
   setStatus: protectedProcedure
@@ -128,12 +128,14 @@ export const userExhibitionRouter = createTRPCRouter({
           visitedAt: userExhibitions.visitedAt,
           note: userExhibitions.note,
           exhibition: exhibitions,
+          museum: museums,
         })
         .from(userExhibitions)
         .innerJoin(
           exhibitions,
           eq(exhibitions.id, userExhibitions.exhibitionId),
         )
+        .innerJoin(museums, eq(museums.id, exhibitions.museumId))
         .where(
           and(
             eq(userExhibitions.userId, ctx.session.user.id),

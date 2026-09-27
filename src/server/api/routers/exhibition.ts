@@ -16,8 +16,10 @@ import { z } from "zod";
 
 import { getDaysRemaining, getPhase, todayInHelsinki } from "~/domain/dates";
 import { getUrgency } from "~/domain/urgency";
+import { batchedByIds } from "~/server/api/batch";
 import { groupExhibitionRows } from "~/server/api/grouping";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { getActiveExhibitionPool } from "~/server/cache/active-pool";
 import {
   categories,
   exhibitionCategories,
@@ -48,7 +50,7 @@ const listInput = z.object({
 });
 
 const selectExhibitions = () => ({ exhibition: exhibitions, museum: museums });
-const onlyExhibitions = eq(exhibitions.kind, "exhibition");
+export const onlyExhibitions = eq(exhibitions.kind, "exhibition");
 /** Hidden on any member hides the whole group: a group is one thing to the user, even split across rows for traceability. */
 export const whereVisible = (userId: string | null) =>
   userId
@@ -77,20 +79,6 @@ const whereNotVisited = (userId: string | null) =>
 
 type ApiContext = Awaited<ReturnType<typeof createTRPCContext>>;
 type ListInput = z.infer<typeof listInput>;
-
-const ID_BATCH_SIZE = 90;
-
-/** Runs `fetch` over `ids` in batches, staying under D1's SQL variable limit for large `IN` lists. */
-async function batchedByIds<T>(
-  ids: readonly number[],
-  fetch: (batch: number[]) => Promise<T[]>,
-): Promise<T[]> {
-  const results: T[] = [];
-  for (let offset = 0; offset < ids.length; offset += ID_BATCH_SIZE) {
-    results.push(...(await fetch(ids.slice(offset, offset + ID_BATCH_SIZE))));
-  }
-  return results;
-}
 
 export async function withDetails(
   db: Db,
@@ -142,6 +130,8 @@ export async function withDetails(
     urgency: getUrgency(exhibition, today),
     museum,
     venues,
+    /** Every exhibition id this canonical row stands in for (itself, or its whole group). */
+    memberIds: groupIds,
     categories: categoryRows
       .filter((c) => c.exhibitionId === exhibition.id)
       .map(({ id, name, slug }) => ({ id, name, slug })),
@@ -292,7 +282,7 @@ export const exhibitionRouter = createTRPCRouter({
         .limit(1);
       if (!source) return [];
 
-      const today = todayInHelsinki();
+      const userId = ctx.session?.user?.id ?? null;
       const sourceGroup = source.exhibition.exhibitionGroup;
       const sourceCategoryRows = await ctx.db
         .selectDistinct({ categoryId: exhibitionCategories.categoryId })
@@ -306,67 +296,60 @@ export const exhibitionRouter = createTRPCRouter({
             ? eq(exhibitions.exhibitionGroup, sourceGroup)
             : eq(exhibitions.id, source.exhibition.id),
         );
-      const sourceCategoryIds = sourceCategoryRows.map((row) => row.categoryId);
-      const sharedCounts = new Map<number, number>();
-      if (sourceCategoryIds.length > 0) {
-        const countRows = await batchedByIds(sourceCategoryIds, (batch) =>
-          ctx.db
+      const sourceCategoryIds = new Set(
+        sourceCategoryRows.map((row) => row.categoryId),
+      );
+
+      // Hidden-group expansion mirrors `whereVisible`: hiding one member
+      // hides the whole group.
+      const hiddenRows = userId
+        ? await ctx.db
             .select({
-              exhibitionId: exhibitionCategories.exhibitionId,
-              shared: sql<number>`count(*)`,
+              exhibitionId: userExhibitions.exhibitionId,
+              exhibitionGroup: exhibitions.exhibitionGroup,
             })
-            .from(exhibitionCategories)
-            .where(inArray(exhibitionCategories.categoryId, batch))
-            .groupBy(exhibitionCategories.exhibitionId),
-        );
-        for (const row of countRows) {
-          sharedCounts.set(
-            row.exhibitionId,
-            (sharedCounts.get(row.exhibitionId) ?? 0) + row.shared,
-          );
-        }
-      }
+            .from(userExhibitions)
+            .innerJoin(
+              exhibitions,
+              eq(exhibitions.id, userExhibitions.exhibitionId),
+            )
+            .where(
+              and(
+                eq(userExhibitions.userId, userId),
+                eq(userExhibitions.status, "hidden"),
+              ),
+            )
+        : [];
+      const hiddenIds = new Set(hiddenRows.map((row) => row.exhibitionId));
+      const hiddenGroups = new Set(
+        hiddenRows.flatMap((row) =>
+          row.exhibitionGroup ? [row.exhibitionGroup] : [],
+        ),
+      );
+
       const scoreOf = (
-        exhibition: typeof exhibitions.$inferSelect,
         museum: typeof museums.$inferSelect,
+        categoryIds: readonly number[],
       ) =>
-        (sharedCounts.get(exhibition.id) ?? 0) * 10 +
+        categoryIds.filter((id) => sourceCategoryIds.has(id)).length * 10 +
         (museum.region !== null && museum.region === source.museum.region
           ? 5
           : 0) +
         (museum.id === source.museum.id ? 3 : 0);
-      const candidates = await ctx.db
-        .select({ exhibition: exhibitions, museum: museums })
-        .from(exhibitions)
-        .innerJoin(museums, eq(exhibitions.museumId, museums.id))
-        .where(
-          and(
-            onlyExhibitions,
-            whereVisible(ctx.session?.user?.id ?? null),
-            or(
-              and(
-                lte(exhibitions.startDate, today),
-                or(
-                  sql`${exhibitions.endDate} is null`,
-                  gte(exhibitions.endDate, today),
-                ),
-              ),
-              gt(exhibitions.startDate, today),
-            ),
-            source.exhibition.exhibitionGroup
-              ? or(
-                  sql`${exhibitions.exhibitionGroup} is null`,
-                  sql`${exhibitions.exhibitionGroup} != ${source.exhibition.exhibitionGroup}`,
-                )
-              : sql`${exhibitions.id} != ${source.exhibition.id}`,
-          ),
+      const pool = await getActiveExhibitionPool(ctx.db);
+      const candidates = pool.flatMap(({ exhibition, museum, categoryIds }) => {
+        if (hiddenIds.has(exhibition.id)) return [];
+        if (
+          exhibition.exhibitionGroup &&
+          hiddenGroups.has(exhibition.exhibitionGroup)
         )
-        .then((rows) =>
-          rows.map((row) => ({
-            ...row,
-            score: scoreOf(row.exhibition, row.museum),
-          })),
-        );
+          return [];
+        const isSourceGroup = sourceGroup
+          ? exhibition.exhibitionGroup === sourceGroup
+          : exhibition.id === source.exhibition.id;
+        if (isSourceGroup) return [];
+        return [{ exhibition, museum, score: scoreOf(museum, categoryIds) }];
+      });
 
       const byGroup = new Map<string, typeof candidates>();
       for (const candidate of candidates) {
@@ -390,7 +373,7 @@ export const exhibitionRouter = createTRPCRouter({
         ranked.flatMap(({ members }) =>
           members.map(({ exhibition, museum }) => ({ exhibition, museum })),
         ),
-        ctx.session?.user?.id ?? null,
+        userId,
       );
       const itemsByGroup = new Map(
         items.map((item) => [item.exhibitionGroup ?? `id:${item.id}`, item]),

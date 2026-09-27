@@ -23,6 +23,18 @@
 			"migrations_dir": "drizzle"
 		}
 	],
+	"kv_namespaces": [
+		{
+			// Local dev only: this id is a placeholder, not a real Cloudflare KV
+			// namespace. Replace it with the id from
+			// `wrangler kv namespace create CACHE` before any remote deploy.
+			// Caches public reads (regions, museums, categories, the active-
+			// exhibition pool); see src/server/cache/kv-cache.ts. Code degrades
+			// to uncached reads if this binding is ever absent.
+			"binding": "CACHE",
+			"id": "0000000000000000000000000000c6"
+		}
+	],
 	"services": [
 		{
 			// Self-reference service binding, the service name must match the worker name
