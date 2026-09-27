@@ -260,6 +260,7 @@ export default async function ExhibitionDetailPage({
               startDate={exhibition.startDate}
               initialVisitedAt={exhibition.visitedAt}
               initialNote={exhibition.visitNote}
+              initialRating={exhibition.rating}
             />
           ) : (
             <SignInPrompt message={t.pages.signIn.status} />

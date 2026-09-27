@@ -1,0 +1,1 @@
+ALTER TABLE `kuraattori_user_exhibition` ADD `rating` text;

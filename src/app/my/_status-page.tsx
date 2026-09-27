@@ -41,6 +41,7 @@ export async function MyStatusPage({
             .map((item) => toRowView(item, today))}
           emptyMessage={emptyMessage}
           signedIn
+          ratable={status === "visited"}
         />
       )}
       {endedAt >= 0 && (
@@ -52,6 +53,7 @@ export async function MyStatusPage({
             items={items.slice(endedAt).map((item) => toRowView(item, today))}
             emptyMessage={emptyMessage}
             signedIn
+            ratable={status === "visited"}
           />
         </section>
       )}

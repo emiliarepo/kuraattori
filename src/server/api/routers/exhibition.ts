@@ -163,6 +163,7 @@ export async function withDetails(
             status: userExhibitions.status,
             visitedAt: userExhibitions.visitedAt,
             note: userExhibitions.note,
+            rating: userExhibitions.rating,
           })
           .from(userExhibitions)
           .where(
@@ -199,6 +200,9 @@ export async function withDetails(
         ?.visitedAt ?? null,
     visitNote:
       states.find((state) => groupIds.includes(state.exhibitionId))?.note ??
+      null,
+    rating:
+      states.find((state) => groupIds.includes(state.exhibitionId))?.rating ??
       null,
   }));
 }

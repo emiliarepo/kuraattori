@@ -7,6 +7,7 @@ import { type Category } from "~/app/_components/CategoryList";
 import { type ExhibitionStatus } from "~/app/_components/StatusActions";
 import { type TimeBarProps } from "~/app/_components/TimeBar";
 import { imageSources } from "~/domain/images";
+import { type VisitRating } from "~/domain/rating-nudges";
 import type { Venue } from "~/server/api/grouping";
 import type { RouterOutputs } from "~/trpc/react";
 
@@ -33,6 +34,7 @@ export interface ExhibitionRowView {
   whyLabel: string | null;
   visitedAt: Date | null;
   visitNote: string | null;
+  rating: VisitRating | null;
 }
 
 /** No hrefs: ExhibitionRow's whole row is already a link, and links can't nest. */
@@ -60,6 +62,7 @@ export function toRowView(
     whyLabel: null,
     visitedAt: item.visitedAt,
     visitNote: item.visitNote,
+    rating: item.rating,
   };
 }
 
@@ -102,5 +105,6 @@ export function forYouToRowView(
     whyLabel: item.reasons.length > 0 ? item.reasons.join(" · ") : null,
     visitedAt: null,
     visitNote: null,
+    rating: null,
   };
 }

@@ -253,6 +253,7 @@ function toView(
     whyLabel: index === 2 ? "Luonto ja eläimet · Pääkaupunkiseutu" : null,
     visitedAt: index === 3 ? new Date("2026-09-27T12:00:00.000Z") : null,
     visitNote: null,
+    rating: null,
   };
 }
 

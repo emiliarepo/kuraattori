@@ -66,6 +66,7 @@ export async function exportUserData(db: Db, userId: string) {
         status: userExhibitions.status,
         visitedAt: userExhibitions.visitedAt,
         note: userExhibitions.note,
+        rating: userExhibitions.rating,
         createdAt: userExhibitions.createdAt,
         updatedAt: userExhibitions.updatedAt,
       })

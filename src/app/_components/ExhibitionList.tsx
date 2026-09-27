@@ -7,18 +7,25 @@ export function ExhibitionList({
   emptyMessage,
   className,
   signedIn = false,
+  ratable = false,
 }: {
   items: readonly ExhibitionRowView[];
   emptyMessage: string;
   className?: string;
   signedIn?: boolean;
+  ratable?: boolean;
 }) {
   if (items.length === 0) return <EmptyState message={emptyMessage} />;
 
   return (
     <ul className={className}>
       {items.map((item) => (
-        <ExhibitionRow key={item.href} {...item} signedIn={signedIn} />
+        <ExhibitionRow
+          key={item.href}
+          {...item}
+          signedIn={signedIn}
+          ratable={ratable}
+        />
       ))}
     </ul>
   );
