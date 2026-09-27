@@ -18,6 +18,7 @@ import { archiveImages } from "~/server/import/image-archive";
 import { runImport } from "~/server/import/run-import";
 import type {
   ExhibitionSourceAdapter,
+  MuseumLocation,
   NormalizedCategory,
   NormalizedExhibition,
 } from "~/server/import/types";
@@ -54,6 +55,15 @@ const CURATED_SOURCE_IDS = [
   "42181", // current, Rauma
   "41877", // current, ends today, Savonlinna
 ] as const;
+
+/** Kiasma's location comes from its fixture page; this second Helsinki museum gives the day planner a walking leg. */
+const EXTRA_LOCATIONS: Record<string, MuseumLocation> = {
+  "LUOMUS Kaisaniemen kasvitieteellinen puutarha": {
+    address: "Kaisaniemenranta 2, 00170 Helsinki",
+    latitude: 60.1745,
+    longitude: 24.9461,
+  },
+};
 
 function readFixture(name: string): string {
   return readFileSync(join(FIXTURES_DIR, name), "utf-8");
@@ -196,10 +206,14 @@ async function main() {
     name: "museot.fi",
     fetchExhibitions: () =>
       Promise.resolve({ categories, changed, unchanged: [], failedCount: 0 }),
-    fetchMuseumLocation: async (sourceId) =>
-      sourceId === "21118"
-        ? parseMuseumPage(readFixture("museum-21118.html"))
-        : undefined,
+    fetchMuseumLocation: async (sourceId) => {
+      if (sourceId === "21118")
+        return parseMuseumPage(readFixture("museum-21118.html"));
+      const name = [...museumSourceIdByName].find(
+        ([, id]) => id === sourceId,
+      )?.[0];
+      return name ? EXTRA_LOCATIONS[name] : undefined;
+    },
   };
 
   // `wrangler dev --persist-to X` (and `d1 migrations apply --persist-to X`)

@@ -63,14 +63,24 @@ export function toRowView(
   };
 }
 
-/** Trip mode's row: same shape as `toRowView`, with the why-slot set to the trip's overlap reason. */
+/**
+ * Trip mode's row: same shape as `toRowView`, with the why-slot set to the
+ * trip's overlap reason. Ending-soon rows get the TimeBar's urgent state even
+ * when the trip is further away than the TimeBar's own window.
+ */
 export function tripToRowView(
   item: ExhibitionWithDetails,
   today: string,
   from: string,
   to: string,
+  endingSoon: boolean,
 ): ExhibitionRowView {
-  return { ...toRowView(item, today), whyLabel: tripWhyLabel(item, from, to) };
+  const row = toRowView(item, today);
+  return {
+    ...row,
+    timeBar: endingSoon ? { ...row.timeBar, urgent: true } : row.timeBar,
+    whyLabel: tripWhyLabel(item, from, to, endingSoon),
+  };
 }
 
 /** `recommendation.forYou` doesn't join categories or user state (ineligible exhibitions are excluded already). */

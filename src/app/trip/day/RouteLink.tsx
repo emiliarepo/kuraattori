@@ -5,7 +5,17 @@ import { useEffect, useState } from "react";
 import { isApplePlatform, routeHref, type RoutePoint } from "~/app/_lib/maps";
 import { t } from "~/i18n/fi";
 
-export function RouteLink({ points }: { points: RoutePoint[] }) {
+export function RouteLink({
+  points,
+  label = t.pages.day.showRoute,
+  ariaLabel,
+  className = "btn btn-primary",
+}: {
+  points: RoutePoint[];
+  label?: string;
+  ariaLabel?: string;
+  className?: string;
+}) {
   const [apple, setApple] = useState(false);
 
   useEffect(() => {
@@ -23,9 +33,10 @@ export function RouteLink({ points }: { points: RoutePoint[] }) {
       href={routeHref(points, apple)}
       target="_blank"
       rel="noopener noreferrer"
-      className="btn btn-primary"
+      aria-label={ariaLabel}
+      className={className}
     >
-      {t.pages.day.showRoute}
+      {label}
     </a>
   );
 }

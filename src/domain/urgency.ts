@@ -1,5 +1,8 @@
 import { daysBetween, type ExhibitionDates } from "./dates";
 
+/** Where the TimeBar and the day counts turn rust. */
+export const ENDING_SOON_DAYS = 14;
+
 /** 0-100. Ended exhibitions and ones with no end date are never urgent. */
 export function getUrgency(
   exhibition: Pick<ExhibitionDates, "endDate">,
@@ -11,7 +14,7 @@ export function getUrgency(
   if (daysRemaining === 0) return 100;
   if (daysRemaining === 1) return 90;
   if (daysRemaining <= 6) return 75;
-  if (daysRemaining <= 14) return 50;
+  if (daysRemaining <= ENDING_SOON_DAYS) return 50;
   if (daysRemaining <= 30) return 25;
   if (daysRemaining <= 60) return 10;
   return 0;
