@@ -319,6 +319,7 @@ export const userExhibitions = createTable(
     status: d.text({ enum: ["interested", "visited", "hidden"] }).notNull(),
     visitedAt: d.integer({ mode: "timestamp" }),
     note: d.text(),
+    rating: d.text({ enum: ["up", "down"] }),
     createdAt: d
       .integer({ mode: "timestamp" })
       .default(sql`(unixepoch())`)

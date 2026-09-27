@@ -1,5 +1,5 @@
 # 45 Quick rating after a visit
-Status: todo · Model: Opus 5.5 (low) · Blocked by: 44 (migration order)
+Status: done · Model: Opus 5.5 (low) · Blocked by: 44 (migration order)
 
 When an exhibition is marked Käyty, offer 👍 / 👎 inline, next to the visit date and note. It's optional, one tap, and can be changed or cleared.
 

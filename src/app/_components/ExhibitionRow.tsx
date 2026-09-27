@@ -8,6 +8,8 @@ import {
   type ExhibitionStatus,
 } from "~/app/_components/StatusActions";
 import { TimeBar, type TimeBarProps } from "~/app/_components/TimeBar";
+import { VisitRating } from "~/app/_components/VisitRating";
+import { type VisitRating as Rating } from "~/domain/rating-nudges";
 
 export function ExhibitionRow({
   exhibitionId,
@@ -23,7 +25,9 @@ export function ExhibitionRow({
   whyLabel,
   visitedAt,
   visitNote,
+  rating = null,
   signedIn = false,
+  ratable = false,
 }: {
   exhibitionId: number;
   href: string;
@@ -38,15 +42,21 @@ export function ExhibitionRow({
   whyLabel?: string | null;
   visitedAt?: Date | null;
   visitNote?: string | null;
+  rating?: Rating | null;
   signedIn?: boolean;
+  ratable?: boolean;
 }) {
+  const showRating = signedIn && ratable && status === "visited";
   const visitedLabel = visitedAt
     ? `Käyty ${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", day: "numeric", month: "numeric", year: "numeric" }).format(visitedAt)}`
     : null;
   return (
     <li className="border-rule-soft border-t first:border-t-0">
       <div className="relative">
-        <Link href={href} className="group flex gap-4 py-5 sm:gap-6">
+        <Link
+          href={href}
+          className={`group flex gap-4 sm:gap-6 ${showRating ? "pt-5 pb-2" : "py-5"}`}
+        >
           <div className="w-24 flex-shrink-0 sm:w-40">
             <ImageFallback
               sources={imageSources}
@@ -91,6 +101,11 @@ export function ExhibitionRow({
             status={status ?? null}
             className="absolute top-5 right-0 z-10"
           />
+        )}
+        {showRating && (
+          <div className="pb-5 pl-28 sm:pl-46">
+            <VisitRating exhibitionId={exhibitionId} initialRating={rating} />
+          </div>
         )}
       </div>
     </li>

@@ -7,6 +7,8 @@ import {
   StatusActions,
   type ExhibitionStatus,
 } from "~/app/_components/StatusActions";
+import { VisitRating } from "~/app/_components/VisitRating";
+import { type VisitRating as Rating } from "~/domain/rating-nudges";
 import { api } from "~/trpc/react";
 import { todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
@@ -24,12 +26,14 @@ export function ExhibitionStatusControl({
   startDate,
   initialVisitedAt,
   initialNote,
+  initialRating,
 }: {
   exhibitionId: number;
   initialStatus: ExhibitionStatus | null;
   startDate: string;
   initialVisitedAt: Date | null;
   initialNote: string | null;
+  initialRating: Rating | null;
 }) {
   const [status, setStatus] = useState(initialStatus);
   const [visitedOn, setVisitedOn] = useState(
@@ -77,6 +81,10 @@ export function ExhibitionStatusControl({
               visitDateFormat.format(new Date(`${visitedOn}T12:00:00Z`)),
             )}
           </p>
+          <VisitRating
+            exhibitionId={exhibitionId}
+            initialRating={initialRating}
+          />
           <label className="flex flex-col gap-1">
             <span className="text-kicker text-muted">
               {t.pages.detail.visitDate}

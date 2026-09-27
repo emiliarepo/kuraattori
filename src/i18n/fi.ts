@@ -42,6 +42,14 @@ export const t = {
       announceCleared: "Merkintä poistettu",
       heartLabel: (title: string) => `Kiinnostaa: ${title}`,
     },
+    rating: {
+      group: "Arvio",
+      up: "Pidin",
+      down: "En pitänyt",
+      announceSet: (label: string) => `Arvio: ${label}`,
+      announceCleared: "Arvio poistettu",
+      saveError: "Arvion tallennus epäonnistui.",
+    },
     follow: {
       follow: "Seuraa",
       following: "Seurataan",

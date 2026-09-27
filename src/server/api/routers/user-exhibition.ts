@@ -65,6 +65,7 @@ export const userExhibitionRouter = createTRPCRouter({
                 ? new Date(`${todayInHelsinki()}T12:00:00.000Z`)
                 : null,
             note: null,
+            rating: null,
           })
           .onConflictDoUpdate({
             target: [userExhibitions.userId, userExhibitions.exhibitionId],
@@ -75,6 +76,7 @@ export const userExhibitionRouter = createTRPCRouter({
                   ? new Date(`${todayInHelsinki()}T12:00:00.000Z`)
                   : null,
               note: null,
+              rating: null,
               updatedAt: new Date(),
             },
           });
@@ -118,6 +120,26 @@ export const userExhibitionRouter = createTRPCRouter({
           ),
         );
       return result;
+    }),
+  setRating: protectedProcedure
+    .input(
+      z.object({
+        exhibitionId: z.number().int().positive(),
+        rating: z.enum(["up", "down"]).nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(userExhibitions)
+        .set({ rating: input.rating, updatedAt: new Date() })
+        .where(
+          and(
+            eq(userExhibitions.userId, ctx.session.user.id),
+            eq(userExhibitions.exhibitionId, input.exhibitionId),
+            eq(userExhibitions.status, "visited"),
+          ),
+        );
+      return { rating: input.rating };
     }),
   listByStatus: protectedProcedure
     .input(z.object({ status: z.enum(["interested", "visited", "hidden"]) }))
