@@ -10,7 +10,8 @@ Migrations are serialized (one migration-adding ticket in flight at a time): 14 
 3. Wave B: 15 visit date/note (Luna, migration), 18 travel mode (Sonnet).
 4. Wave C: 16 calendar (Luna, migration).
 5. Wave D: 20 savings (Sonnet, migration), then 21 year in review (Sonnet).
-6. Design consistency review (Opus) across all screens, fixes, final deploy and browser check.
+6. 22 en/sv locales (lowest priority; adds a migration, so after 20).
+7. Design consistency review (Opus) across all screens, fixes, final deploy and browser check.
 
 After each merge: typecheck, lint, test, format, build on main; push; confirm deploy; spot-check the changed screens in the browser.
 Commits use the repo-local identity emilia@repo.codes; rebase agent branches if needed.
