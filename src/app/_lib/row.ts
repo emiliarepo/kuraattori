@@ -2,7 +2,13 @@ import { timeBarProps, imageAlt } from "~/app/_lib/exhibition-format";
 import { type Category } from "~/app/_components/CategoryList";
 import { type ExhibitionStatus } from "~/app/_components/StatusActions";
 import { type TimeBarProps } from "~/app/_components/TimeBar";
+import type { Venue } from "~/server/api/grouping";
 import type { RouterOutputs } from "~/trpc/react";
+
+/** Museum names joined with ", ": the grouped card/row byline, city appended by the caller. */
+function venueNames(venues: readonly Venue[]): string {
+  return venues.map((venue) => venue.name).join(", ");
+}
 
 export type ExhibitionWithDetails = NonNullable<
   RouterOutputs["exhibition"]["bySlug"]
@@ -35,7 +41,7 @@ export function toRowView(
   return {
     href: `/exhibitions/${item.slug}`,
     title: item.titleFi,
-    museum: item.museum.name,
+    museum: venueNames(item.venues),
     city: item.museum.city ?? "",
     imageUrl: item.imageUrl,
     imageAlt: imageAlt(item.titleFi, item.museum.name),
@@ -54,7 +60,7 @@ export function forYouToRowView(
   return {
     href: `/exhibitions/${item.exhibition.slug}`,
     title: item.exhibition.titleFi,
-    museum: item.museum.name,
+    museum: venueNames(item.venues),
     city: item.museum.city ?? "",
     imageUrl: item.exhibition.imageUrl,
     imageAlt: imageAlt(item.exhibition.titleFi, item.museum.name),

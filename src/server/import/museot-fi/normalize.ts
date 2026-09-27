@@ -1,5 +1,6 @@
 import { resolveRegion } from "~/domain/regions";
 
+import { classify } from "../grouping";
 import { hashListingPayload } from "../hash";
 import type { NormalizedExhibition, NormalizedMuseum } from "../types";
 import type { RawDetail } from "./parse-detail";
@@ -53,5 +54,11 @@ export function normalizeExhibition(
     museumCardEligible: detail.museumCardEligible,
     categorySourceIds,
     payloadHash: hashListingItem(listing),
+    ...classify({
+      title: detail.title,
+      startDate: detail.startDate,
+      endDate: detail.endDate,
+      description: detail.description,
+    }),
   };
 }

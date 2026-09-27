@@ -1,8 +1,14 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 
 import { type Db } from "~/server/db";
-import { dataSources, importRuns } from "~/server/db/schema";
+import {
+  dataSources,
+  exhibitions,
+  importRuns,
+  museums,
+} from "~/server/db/schema";
 
+import { classify } from "./grouping";
 import type { ExhibitionSourceAdapter } from "./types";
 import {
   loadExistingCategories,
@@ -24,6 +30,51 @@ export interface ImportRunStats {
   itemsMissing: number;
   itemsFailed: number;
   errorMessage?: string;
+  /** `"title (Venue A, Venue B)"` for every current exhibition_group with more than one member, for review. */
+  groupedExamples: string[];
+  /** Titles classified as `kind = "notice"`, for reviewing false positives. */
+  noticeTitles: string[];
+}
+
+async function reportGroupingAndNotices(
+  db: Db,
+): Promise<Pick<ImportRunStats, "groupedExamples" | "noticeTitles">> {
+  const exhibitionRows = await db
+    .select({
+      group: exhibitions.exhibitionGroup,
+      title: exhibitions.titleFi,
+      museumName: museums.name,
+    })
+    .from(exhibitions)
+    .innerJoin(museums, eq(exhibitions.museumId, museums.id))
+    .where(
+      and(
+        eq(exhibitions.kind, "exhibition"),
+        isNotNull(exhibitions.exhibitionGroup),
+      ),
+    );
+
+  const byGroup = new Map<string, { title: string; museumName: string }[]>();
+  for (const row of exhibitionRows) {
+    if (!row.group) continue;
+    const members = byGroup.get(row.group) ?? [];
+    members.push({ title: row.title, museumName: row.museumName });
+    byGroup.set(row.group, members);
+  }
+  const groupedExamples = [...byGroup.values()]
+    .filter((members) => members.length > 1)
+    .map(
+      (members) =>
+        `${members[0]!.title} (${members.map((m) => m.museumName).join(", ")})`,
+    );
+
+  const noticeRows = await db
+    .select({ title: exhibitions.titleFi })
+    .from(exhibitions)
+    .where(eq(exhibitions.kind, "notice"));
+  const noticeTitles = noticeRows.map((row) => row.title);
+
+  return { groupedExamples, noticeTitles };
 }
 
 async function getOrCreateDataSource(
@@ -92,6 +143,8 @@ export async function runImport(
       itemsMissing: 0,
       itemsFailed: 0,
       errorMessage,
+      groupedExamples: [],
+      noticeTitles: [],
     };
   }
 }
@@ -183,7 +236,16 @@ async function performImport(
     const existing = existingExhibitions.get(exhibition.sourceId);
     if (!existing) continue; // reported as new by the adapter but unknown here; treat as a fetch anomaly
 
-    await touchExhibition(db, existing.id);
+    await touchExhibition(
+      db,
+      existing.id,
+      classify({
+        title: existing.titleFi,
+        startDate: existing.startDate,
+        endDate: existing.endDate ?? undefined,
+        description: existing.descriptionFi ?? undefined,
+      }),
+    );
     itemsUnchanged++;
     membershipByExhibitionId.set(
       existing.id,
@@ -199,6 +261,8 @@ async function performImport(
     (id) => !seenSourceIds.has(id),
   ).length;
 
+  const { groupedExamples, noticeTitles } = await reportGroupingAndNotices(db);
+
   return {
     itemsFetched: result.changed.length + result.unchanged.length,
     itemsCreated,
@@ -206,5 +270,7 @@ async function performImport(
     itemsUnchanged,
     itemsMissing,
     itemsFailed: result.failedCount,
+    groupedExamples,
+    noticeTitles,
   };
 }

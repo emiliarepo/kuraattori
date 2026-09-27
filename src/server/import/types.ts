@@ -25,6 +25,10 @@ export interface NormalizedExhibition {
   categorySourceIds: string[];
   /** Hash of the listing payload, used to skip re-fetching an unchanged detail page. */
   payloadHash: string;
+  /** Same-exhibition-at-several-venues key: see `~/server/import/grouping`. */
+  exhibitionGroup: string;
+  /** `notice` listings (closures, etc.) are kept but excluded from all lists. */
+  kind: "exhibition" | "notice";
 }
 
 /**

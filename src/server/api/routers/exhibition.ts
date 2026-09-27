@@ -16,6 +16,7 @@ import { z } from "zod";
 
 import { getDaysRemaining, getPhase, todayInHelsinki } from "~/domain/dates";
 import { getUrgency } from "~/domain/urgency";
+import { groupExhibitionRows } from "~/server/api/grouping";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import {
   categories,
@@ -47,9 +48,18 @@ const listInput = z.object({
 });
 
 const selectExhibitions = () => ({ exhibition: exhibitions, museum: museums });
-const whereVisible = (userId: string | null) =>
+const onlyExhibitions = eq(exhibitions.kind, "exhibition");
+/** Hidden on any member hides the whole group: a group is one thing to the user, even split across rows for traceability. */
+export const whereVisible = (userId: string | null) =>
   userId
-    ? sql`not exists (select 1 from ${userExhibitions} where ${userExhibitions.userId} = ${userId} and ${userExhibitions.exhibitionId} = ${exhibitions.id} and ${userExhibitions.status} = 'hidden')`
+    ? sql`not exists (
+        select 1 from ${userExhibitions} ue
+        inner join ${exhibitions} e2 on e2.id = ue.exhibitionId
+        where ue.userId = ${userId}
+          and ue.status = 'hidden'
+          and (e2.id = ${exhibitions.id}
+            or (${exhibitions.exhibitionGroup} is not null and e2.exhibitionGroup = ${exhibitions.exhibitionGroup}))
+      )`
     : undefined;
 
 type ApiContext = Awaited<ReturnType<typeof createTRPCContext>>;
@@ -64,7 +74,9 @@ async function withDetails(
   userId: string | null,
 ) {
   if (!rows.length) return [];
-  const exhibitionIds = rows.map(({ exhibition }) => exhibition.id);
+  const groups = groupExhibitionRows(rows);
+  const canonicalIds = groups.map((group) => group.exhibition.id);
+  const memberIds = groups.flatMap((group) => group.memberIds);
   const categoryRows = await db
     .select({
       exhibitionId: exhibitionCategories.exhibitionId,
@@ -74,7 +86,7 @@ async function withDetails(
     })
     .from(exhibitionCategories)
     .innerJoin(categories, eq(categories.id, exhibitionCategories.categoryId))
-    .where(inArray(exhibitionCategories.exhibitionId, exhibitionIds));
+    .where(inArray(exhibitionCategories.exhibitionId, canonicalIds));
   const states = userId
     ? await db
         .select({
@@ -85,29 +97,33 @@ async function withDetails(
         .where(
           and(
             eq(userExhibitions.userId, userId),
-            inArray(userExhibitions.exhibitionId, exhibitionIds),
+            inArray(userExhibitions.exhibitionId, memberIds),
           ),
         )
     : [];
   const today = todayInHelsinki();
-  return rows.map(({ exhibition, museum }) => ({
+  return groups.map(({ exhibition, museum, venues, memberIds: groupIds }) => ({
     ...exhibition,
     phase: getPhase(exhibition, today),
     daysRemaining: getDaysRemaining(exhibition, today),
     urgency: getUrgency(exhibition, today),
     museum,
+    venues,
     categories: categoryRows
       .filter((c) => c.exhibitionId === exhibition.id)
       .map(({ id, name, slug }) => ({ id, name, slug })),
     status:
-      states.find((state) => state.exhibitionId === exhibition.id)?.status ??
+      states.find((state) => groupIds.includes(state.exhibitionId))?.status ??
       null,
   }));
 }
 
 async function listExhibitions(ctx: ApiContext, input: ListInput) {
   const today = todayInHelsinki();
-  const filters = [whereVisible(ctx.session?.user?.id ?? null)];
+  const filters = [
+    onlyExhibitions,
+    whereVisible(ctx.session?.user?.id ?? null),
+  ];
   if (input.region) filters.push(eq(museums.region, input.region));
   if (input.city) filters.push(eq(museums.city, input.city));
   if (input.museumIds?.length)
@@ -206,9 +222,22 @@ export const exhibitionRouter = createTRPCRouter({
         .where(eq(exhibitions.slug, input.slug))
         .limit(1);
       if (!row) return null;
+      // Grouped siblings, so the detail page can list every venue.
+      const rows = row.exhibition.exhibitionGroup
+        ? await ctx.db
+            .select(selectExhibitions())
+            .from(exhibitions)
+            .innerJoin(museums, eq(exhibitions.museumId, museums.id))
+            .where(
+              and(
+                onlyExhibitions,
+                eq(exhibitions.exhibitionGroup, row.exhibition.exhibitionGroup),
+              ),
+            )
+        : [row];
       const [item] = await withDetails(
         ctx.db,
-        [row],
+        rows,
         ctx.session?.user?.id ?? null,
       );
       return item;
@@ -258,6 +287,7 @@ export const exhibitionRouter = createTRPCRouter({
       const openedSince = new Date(`${today}T00:00:00Z`);
       openedSince.setUTCDate(openedSince.getUTCDate() - NEW_WITHIN_DAYS);
       const filters = [
+        onlyExhibitions,
         whereVisible(ctx.session?.user?.id ?? null),
         gte(exhibitions.startDate, openedSince.toISOString().slice(0, 10)),
         lte(exhibitions.startDate, today),

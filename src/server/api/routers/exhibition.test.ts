@@ -250,4 +250,266 @@ describe("exhibition API", () => {
       expect(result.map((item) => item.slug)).toEqual(["tampere-new"]);
     });
   });
+
+  describe("grouping", () => {
+    it("collapses the same exhibition at two venues into one item with both venues listed", async () => {
+      await db.insert(schema.museums).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "m1",
+          name: "Oulun museo",
+          slug: "oulun-museo",
+          city: "Oulu",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "m2",
+          name: "Tiima",
+          slug: "tiima",
+          city: "Oulu",
+        },
+      ]);
+      await db.insert(schema.exhibitions).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "e1",
+          museumId: 1,
+          slug: "metallikausi-oulu",
+          titleFi: "Metallikausi",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "a",
+          exhibitionGroup: "metallikausi-group",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "e2",
+          museumId: 2,
+          slug: "metallikausi-tiima",
+          titleFi: "Metallikausi",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "b",
+          exhibitionGroup: "metallikausi-group",
+        },
+      ]);
+
+      const result = await createCaller(ctx).exhibition.list({});
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0]?.slug).toBe("metallikausi-oulu");
+      expect(result.items[0]?.venues.map((v) => v.name)).toEqual([
+        "Oulun museo",
+        "Tiima",
+      ]);
+    });
+
+    it("shows a status set on either group member on the merged item", async () => {
+      await db
+        .insert(schema.users)
+        .values({ id: "u1", email: "u1@example.com" });
+      await db.insert(schema.museums).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "m1",
+          name: "Oulun museo",
+          slug: "oulun-museo",
+          city: "Oulu",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "m2",
+          name: "Tiima",
+          slug: "tiima",
+          city: "Oulu",
+        },
+      ]);
+      await db.insert(schema.exhibitions).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "e1",
+          museumId: 1,
+          slug: "metallikausi-oulu",
+          titleFi: "Metallikausi",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "a",
+          exhibitionGroup: "metallikausi-group",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "e2",
+          museumId: 2,
+          slug: "metallikausi-tiima",
+          titleFi: "Metallikausi",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "b",
+          exhibitionGroup: "metallikausi-group",
+        },
+      ]);
+      await db
+        .insert(schema.userExhibitions)
+        .values({ userId: "u1", exhibitionId: 2, status: "interested" });
+
+      const signedIn = {
+        ...ctx,
+        session: { user: { id: "u1" }, expires: "2099-01-01" },
+      } as typeof ctx;
+      const result = await createCaller(signedIn).exhibition.list({});
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0]?.status).toBe("interested");
+    });
+
+    it("hides the merged item when any group member is hidden", async () => {
+      await db
+        .insert(schema.users)
+        .values({ id: "u1", email: "u1@example.com" });
+      await db.insert(schema.museums).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "m1",
+          name: "Oulun museo",
+          slug: "oulun-museo",
+          city: "Oulu",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "m2",
+          name: "Tiima",
+          slug: "tiima",
+          city: "Oulu",
+        },
+      ]);
+      await db.insert(schema.exhibitions).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "e1",
+          museumId: 1,
+          slug: "metallikausi-oulu",
+          titleFi: "Metallikausi",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "a",
+          exhibitionGroup: "metallikausi-group",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "e2",
+          museumId: 2,
+          slug: "metallikausi-tiima",
+          titleFi: "Metallikausi",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "b",
+          exhibitionGroup: "metallikausi-group",
+        },
+      ]);
+      await db
+        .insert(schema.userExhibitions)
+        .values({ userId: "u1", exhibitionId: 2, status: "hidden" });
+
+      const signedIn = {
+        ...ctx,
+        session: { user: { id: "u1" }, expires: "2099-01-01" },
+      } as typeof ctx;
+      const result = await createCaller(signedIn).exhibition.list({});
+      expect(result.items).toHaveLength(0);
+    });
+
+    it("excludes kind='notice' listings from list and new", async () => {
+      await db.insert(schema.museums).values({
+        id: 1,
+        source: "test",
+        sourceId: "m1",
+        name: "Heinolan taidemuseo",
+        slug: "heinolan-taidemuseo",
+        city: "Heinola",
+      });
+      await db.insert(schema.exhibitions).values({
+        id: 1,
+        source: "test",
+        sourceId: "e1",
+        museumId: 1,
+        slug: "notice",
+        titleFi: "suljettu näyttelyn vaihdon ajan",
+        startDate: "2026-09-20",
+        endDate: "2026-12-31",
+        sourcePayloadHash: "a",
+        kind: "notice",
+      });
+
+      const list = await createCaller(ctx).exhibition.list({});
+      expect(list.items).toHaveLength(0);
+      const upcoming = await createCaller(ctx).exhibition.new({});
+      expect(upcoming).toHaveLength(0);
+    });
+
+    it("bySlug lists every venue in the group, however it was reached", async () => {
+      await db.insert(schema.museums).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "m1",
+          name: "Oulun museo",
+          slug: "oulun-museo",
+          city: "Oulu",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "m2",
+          name: "Tiima",
+          slug: "tiima",
+          city: "Oulu",
+        },
+      ]);
+      await db.insert(schema.exhibitions).values([
+        {
+          id: 1,
+          source: "test",
+          sourceId: "e1",
+          museumId: 1,
+          slug: "metallikausi-oulu",
+          titleFi: "Metallikausi",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "a",
+          exhibitionGroup: "metallikausi-group",
+        },
+        {
+          id: 2,
+          source: "test",
+          sourceId: "e2",
+          museumId: 2,
+          slug: "metallikausi-tiima",
+          titleFi: "Metallikausi",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
+          sourcePayloadHash: "b",
+          exhibitionGroup: "metallikausi-group",
+        },
+      ]);
+
+      const viaTiima = await createCaller(ctx).exhibition.bySlug({
+        slug: "metallikausi-tiima",
+      });
+      expect(viaTiima?.slug).toBe("metallikausi-oulu");
+      expect(viaTiima?.venues.map((v) => v.name)).toEqual([
+        "Oulun museo",
+        "Tiima",
+      ]);
+    });
+  });
 });

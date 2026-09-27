@@ -24,8 +24,16 @@ export const myRouter = createTRPCRouter({
             .bySlug({ slug: row.exhibition.slug }),
         ),
       );
-      return items.filter(
+      const found = items.filter(
         (item): item is NonNullable<typeof item> => item !== null,
       );
+      // Two group members can each carry the user's status; bySlug then
+      // resolves both to the same canonical exhibition.
+      const seenSlugs = new Set<string>();
+      return found.filter((item) => {
+        if (seenSlugs.has(item.slug)) return false;
+        seenSlugs.add(item.slug);
+        return true;
+      });
     }),
 });

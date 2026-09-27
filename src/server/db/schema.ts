@@ -168,6 +168,16 @@ export const exhibitions = createTable(
     imageUrl: d.text(),
     museumCardEligible: d.integer({ mode: "boolean" }).notNull().default(false),
     sourcePayloadHash: d.text().notNull(),
+    /**
+     * Same-exhibition-at-several-venues key (normalized title + start + end +
+     * description hash), computed by the importer. Null until an import run
+     * classifies the row.
+     */
+    exhibitionGroup: d.text(),
+    kind: d
+      .text({ enum: ["exhibition", "notice"] })
+      .notNull()
+      .default("exhibition"),
     createdAt: d
       .integer({ mode: "timestamp" })
       .default(sql`(unixepoch())`)
@@ -183,6 +193,7 @@ export const exhibitions = createTable(
     unique("exhibition_source_idx").on(t.source, t.sourceId),
     index("exhibition_museum_idx").on(t.museumId),
     index("exhibition_dates_idx").on(t.startDate, t.endDate),
+    index("exhibition_group_idx").on(t.exhibitionGroup),
   ],
 );
 
