@@ -1,5 +1,5 @@
 # 29 Profile sub-pages and calendar entry points
-Status: todo · Model: Sonnet 5 · Blocked by: 23
+Status: done · Model: Sonnet 5 · Blocked by: 23
 
 `/profile` has become one long form (24 categories × 4 levels, grouped regions, calendar at the bottom). Split it and surface the calendar where users want it.
 

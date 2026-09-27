@@ -52,8 +52,8 @@ Mobile first. Bottom tab bar on mobile: **Koti · Selaa · Omat · Profiili** (k
 | `/exhibitions` | Browse: "Selaa" heading and an ExhibitionRow list, cursor paging. Filters: region, city, museum, category, Museokortti, käynnissä/tulossa, päättyy N pv sisällä, text search. Filter state lives in the URL. Mobile: a filter bottom sheet; desktop: a left sidebar. |
 | `/exhibitions/[slug]` | Detail: breadcrumb (Näyttelyt / city / museum), UrgencyLabel, large serif title, italic byline. Below it a 1.6fr/1fr grid: image then description on the left; a sticky right column with the meta list (Museo, Kaupunki, Avoinna, Museokortti, Aiheet), TimeBar, StatusActions, source link and last update. On mobile the order is image, meta column, description. |
 | `/museums`, `/museums/[slug]` | Museum list and museum page with its exhibitions (current, upcoming, past). |
-| `/my` | Tabs (`/my/interested`, `/my/visited`, `/my/hidden`): Kiinnostavat, Käydyt (history, including ended ones), Piilotetut. |
-| `/profile` | Interests (categories), regions, sign out. `/welcome` is onboarding after first login, skippable, with the same controls. |
+| `/my` | Tabs (`/my/interested`, `/my/visited`, `/my/hidden`): Kiinnostavat, Käydyt (history, including ended ones), Piilotetut. `/my/interested` also has a compact calendar line under the tabs: a link to `/profile/calendar`, or, once a feed exists, a direct "Lisää kalenteriin" webcal link plus "Asetukset". |
+| `/profile` | Redirects to `/profile/interests`. Tabs (`/profile/interests`, `/profile/regions`, `/profile/calendar`, `/profile/account`): Kiinnostukset (category weight rows, selected ones first), Alueet (`groupRegions()`), Kalenteri (the feed from ticket 16), Tili (name/email, sign out). Each change saves automatically with a "Tallennettu" confirmation. `/welcome` is onboarding after first login, skippable, reusing the same interest and region components. |
 | `/sign-in` | Google sign-in. |
 
 ## Data and domain decisions

@@ -3,16 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import {
-  InterestControl,
-  type InterestWeight,
-} from "~/app/_components/InterestControl";
+import { type InterestWeight } from "~/app/_components/InterestControl";
+import { InterestsList, type Category } from "~/app/_components/InterestsList";
+import { RegionsList } from "~/app/_components/RegionsList";
 import { markOnboardingDone } from "~/app/welcome/onboarding-action";
-import { groupRegions } from "~/domain/regions";
 import { t } from "~/i18n/fi";
 import { api } from "~/trpc/react";
 
-type Category = { id: number; name: string };
 type Step = "interests" | "regions";
 
 export function WelcomeFlow({
@@ -40,7 +37,6 @@ export function WelcomeFlow({
       ),
   );
   const [regions, setRegions] = useState<readonly string[]>(initialRegions);
-  const regionGroups = groupRegions(allRegions);
 
   const updateInterests = api.profile.updateInterests.useMutation();
   const updateRegions = api.profile.updateRegions.useMutation();
@@ -100,21 +96,11 @@ export function WelcomeFlow({
 
       {step === "interests" ? (
         <>
-          <ul className="flex flex-col gap-2.5">
-            {categories.map((category) => (
-              <li
-                key={category.id}
-                className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-              >
-                <span className="text-lg">{category.name}</span>
-                <InterestControl
-                  categoryName={category.name}
-                  value={interests.get(category.id) ?? null}
-                  onChange={(weight) => setInterest(category.id, weight)}
-                />
-              </li>
-            ))}
-          </ul>
+          <InterestsList
+            categories={categories}
+            interests={interests}
+            onChange={setInterest}
+          />
           <button
             type="button"
             onClick={() => setStep("regions")}
@@ -125,28 +111,11 @@ export function WelcomeFlow({
         </>
       ) : (
         <>
-          {[regionGroups.cities, regionGroups.others]
-            .filter((group) => group.length > 0)
-            .map((group, index) => (
-              <ul
-                key={index}
-                className={`flex flex-col gap-2 ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
-              >
-                {group.map((region) => (
-                  <li key={region}>
-                    <label className="flex items-center gap-2.5 text-lg">
-                      <input
-                        type="checkbox"
-                        checked={regions.includes(region)}
-                        onChange={() => toggleRegion(region)}
-                        className="accent-signal h-4 w-4 flex-none"
-                      />
-                      {region}
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            ))}
+          <RegionsList
+            allRegions={allRegions}
+            regions={regions}
+            onChange={toggleRegion}
+          />
           <button
             type="button"
             onClick={() => void finish()}
