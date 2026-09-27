@@ -334,6 +334,10 @@ export const t = {
       body: "Etsimääsi sivua ei ole, tai se on poistettu.",
       home: "Etusivulle",
     },
+    maintenance: {
+      title: "Kuraattori on hetken tauolla",
+      body: "Palaamme pian.",
+    },
     meta: {
       home: "Näyttelyt suomalaisissa museoissa: selaa, tallenna kiinnostavat ja seuraa milloin ne päättyvät.",
       browse:

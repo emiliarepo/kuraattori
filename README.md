@@ -93,13 +93,33 @@ To run your own copy:
 1. Create a D1 database (`wrangler d1 create kuraattori`) and a KV namespace (`wrangler kv namespace create CACHE`). Put their IDs in `wrangler.jsonc`, and change the custom domain route to yours.
 2. Set the Worker secrets: `wrangler secret put AUTH_SECRET`, `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`. Use a Google OAuth web client with `https://<your-domain>/api/auth/callback/google` as the redirect URI.
 3. Set `NEXT_PUBLIC_SITE_URL` in `.env.production`.
-4. Add the repository secrets `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID` and `CLOUDFLARE_API_TOKEN`. The token needs Workers Scripts: Edit, D1: Edit, Workers Routes: Edit on your zone, Account Settings: Read, and Account Analytics: Read (for the usage check).
+4. Add the repository secrets `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID` and `CLOUDFLARE_API_TOKEN`. The token needs Workers Scripts: Edit, D1: Edit, Workers Routes: Edit on your zone, Account Settings: Read, Account Analytics: Read (for the usage check) and Workers KV Storage: Edit (for the cost guardrail's kill switch, below).
+5. Add the repository variables listed under [Cost guardrails](#cost-guardrails) below, so the kill switch has budgets to compare against.
 
 ## Monitoring
 
-[`.github/workflows/health.yml`](.github/workflows/health.yml) requests the main public routes every 30 minutes and fails if any of them is slow or returns an error. Once a day it also fails if D1 reads for the day exceed 2.5 million rows. The import fails loudly when museot.fi suddenly returns far fewer exhibitions than the previous run, because that usually means the markup changed. Failed scheduled runs notify the repository owner through GitHub.
+[`.github/workflows/health.yml`](.github/workflows/health.yml) requests the main public routes every 30 minutes and fails if any of them is slow or returns an error. The import fails loudly when museot.fi suddenly returns far fewer exhibitions than the previous run, because that usually means the markup changed. Failed scheduled runs notify the repository owner through GitHub.
 
 Server errors are logged with context (route, tRPC procedure, D1 error code) to Workers Logs. Users see a Finnish error page, and one failing section no longer takes down the whole page.
+
+### Cost guardrails
+
+Cloudflare has no hard spending cap on the Workers paid plan, so `health.yml` also bounds the worst case: every 30 minutes, [`scripts/check-usage-budgets.mjs`](scripts/check-usage-budgets.mjs) reads today's usage (since 00:00 UTC) from the Cloudflare GraphQL Analytics API and compares it against a daily budget per metric, each a repository variable so it can be changed without a deploy:
+
+| Repository variable | Metric |
+|---|---|
+| `BUDGET_WORKER_REQUESTS` | Worker requests |
+| `BUDGET_WORKER_CPU_MS` | Worker CPU time (ms; requests × median CPU time per request — the Analytics API has no daily-total field) |
+| `BUDGET_D1_ROWS_READ` | D1 rows read |
+| `BUDGET_D1_ROWS_WRITTEN` | D1 rows written |
+| `BUDGET_KV_READS` | KV read operations |
+| `BUDGET_KV_WRITES` | KV write operations |
+| `BUDGET_R2_CLASS_A` | R2 Class A (write-like) operations |
+| `BUDGET_R2_CLASS_B` | R2 Class B (read-like) operations |
+
+The job summary shows usage vs. budget for every metric on every run. If any metric is over budget, the script writes a `maintenance` key to the `CACHE` KV namespace (reason plus an expiry at the next 00:00 UTC) and fails the run, which makes GitHub email the repository owner. [`src/middleware.ts`](src/middleware.ts) checks that key on every request — one KV read, cached in the isolate for 60 seconds so the check itself can't become the cost problem it's guarding against — and while it's set, every route (including `/api/auth/*` and the calendar feed) returns the Finnish maintenance page with HTTP 503 and `Retry-After`, without touching D1, R2 or any other binding. Static assets are served by Cloudflare directly and are unaffected. The flag expires on its own at the recorded time; for manual control (e.g. planned maintenance), run `pnpm exec tsx scripts/maintenance.ts on "<reason>"` or `... off` with `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` set.
+
+`wrangler.jsonc`'s `limits.cpu_ms` caps CPU time per request well above any real request, so one runaway invocation can't itself become a cost incident; see [issues/39-cost-guardrails.md](issues/39-cost-guardrails.md) for the baseline measurements behind both the budgets and this limit, and how they were derived.
 
 ## Data and privacy
 
