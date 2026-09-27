@@ -19,6 +19,7 @@ import { todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { siteUrl } from "~/app/_lib/site-url";
 
 const dateTimeFormat = new Intl.DateTimeFormat("fi-FI", {
   day: "numeric",
@@ -37,6 +38,14 @@ export async function generateMetadata({
   return {
     title: `${exhibition.titleFi} — ${exhibition.museum.name} — ${t.app.name}`,
     description: exhibition.descriptionFi?.slice(0, 200),
+    alternates: { canonical: `/exhibitions/${exhibition.slug}` },
+    openGraph: {
+      type: "article",
+      title: `${exhibition.titleFi} — ${exhibition.museum.name}`,
+      description: exhibition.descriptionFi?.slice(0, 200),
+      url: new URL(`/exhibitions/${exhibition.slug}`, siteUrl),
+      images: [exhibition.imageUrl ?? "/logo-512.png"],
+    },
   };
 }
 

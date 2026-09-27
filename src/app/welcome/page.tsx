@@ -4,6 +4,12 @@ import { WelcomeFlow } from "~/app/welcome/WelcomeFlow";
 import { hasCompletedOnboarding } from "~/app/welcome/onboarding-cookie";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { type Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Aloitus",
+  robots: { index: false, follow: false },
+};
 
 export default async function WelcomePage() {
   const session = await auth();

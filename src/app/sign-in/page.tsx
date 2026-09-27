@@ -4,6 +4,12 @@ import { redirect } from "next/navigation";
 import { env } from "~/env";
 import { t } from "~/i18n/fi";
 import { auth, signIn } from "~/server/auth";
+import { type Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Kirjaudu sisään",
+  robots: { index: false, follow: false },
+};
 
 export default async function SignInPage({
   searchParams,

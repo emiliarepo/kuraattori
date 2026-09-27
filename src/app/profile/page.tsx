@@ -4,6 +4,12 @@ import { redirect } from "next/navigation";
 import { ProfileForm } from "~/app/profile/ProfileForm";
 import { auth, signOut } from "~/server/auth";
 import { api } from "~/trpc/server";
+import { type Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Profiili",
+  robots: { index: false, follow: false },
+};
 
 export default async function ProfilePage() {
   const session = await auth();
