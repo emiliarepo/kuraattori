@@ -14,7 +14,7 @@ export default async function PrivacyPage() {
     <LegalPage
       lang={locale === "fi" ? undefined : "fi"}
       title={t.legal.privacyTitle}
-      kicker="Versio 3 · Päivitetty 27.9.2026"
+      kicker="Versio 4 · Päivitetty 27.9.2026"
     >
       <p>
         Tämä seloste kertoo, mitä henkilötietoja Kuraattori käsittelee ja miksi
@@ -48,6 +48,10 @@ export default async function PrivacyPage() {
           museopäivien suunnitelmat.
         </li>
         <li>Henkilökohtaisen kalenteriosoitteesi tunniste.</li>
+        <li>
+          Jos haet lähellä avoinna olevia museoita: noin 100 metriin pyöristetty
+          sijaintisi, vain sen yhden haun ajan.
+        </li>
         <li>
           Jos otat muistutukset käyttöön: laitteesi ilmoitustilauksen osoite ja
           salausavaimet sekä tieto siitä, mistä näyttelyistä ja minä päivänä
@@ -96,6 +100,16 @@ export default async function PrivacyPage() {
         Cloudflare ja Google ovat yhdysvaltalaisia yrityksiä. Tietoja voidaan
         siirtää Yhdysvaltoihin EU:n ja Yhdysvaltojen välisen tietosuojakehyksen
         (Data Privacy Framework) tai EU:n vakiosopimuslausekkeiden perusteella.
+      </p>
+
+      <h2>Sijainti</h2>
+      <p>
+        Avoinna nyt lähelläsi -sivu kysyy selaimesi sijaintia vain, kun pyydät
+        sitä napauttamalla. Selain pyöristää koordinaatit noin 100 metrin
+        tarkkuuteen ennen kuin ne lähetetään palvelimelle, ja niitä käytetään
+        vain lähellä olevien museoiden hakemiseen. Sijaintia ei tallenneta
+        tietokantaan, evästeisiin eikä lokeihin, eikä sitä liitetä tiliisi. Jos
+        et anna lupaa sijaintiin, voit valita kaupungin.
       </p>
 
       <h2>Karttatiedot</h2>

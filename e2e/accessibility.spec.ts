@@ -6,6 +6,7 @@ import { devSignIn, uniqueEmail } from "./dev-sign-in";
 const PAGES: { name: string; path: string; requiresAuth?: boolean }[] = [
   { name: "home", path: "/" },
   { name: "browse", path: "/exhibitions" },
+  { name: "nearby", path: "/nearby?city=Helsinki" },
   {
     name: "detail",
     path: "/exhibitions/oliver-beer-resonance-project-the-cave",

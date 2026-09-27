@@ -1,4 +1,5 @@
 import { daysBetween } from "./dates";
+import { NO_LEARNED_AFFINITY, type LearnedAffinity } from "./learned-affinity";
 
 const FIRST_CATEGORY_POINTS = 40;
 const ADDITIONAL_CATEGORY_POINTS = 15;
@@ -7,6 +8,15 @@ const REGION_POINTS = 20;
 const MUSEUM_POINTS = 15;
 const NEW_POINTS = 10;
 const NEW_WITHIN_DAYS = 14;
+/**
+ * Learned from 👍/👎: each part approaches its maximum as net ratings grow
+ * (`max * (1 - e^(-net / 3))`), and their sum is capped below a followed
+ * museum, so it reorders close candidates but never outweighs a manual choice.
+ */
+const LEARNED_CATEGORY_MAX = 8;
+const LEARNED_MUSEUM_MAX = 6;
+const LEARNED_CAP = 12;
+const LEARNED_SATURATION = 3;
 
 /** `1` = Kiinnostaa, `2` = Erityisesti. `-1` ("Ei kiinnosta") never scores; see `excludedCategoryIds`. */
 export type InterestWeight = 1 | 2;
@@ -20,7 +30,14 @@ export type RelevanceReason =
     }
   | { readonly type: "region"; readonly points: number }
   | { readonly type: "museum"; readonly points: number }
-  | { readonly type: "new"; readonly points: number };
+  | { readonly type: "new"; readonly points: number }
+  | {
+      readonly type: "learned";
+      /** Negative after 👎; such a reason lowers the score but is never shown. */
+      readonly points: number;
+      /** Whichever of the two contributed more. */
+      readonly basis: "category" | "museum";
+    };
 
 export interface RelevanceResult {
   readonly score: number;
@@ -42,6 +59,39 @@ export interface UserPreferences {
   readonly excludedCategoryIds: ReadonlySet<number>;
   readonly preferredRegions: ReadonlySet<string>;
   readonly followedMuseumIds: ReadonlySet<number>;
+  /** Only on the user's own pages; absent means no learned signal. */
+  readonly learnedAffinity?: LearnedAffinity;
+}
+
+function saturate(net: number, max: number): number {
+  return (
+    Math.sign(net) * max * (1 - Math.exp(-Math.abs(net) / LEARNED_SATURATION))
+  );
+}
+
+function learnedReason(
+  exhibition: RelevanceExhibition,
+  affinity: LearnedAffinity,
+): RelevanceReason | null {
+  const categoryNet = [...new Set(exhibition.categoryIds)].reduce(
+    (sum, categoryId) => sum + (affinity.categories.get(categoryId) ?? 0),
+    0,
+  );
+  const category = saturate(categoryNet, LEARNED_CATEGORY_MAX);
+  const museum = saturate(
+    affinity.museums.get(exhibition.museumId) ?? 0,
+    LEARNED_MUSEUM_MAX,
+  );
+  const points = Math.max(
+    -LEARNED_CAP,
+    Math.min(LEARNED_CAP, category + museum),
+  );
+  if (points === 0) return null;
+  return {
+    type: "learned",
+    points,
+    basis: Math.abs(museum) > Math.abs(category) ? "museum" : "category",
+  };
 }
 
 export function getRelevance(
@@ -91,6 +141,12 @@ export function getRelevance(
   ) {
     reasons.push({ type: "new", points: NEW_POINTS });
   }
+
+  const learned = learnedReason(
+    exhibition,
+    preferences.learnedAffinity ?? NO_LEARNED_AFFINITY,
+  );
+  if (learned !== null) reasons.push(learned);
 
   return {
     score: reasons.reduce((sum, reason) => sum + reason.points, 0),

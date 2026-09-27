@@ -22,6 +22,7 @@ const ctx = {
 } as unknown as Parameters<typeof createCaller>[0];
 
 afterEach(async () => {
+  await client.execute("delete from kuraattori_user_exhibition");
   await client.execute("delete from kuraattori_user_followed_museum");
   await client.execute("delete from kuraattori_user_interest");
   await client.execute("delete from kuraattori_exhibition_category");
@@ -95,5 +96,84 @@ describe("recommendation.forYou", () => {
     ]);
     expect(result[0]?.reasons).toContain("Seuraat: Kiasma");
     expect(result[0]!.score).toBeGreaterThan(result[1]!.score);
+  });
+
+  it("ranks an exhibition like the user's 👍 visits above an equal match, with a 'Pidit' reason", async () => {
+    await db.insert(schema.museums).values([
+      { id: 1, source: "test", sourceId: "m1", name: "Kiasma", slug: "kiasma" },
+      {
+        id: 2,
+        source: "test",
+        sourceId: "m2",
+        name: "Ateneum",
+        slug: "ateneum",
+      },
+    ]);
+    await db.insert(schema.categories).values([
+      {
+        id: 1,
+        source: "test",
+        sourceId: "c1",
+        name: "Nykytaide",
+        slug: "nykytaide",
+      },
+      {
+        id: 2,
+        source: "test",
+        sourceId: "c2",
+        name: "Valokuva",
+        slug: "valokuva",
+      },
+    ]);
+    const exhibition = (id: number, museumId: number) => ({
+      id,
+      source: "test",
+      sourceId: `e${id}`,
+      museumId,
+      slug: `e${id}`,
+      titleFi: `Exhibition ${id}`,
+      startDate: "2026-01-01",
+      endDate: "2026-12-01",
+      sourcePayloadHash: `${id}`,
+    });
+    await db
+      .insert(schema.exhibitions)
+      .values([
+        exhibition(1, 1),
+        exhibition(2, 1),
+        exhibition(3, 2),
+        exhibition(4, 2),
+      ]);
+    await db.insert(schema.exhibitionCategories).values([
+      { exhibitionId: 1, categoryId: 1 },
+      { exhibitionId: 2, categoryId: 1 },
+      { exhibitionId: 3, categoryId: 1 },
+      { exhibitionId: 4, categoryId: 2 },
+    ]);
+    await db.insert(schema.userInterests).values([
+      { userId, categoryId: 1, weight: 1 },
+      { userId, categoryId: 2, weight: 1 },
+    ]);
+    await db.insert(schema.userExhibitions).values([
+      {
+        userId,
+        exhibitionId: 1,
+        status: "visited",
+        visitedAt: new Date(),
+        rating: "up",
+      },
+      {
+        userId,
+        exhibitionId: 2,
+        status: "visited",
+        visitedAt: new Date(),
+        rating: "up",
+      },
+    ]);
+
+    const result = await createCaller(ctx).recommendation.forYou();
+    expect(result.map((item) => item.exhibition.slug)).toEqual(["e3", "e4"]);
+    expect(result[0]?.reasons).toContain("Pidit samankaltaisista");
+    expect(result[1]?.reasons).not.toContain("Pidit samankaltaisista");
   });
 });
