@@ -1,21 +1,43 @@
-import { asc, eq, inArray, or, sql } from "drizzle-orm";
+import { asc, count, eq, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { todayInHelsinki } from "~/domain/dates";
-import { getRelevance } from "~/domain/relevance";
+import { getRelevance, type RelevanceReason } from "~/domain/relevance";
 import { getSinulleScore, isSinulleEligible } from "~/domain/ranking";
 import { getUrgency } from "~/domain/urgency";
+import { t } from "~/i18n/fi";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
   categories,
   exhibitionCategories,
   exhibitions,
+  importRuns,
   museums,
   userExhibitions,
   userFollowedMuseums,
   userInterests,
   userRegions,
 } from "~/server/db/schema";
+
+function reasonLabel(
+  reason: RelevanceReason,
+  context: {
+    categoryNameById: ReadonlyMap<number, string>;
+    region: string | null;
+    museumName: string;
+  },
+): string | null {
+  switch (reason.type) {
+    case "category":
+      return context.categoryNameById.get(reason.categoryId) ?? null;
+    case "region":
+      return context.region;
+    case "museum":
+      return context.museumName;
+    case "new":
+      return t.pages.home.whyNew;
+  }
+}
 
 export const recommendationRouter = createTRPCRouter({
   forYou: protectedProcedure
@@ -26,60 +48,69 @@ export const recommendationRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const [interests, regions, followed, states, rows] = await Promise.all([
-        ctx.db
-          .select({ id: userInterests.categoryId })
-          .from(userInterests)
-          .where(eq(userInterests.userId, userId)),
-        ctx.db
-          .select({ region: userRegions.region })
-          .from(userRegions)
-          .where(eq(userRegions.userId, userId)),
-        ctx.db
-          .select({ id: userFollowedMuseums.museumId })
-          .from(userFollowedMuseums)
-          .where(eq(userFollowedMuseums.userId, userId)),
-        ctx.db
-          .select({
-            id: userExhibitions.exhibitionId,
-            status: userExhibitions.status,
-          })
-          .from(userExhibitions)
-          .where(eq(userExhibitions.userId, userId)),
-        ctx.db
-          .select({ exhibition: exhibitions, museum: museums })
-          .from(exhibitions)
-          .innerJoin(museums, eq(exhibitions.museumId, museums.id))
-          .where(
-            or(
-              sql`${exhibitions.endDate} is null`,
-              sql`${exhibitions.endDate} >= ${todayInHelsinki()}`,
-            ),
-          )
-          .orderBy(asc(exhibitions.startDate))
-          .limit(500),
-      ]);
+      const [interests, regions, followed, states, rows, importRunCount] =
+        await Promise.all([
+          ctx.db
+            .select({ id: userInterests.categoryId })
+            .from(userInterests)
+            .where(eq(userInterests.userId, userId)),
+          ctx.db
+            .select({ region: userRegions.region })
+            .from(userRegions)
+            .where(eq(userRegions.userId, userId)),
+          ctx.db
+            .select({ id: userFollowedMuseums.museumId })
+            .from(userFollowedMuseums)
+            .where(eq(userFollowedMuseums.userId, userId)),
+          ctx.db
+            .select({
+              id: userExhibitions.exhibitionId,
+              status: userExhibitions.status,
+            })
+            .from(userExhibitions)
+            .where(eq(userExhibitions.userId, userId)),
+          ctx.db
+            .select({ exhibition: exhibitions, museum: museums })
+            .from(exhibitions)
+            .innerJoin(museums, eq(exhibitions.museumId, museums.id))
+            .where(
+              or(
+                sql`${exhibitions.endDate} is null`,
+                sql`${exhibitions.endDate} >= ${todayInHelsinki()}`,
+              ),
+            )
+            .orderBy(asc(exhibitions.startDate))
+            .limit(500),
+          ctx.db
+            .select({ count: count() })
+            .from(importRuns)
+            .where(eq(importRuns.status, "succeeded")),
+        ]);
       const categoryRows: { exhibitionId: number; categoryId: number }[] = [];
+      const categoryNameById = new Map<number, string>();
       for (let offset = 0; offset < rows.length; offset += 90) {
         const batch = rows.slice(offset, offset + 90);
-        categoryRows.push(
-          ...(await ctx.db
-            .select({
-              exhibitionId: exhibitionCategories.exhibitionId,
-              categoryId: exhibitionCategories.categoryId,
-            })
-            .from(exhibitionCategories)
-            .innerJoin(
-              categories,
-              eq(categories.id, exhibitionCategories.categoryId),
-            )
-            .where(
-              inArray(
-                exhibitionCategories.exhibitionId,
-                batch.map((row) => row.exhibition.id),
-              ),
-            )),
-        );
+        const batchRows = await ctx.db
+          .select({
+            exhibitionId: exhibitionCategories.exhibitionId,
+            categoryId: exhibitionCategories.categoryId,
+            name: categories.name,
+          })
+          .from(exhibitionCategories)
+          .innerJoin(
+            categories,
+            eq(categories.id, exhibitionCategories.categoryId),
+          )
+          .where(
+            inArray(
+              exhibitionCategories.exhibitionId,
+              batch.map((row) => row.exhibition.id),
+            ),
+          );
+        for (const row of batchRows) {
+          categoryRows.push(row);
+          categoryNameById.set(row.categoryId, row.name);
+        }
       }
       const preferences = {
         interestCategoryIds: new Set(interests.map((x) => x.id)),
@@ -87,6 +118,7 @@ export const recommendationRouter = createTRPCRouter({
         followedMuseumIds: new Set(followed.map((x) => x.id)),
       };
       const today = todayInHelsinki();
+      const hasMultipleImports = (importRunCount[0]?.count ?? 0) > 1;
       return rows
         .flatMap(({ exhibition, museum }) => {
           const relevance = getRelevance(
@@ -96,7 +128,9 @@ export const recommendationRouter = createTRPCRouter({
                 .map((x) => x.categoryId),
               region: museum.region,
               museumId: museum.id,
-              firstSeenAt: exhibition.createdAt.toISOString().slice(0, 10),
+              firstSeenAt: hasMultipleImports
+                ? exhibition.createdAt.toISOString().slice(0, 10)
+                : null,
             },
             preferences,
             today,
@@ -112,11 +146,21 @@ export const recommendationRouter = createTRPCRouter({
           )
             return [];
           const urgency = getUrgency(exhibition, today);
+          const reasons = relevance.reasons
+            .map((reason) =>
+              reasonLabel(reason, {
+                categoryNameById,
+                region: museum.region,
+                museumName: museum.name,
+              }),
+            )
+            .filter((label): label is string => label !== null);
           return [
             {
               exhibition,
               museum,
               relevance,
+              reasons,
               urgency,
               score: getSinulleScore({ relevance, urgency }),
             },

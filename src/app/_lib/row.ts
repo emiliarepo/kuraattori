@@ -18,6 +18,7 @@ export interface ExhibitionRowView {
   categories: Category[];
   timeBar: TimeBarProps;
   status: ExhibitionStatus | null;
+  whyLabel: string | null;
 }
 
 /** No hrefs: ExhibitionRow's whole row is already a link, and links can't nest. */
@@ -41,6 +42,7 @@ export function toRowView(
     categories: categoryLabels(item.categories),
     timeBar: timeBarProps(item, today),
     status: item.status,
+    whyLabel: null,
   };
 }
 
@@ -59,5 +61,6 @@ export function forYouToRowView(
     categories: [],
     timeBar: timeBarProps(item.exhibition, today),
     status: null,
+    whyLabel: item.reasons.length > 0 ? item.reasons.join(" · ") : null,
   };
 }

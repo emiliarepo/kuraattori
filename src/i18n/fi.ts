@@ -71,6 +71,7 @@ export const t = {
       forYou: "Sinulle",
       new: "Uudet näyttelyt",
       upcoming: "Tulossa",
+      whyNew: "Uusi",
     },
     browse: {
       title: "Selaa",
