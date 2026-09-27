@@ -26,6 +26,12 @@ export function RegionSelector({
   const [open, setOpen] = useState(false);
   useBackToClose(open, () => setOpen(false));
   const [selected, setSelected] = useState<readonly string[]>(initialSelected);
+  const initialKey = initialSelected.join(",");
+  const [syncedKey, setSyncedKey] = useState(initialKey);
+  if (syncedKey !== initialKey) {
+    setSyncedKey(initialKey);
+    setSelected(initialSelected);
+  }
   const panelId = useId();
   const groups = groupRegions(allRegions);
   const router = useRouter();
@@ -83,7 +89,7 @@ export function RegionSelector({
             onKeyDown={(event) => {
               if (event.key === "Escape") setOpen(false);
             }}
-            className="border-rule bg-bg fixed inset-x-0 bottom-0 z-20 flex max-h-[85dvh] flex-col border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:absolute sm:top-full sm:right-0 sm:left-auto sm:bottom-auto sm:mt-2 sm:max-h-[70vh] sm:w-64 sm:border sm:pb-4"
+            className="border-rule bg-bg fixed inset-x-0 bottom-0 z-20 flex max-h-[85dvh] flex-col border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:absolute sm:top-full sm:right-0 sm:bottom-auto sm:left-auto sm:mt-2 sm:max-h-[70vh] sm:w-64 sm:border sm:pb-4"
           >
             <p className="text-headline mb-3 text-xl">
               {t.ui.region.sheetTitle}

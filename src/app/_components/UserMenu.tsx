@@ -43,6 +43,7 @@ export function UserMenu({
           >
             <Link
               href="/profile"
+              onClick={() => setOpen(false)}
               className="hover:text-signal block py-1 text-sm font-semibold"
             >
               {t.ui.nav.profile}

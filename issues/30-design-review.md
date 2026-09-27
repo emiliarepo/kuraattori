@@ -20,5 +20,6 @@ Deliverables: fixes committed per area, before/after screenshots for anything vi
 | Screen | Issue | Fix | Commit |
 |---|---|---|---|
 | Masthead (desktop) | Region popover jumped horizontally as the label changed: base `inset-x-0` kept `left:0` at `sm`, so the panel hung off the trigger's left edge and overflowed the masthead by 140 px | `sm:left-auto`; trigger capped at `max-w-56` with a truncated label; date line no longer wraps | region |
-| Masthead | First region toggle closed the popover (the `RegionSelector` key included the active regions, so `router.refresh()` remounted it) | Key by user only; E2E `region-selector.spec.ts` | region |
+| Masthead | First region toggle closed the popover (the `RegionSelector` key included the active regions, so `router.refresh()` remounted it) | Key by user only and adopt new server regions without remounting; E2E `region-selector.spec.ts` | region |
 | Masthead (390 px) | Date wrapped onto two lines next to a long region label | Date `whitespace-nowrap`, selector shrinks | region |
+| Masthead (desktop, signed in) | After UserMenu → Profiili the menu stayed open; its full-screen overlay swallowed the next click anywhere | Close the menu on link click; E2E `user-menu.spec.ts` | behaviour |

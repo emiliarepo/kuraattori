@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { devSignIn, uniqueEmail } from "./dev-sign-in";
 import { t } from "../src/i18n/fi";
 
 test("region popover stays open and anchored while toggling regions", async ({
@@ -20,4 +21,21 @@ test("region popover stays open and anchored while toggling regions", async ({
   }
 
   assertPageClean();
+});
+
+test("masthead region label follows a change on the profile page", async ({
+  page,
+}) => {
+  await devSignIn(page, uniqueEmail("region-sync"));
+  await page.goto("/profile/regions");
+  const main = page.getByRole("main");
+  const name = (await main
+    .getByRole("checkbox", { checked: false })
+    .first()
+    .locator("xpath=..")
+    .textContent())!.trim();
+  await main.getByRole("checkbox", { name }).click();
+  await expect(
+    page.locator("header").getByRole("button", { name: new RegExp(name) }),
+  ).toBeVisible();
 });
