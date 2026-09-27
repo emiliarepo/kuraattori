@@ -63,7 +63,7 @@ export function Stamp({ id, label, city, year, ink, postmark }: StampProps) {
             <circle key={`r${y}`} cx={STAMP_WIDTH} cy={y} r={HOLE_RADIUS} />,
           ])}
         </mask>
-        <path id={arcId} d="M -16.5 0 A 16.5 16.5 0 0 1 16.5 0" fill="none" />
+        <path id={arcId} d="M -14.8 0 A 14.8 14.8 0 0 1 14.8 0" fill="none" />
       </defs>
 
       <rect
@@ -146,9 +146,9 @@ export function Stamp({ id, label, city, year, ink, postmark }: StampProps) {
         <circle r={12.5} strokeWidth={0.6} />
         <text
           className="font-sans"
-          fontSize={5}
+          fontSize={4.4}
           fontWeight={600}
-          letterSpacing={1.1}
+          letterSpacing={1}
           {...postmarkInk}
         >
           <textPath href={`#${arcId}`} startOffset="50%" textAnchor="middle">
