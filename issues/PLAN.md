@@ -26,5 +26,6 @@ Commits use the repo-local identity emilia@repo.codes; rebase agent branches if 
 
 1. 30 design verification (Opus low) — now, before new features.
 2. Then in parallel where files allow: 35 Museopassi (Opus low), 36 day planner (Opus low), 22 en/sv (Opus low); 34 Sunday edition (Sonnet, low priority) last.
+2b. 38 image archive to R2 (Sonnet); needs user-approved R2 bucket and token permission.
 3. 37 final verification (Opus low) after everything.
 4. Public release: fixtures stay as they are (user decision, 27.9.2026); no history rewrite. MIT licence added.
