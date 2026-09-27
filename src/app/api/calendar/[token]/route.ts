@@ -11,7 +11,6 @@ import {
 } from "~/server/db/schema";
 import { siteUrl } from "~/app/_lib/site-url";
 
-
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ token: string }> },
