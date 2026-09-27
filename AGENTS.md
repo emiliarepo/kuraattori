@@ -10,7 +10,7 @@ the README covers setup and scripts. Read `docs/design.md` before any UI work.
   in Finnish, from `src/i18n/fi.ts`. Slugs come from Finnish titles (they're data).
 - **Design:** "Aikakauslehti" per `docs/design.md`: tokens only (no raw colours), the spacing
   steps and `btn` utilities it defines, existing components (`Section`, `Rail`, `ExhibitionCard`,
-  `ExhibitionRow`). Rails keep the card line budget: every card in a rail has equal height and
+  `ExhibitionRow`). Rails keep cards aligned: every card in a rail has equal height and
   equal title/TimeBar positions.
 - **Domain logic** stays pure in `src/domain/` with explicit `today` (Europe/Helsinki).
   Urgency breaks ties; it never outranks relevance.

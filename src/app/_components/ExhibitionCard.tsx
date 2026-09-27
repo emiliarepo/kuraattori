@@ -7,8 +7,8 @@ import { TimeBar } from "~/app/_components/TimeBar";
 import { type ExhibitionRowView } from "~/app/_lib/row";
 
 /**
- * Fixed line budget so every card in a rail lines up: kicker (or lead) 1 line, title 2,
- * byline 1, categories 1, then the time block pinned to the bottom. The
+ * Text takes its natural height and the slack collects above the time block,
+ * which is pinned to the bottom so it lines up across a rail. The
  * status heart sits over the image as a sibling of the link, not nested
  * inside it.
  */
@@ -41,7 +41,7 @@ export function ExhibitionCard({
         )}
         <p
           title={item.title}
-          className="line-clamp-2 min-h-[2lh] text-base leading-tight font-medium group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4 sm:text-lg sm:leading-tight"
+          className="line-clamp-2 text-base leading-tight font-medium group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4 sm:text-lg sm:leading-tight"
         >
           {item.title}
         </p>
