@@ -16,12 +16,13 @@ import {
   visitYear,
   type StampedMuseum,
 } from "~/domain/passport";
+import { INTL_LOCALE } from "~/i18n/locales";
 import { getI18n } from "~/i18n/server";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
 export default async function MyPassportPage() {
-  const { t } = await getI18n();
+  const { t, locale } = await getI18n();
   const copy = t.pages.my.passport;
   const session = await auth();
   if (!session?.user) return <SignInPrompt message={t.pages.signIn.my} />;
@@ -30,7 +31,13 @@ export default async function MyPassportPage() {
     api.museum.list(),
     api.my.stamps(),
   ]);
-  const passport = buildPassport(museums, stamps, copy.otherRegion);
+  const passport = buildPassport(
+    museums,
+    stamps,
+    copy.otherRegion,
+    t.regionName,
+    INTL_LOCALE[locale],
+  );
   const stampedRegions = passport.regions.filter((r) => r.stamped.length);
 
   return (

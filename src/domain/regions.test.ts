@@ -45,3 +45,16 @@ describe("groupRegions", () => {
     });
   });
 });
+
+describe("groupRegions display order", () => {
+  it("sorts the other regions by their shown name in that language", async () => {
+    const { i18nFor } = await import("~/i18n");
+    const { t } = i18nFor("sv");
+    const { others } = groupRegions(
+      ["Uusimaa", "Ahvenanmaa", "Lappi"],
+      t.regionName,
+      "sv-FI",
+    );
+    expect(others.map(t.regionName)).toEqual(["Lappland", "Nyland", "Åland"]);
+  });
+});

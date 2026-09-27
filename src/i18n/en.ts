@@ -1,8 +1,8 @@
+import { REGION_NAMES } from "./region-names";
 import type { Messages } from "./fi";
 
 export const t = {
-  regionName: (region: string): string =>
-    region === "Pääkaupunkiseutu" ? "Helsinki region" : region,
+  regionName: (region: string): string => REGION_NAMES.en[region] ?? region,
   app: {
     name: "Kuraattori",
   },

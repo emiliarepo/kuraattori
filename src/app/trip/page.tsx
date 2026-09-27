@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import { INTL_LOCALE } from "~/i18n/locales";
 
 import { EmptyState } from "~/app/_components/EmptyState";
 import {
@@ -41,7 +42,11 @@ export default async function TripPage({
     auth(),
   ]);
   const signedIn = Boolean(session?.user);
-  const { cities: cityRegions, others: otherRegions } = groupRegions(regions);
+  const { cities: cityRegions, others: otherRegions } = groupRegions(
+    regions,
+    t.regionName,
+    INTL_LOCALE[locale],
+  );
   const freeCities = [
     ...new Set(
       museums

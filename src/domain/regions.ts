@@ -25,18 +25,24 @@ export function resolveRegion(
 }
 
 const CITY_REGIONS = ["Pääkaupunkiseutu", "Tampere", "Turku"] as const;
-const collator = new Intl.Collator("fi-FI");
-
-/** Splits regions for display: the city regions in fixed order, then the rest alphabetically. */
-export function groupRegions(regions: readonly string[]): {
+/**
+ * Splits regions for display: the city regions in fixed order, then the rest
+ * alphabetically by the name they're shown under.
+ */
+export function groupRegions(
+  regions: readonly string[],
+  displayName: (region: string) => string = (region) => region,
+  intlLocale = "fi-FI",
+): {
   cities: string[];
   others: string[];
 } {
   const present = new Set(regions);
+  const collator = new Intl.Collator(intlLocale);
   return {
     cities: CITY_REGIONS.filter((region) => present.has(region)),
     others: regions
       .filter((region) => !(CITY_REGIONS as readonly string[]).includes(region))
-      .sort(collator.compare),
+      .sort((a, b) => collator.compare(displayName(a), displayName(b))),
   };
 }

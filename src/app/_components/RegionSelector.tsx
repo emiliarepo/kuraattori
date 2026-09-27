@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { INTL_LOCALE } from "~/i18n/locales";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { usePendingNavigation } from "~/app/_components/PendingNavigation";
@@ -24,7 +25,7 @@ export function RegionSelector({
   initialSelected: readonly string[];
   isSignedIn: boolean;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [open, setOpen] = useState(false);
   useBackToClose(open, () => setOpen(false));
   const [selected, setSelected] = useState<readonly string[]>(initialSelected);
@@ -44,7 +45,7 @@ export function RegionSelector({
     document.addEventListener("pointerdown", closeOnOutside);
     return () => document.removeEventListener("pointerdown", closeOnOutside);
   }, [open]);
-  const groups = groupRegions(allRegions);
+  const groups = groupRegions(allRegions, t.regionName, INTL_LOCALE[locale]);
   const router = useRouter();
   const updateRegions = api.profile.updateRegions.useMutation();
   const { pending, start } = usePendingNavigation();

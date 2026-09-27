@@ -1,4 +1,5 @@
 import { groupRegions } from "~/domain/regions";
+import { INTL_LOCALE } from "~/i18n/locales";
 import { useI18n } from "~/i18n/client";
 
 export function RegionsList({
@@ -10,8 +11,12 @@ export function RegionsList({
   regions: readonly string[];
   onChange: (region: string) => void;
 }) {
-  const { t } = useI18n();
-  const regionGroups = groupRegions(allRegions);
+  const { t, locale } = useI18n();
+  const regionGroups = groupRegions(
+    allRegions,
+    t.regionName,
+    INTL_LOCALE[locale],
+  );
 
   return (
     <>

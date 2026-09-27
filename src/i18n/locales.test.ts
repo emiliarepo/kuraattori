@@ -47,6 +47,8 @@ describe("regionName", () => {
     expect(i18nFor("sv").t.regionName("Pääkaupunkiseutu")).toBe(
       "Huvudstadsregionen",
     );
-    expect(i18nFor("en").t.regionName("Lappi")).toBe("Lappi");
+    expect(i18nFor("en").t.regionName("Kainuu")).toBe("Kainuu");
+    expect(i18nFor("en").t.regionName("Lappi")).toBe("Lapland");
+    expect(i18nFor("sv").t.regionName("Turku")).toBe("Åbo");
   });
 });

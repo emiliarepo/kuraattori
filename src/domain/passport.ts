@@ -339,6 +339,8 @@ export function buildPassport(
   museums: readonly PassportMuseum[],
   firstVisits: ReadonlyMap<number, Date>,
   otherRegion: string,
+  displayName: (region: string) => string = (region) => region,
+  intlLocale = "fi-FI",
 ): Passport {
   const byRegion = new Map<string, PassportRegion>();
   for (const museum of museums) {
@@ -355,7 +357,11 @@ export function buildPassport(
     if (firstVisitedAt) entry.stamped.push({ ...museum, firstVisitedAt });
     else entry.unstamped.push(museum);
   }
-  const { cities, others } = groupRegions([...byRegion.keys()]);
+  const { cities, others } = groupRegions(
+    [...byRegion.keys()],
+    displayName,
+    intlLocale,
+  );
   const regions = [...cities, ...others].map((region) => {
     const entry = byRegion.get(region)!;
     entry.stamped.sort(

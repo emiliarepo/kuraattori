@@ -14,6 +14,7 @@ import {
   visitYear,
   type StampedMuseum,
 } from "~/domain/passport";
+import { INTL_LOCALE } from "~/i18n/locales";
 import { getI18n } from "~/i18n/server";
 import { INTER_600_GLYPHS } from "./ring-glyphs";
 import { siteUrl } from "~/app/_lib/site-url";
@@ -217,7 +218,7 @@ function ShareStamp({
 }
 
 export async function GET(request: Request) {
-  const { t } = await getI18n();
+  const { t, locale } = await getI18n();
   const session = await auth();
   if (!session?.user) return new Response(null, { status: 401 });
 
@@ -228,7 +229,13 @@ export async function GET(request: Request) {
     loadFont("/fonts/newsreader-italic-500.ttf", request),
     loadFont("/fonts/inter-600.ttf", request),
   ]);
-  const passport = buildPassport(museums, stamps, copy.otherRegion);
+  const passport = buildPassport(
+    museums,
+    stamps,
+    copy.otherRegion,
+    t.regionName,
+    INTL_LOCALE[locale],
+  );
   const stamped = passport.regions
     .flatMap((region) => region.stamped)
     .slice(0, MAX_STAMPS);
