@@ -1,9 +1,10 @@
 import "~/styles/globals.css";
 
-import { type Metadata } from "next";
+import { type Metadata, type Viewport } from "next";
 import { Inter, Newsreader } from "next/font/google";
 
 import { AppShell } from "~/app/_components/AppShell";
+import { ServiceWorkerRegistration } from "~/app/_components/ServiceWorkerRegistration";
 import { t } from "~/i18n/fi";
 import { TRPCReactProvider } from "~/trpc/react";
 import { siteUrl } from "~/app/_lib/site-url";
@@ -18,6 +19,21 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-touch-icon.png",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: t.app.name,
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f1e7" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1612" },
+  ],
 };
 
 const newsreader = Newsreader({
@@ -39,6 +55,7 @@ export default function RootLayout({
     <html lang="fi" className={`${newsreader.variable} ${inter.variable}`}>
       <body className="bg-bg text-fg">
         <TRPCReactProvider>
+          <ServiceWorkerRegistration />
           <AppShell>{children}</AppShell>
         </TRPCReactProvider>
       </body>
