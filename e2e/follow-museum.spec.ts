@@ -17,7 +17,17 @@ test("follow a museum from its page, then see it on the home rail", async ({
   const follow = page.getByRole("button", {
     name: "Seuraa: Nykytaiteen museo Kiasma",
   });
-  await follow.click();
+  // The button already flips optimistically on click, before the mutation's
+  // response lands — wait for the response itself, not just the optimistic
+  // UI, or the follow can still be in flight when we navigate away.
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.url().includes("museum.follow") &&
+        response.request().method() === "POST",
+    ),
+    follow.click(),
+  ]);
   await expect(
     page.getByRole("button", {
       name: "Lopeta seuraaminen: Nykytaiteen museo Kiasma",
