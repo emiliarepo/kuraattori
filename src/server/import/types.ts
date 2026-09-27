@@ -1,3 +1,5 @@
+import type { OpeningHours } from "~/domain/opening-hours";
+
 export interface NormalizedCategory {
   sourceId: string;
   name: string;
@@ -16,6 +18,13 @@ export interface MuseumLocation {
   address: string;
   latitude?: number;
   longitude?: number;
+}
+
+export interface MuseumPage {
+  location: MuseumLocation | undefined;
+  /** Undefined when the hours block is missing or unparseable. */
+  openingHours: OpeningHours | undefined;
+  freeDays: string[];
 }
 
 export interface NormalizedExhibition {
@@ -72,8 +81,8 @@ export interface ExhibitionSourceAdapter {
     knownHashes: ReadonlyMap<string, string>,
   ) => Promise<FetchExhibitionsResult>;
   fetchMuseums?: () => Promise<NormalizedMuseum[]>;
-  fetchMuseumLocation?: (
+  fetchMuseumPage?: (
     sourceId: string,
     city: string | null | undefined,
-  ) => Promise<MuseumLocation | undefined>;
+  ) => Promise<MuseumPage>;
 }

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { drizzle } from "drizzle-orm/d1";
@@ -13,7 +13,11 @@ import {
   type RawListingItem,
 } from "~/server/import/museot-fi/parse-listing";
 import { normalizeExhibition } from "~/server/import/museot-fi/normalize";
-import { parseMuseumPage } from "~/server/import/museot-fi/parse-museum";
+import {
+  parseFreeDays,
+  parseMuseumPage,
+  parseOpeningHours,
+} from "~/server/import/museot-fi/parse-museum";
 import { archiveImages } from "~/server/import/image-archive";
 import { runImport } from "~/server/import/run-import";
 import type {
@@ -56,7 +60,7 @@ const CURATED_SOURCE_IDS = [
   "41877", // current, ends today, Savonlinna
 ] as const;
 
-/** Kiasma's location comes from its fixture page; this second Helsinki museum gives the day planner a walking leg. */
+/** Museums with a `museum-<id>.html` fixture get their location and hours from it; this second Helsinki museum gives the day planner a walking leg. */
 const EXTRA_LOCATIONS: Record<string, MuseumLocation> = {
   "LUOMUS Kaisaniemen kasvitieteellinen puutarha": {
     address: "Kaisaniemenranta 2, 00170 Helsinki",
@@ -206,13 +210,24 @@ async function main() {
     name: "museot.fi",
     fetchExhibitions: () =>
       Promise.resolve({ categories, changed, unchanged: [], failedCount: 0 }),
-    fetchMuseumLocation: async (sourceId) => {
-      if (sourceId === "21118")
-        return parseMuseumPage(readFixture("museum-21118.html"));
+    fetchMuseumPage: async (sourceId) => {
+      const fixture = `museum-${sourceId}.html`;
+      if (existsSync(join(FIXTURES_DIR, fixture))) {
+        const html = readFixture(fixture);
+        return {
+          location: parseMuseumPage(html),
+          openingHours: parseOpeningHours(html),
+          freeDays: parseFreeDays(html),
+        };
+      }
       const name = [...museumSourceIdByName].find(
         ([, id]) => id === sourceId,
       )?.[0];
-      return name ? EXTRA_LOCATIONS[name] : undefined;
+      return {
+        location: name ? EXTRA_LOCATIONS[name] : undefined,
+        openingHours: undefined,
+        freeDays: [],
+      };
     },
   };
 

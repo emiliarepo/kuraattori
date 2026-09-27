@@ -22,7 +22,10 @@ test("plan a museum day from the trip tab and save it", async ({
   await page.getByRole("button", { name: t.pages.trip.planDaySubmit }).click();
   await page.waitForURL(/\/trip\/day\?.*city=Helsinki/);
 
-  const boxes = page.getByRole("checkbox");
+  const boxes = page
+    .getByRole("listitem")
+    .filter({ hasNotText: t.pages.day.closedOn })
+    .getByRole("checkbox");
   await boxes.nth(0).check();
   await boxes.nth(1).check();
   await page.getByRole("button", { name: t.pages.day.plan }).click();

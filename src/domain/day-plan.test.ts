@@ -4,6 +4,7 @@ import {
   addMinutes,
   haversineKm,
   orderStops,
+  scheduleVisits,
   walkingMinutes,
 } from "~/domain/day-plan";
 
@@ -64,5 +65,49 @@ describe("leg maths", () => {
   it("adds visit times across the hour", () => {
     expect(addMinutes("11:00", 90)).toBe("12:30");
     expect(addMinutes("23:30", 90)).toBe("01:00");
+  });
+});
+
+describe("scheduleVisits", () => {
+  const hours = (open: string, close: string) => ({ open, close });
+
+  it("waits for a museum to open", () => {
+    expect(scheduleVisits([hours("12:00", "18:00")], "11:00", 90)).toEqual([
+      { kind: "visit", start: "12:00", end: "13:30", cutShort: false },
+    ]);
+  });
+
+  it("ends a visit at closing time and flags the museums it can't reach", () => {
+    expect(
+      scheduleVisits(
+        [
+          hours("10:00", "18:00"),
+          hours("10:00", "12:00"),
+          hours("10:00", "12:00"),
+        ],
+        "10:30",
+        90,
+      ),
+    ).toEqual([
+      { kind: "visit", start: "10:30", end: "12:00", cutShort: false },
+      { kind: "tooLate", close: "12:00" },
+      { kind: "tooLate", close: "12:00" },
+    ]);
+  });
+
+  it("skips closed museums and leaves unknown hours unconstrained", () => {
+    expect(
+      scheduleVisits([null, undefined, hours("10:00", "12:15")], "11:00", 90),
+    ).toEqual([
+      { kind: "closed" },
+      { kind: "visit", start: "11:00", end: "12:30", cutShort: false },
+      { kind: "tooLate", close: "12:15" },
+    ]);
+  });
+
+  it("marks a visit cut short by closing time", () => {
+    expect(scheduleVisits([hours("10:00", "12:00")], "11:00", 90)).toEqual([
+      { kind: "visit", start: "11:00", end: "12:00", cutShort: true },
+    ]);
   });
 });

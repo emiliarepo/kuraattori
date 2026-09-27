@@ -1,5 +1,6 @@
 import { eq, inArray } from "drizzle-orm";
 
+import type { OpeningHours } from "~/domain/opening-hours";
 import { type Db } from "~/server/db";
 import {
   categories,
@@ -15,6 +16,7 @@ import type {
   NormalizedExhibition,
   NormalizedMuseum,
   MuseumLocation,
+  MuseumPage,
 } from "./types";
 
 export interface ExistingRow {
@@ -22,6 +24,12 @@ export interface ExistingRow {
   slug: string;
   address?: string | null;
   city?: string | null;
+}
+
+export interface ExistingMuseumRow extends ExistingRow {
+  name: string;
+  openingHours: OpeningHours | null;
+  freeDays: string[] | null;
 }
 
 export interface ExistingExhibitionRow extends ExistingRow {
@@ -35,23 +43,21 @@ export interface ExistingExhibitionRow extends ExistingRow {
 export async function loadExistingMuseums(
   db: Db,
   source: string,
-): Promise<Map<string, ExistingRow>> {
+): Promise<Map<string, ExistingMuseumRow>> {
   const rows = await db
     .select({
       sourceId: museums.sourceId,
       id: museums.id,
       slug: museums.slug,
+      name: museums.name,
       address: museums.address,
       city: museums.city,
+      openingHours: museums.openingHours,
+      freeDays: museums.freeDays,
     })
     .from(museums)
     .where(eq(museums.source, source));
-  return new Map(
-    rows.map((row) => [
-      row.sourceId,
-      { id: row.id, slug: row.slug, address: row.address, city: row.city },
-    ]),
-  );
+  return new Map(rows.map(({ sourceId, ...row }) => [sourceId, row]));
 }
 
 export async function updateMuseumLocation(
@@ -341,4 +347,25 @@ export async function syncExhibitionCategories(
   for (const rowChunk of chunk(rows, 40)) {
     await db.insert(exhibitionCategories).values(rowChunk);
   }
+}
+
+/**
+ * Writes the hours and free days when they differ from the stored ones.
+ * Unparseable hours (`undefined`) keep the previous value.
+ */
+export async function updateMuseumSchedule(
+  db: Db,
+  existing: ExistingMuseumRow,
+  page: Pick<MuseumPage, "openingHours" | "freeDays">,
+): Promise<void> {
+  const openingHours = page.openingHours ?? existing.openingHours;
+  if (
+    JSON.stringify(openingHours) === JSON.stringify(existing.openingHours) &&
+    JSON.stringify(page.freeDays) === JSON.stringify(existing.freeDays ?? [])
+  )
+    return;
+  await db
+    .update(museums)
+    .set({ openingHours, freeDays: page.freeDays })
+    .where(eq(museums.id, existing.id));
 }

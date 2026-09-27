@@ -21,6 +21,7 @@ import {
   upsertExhibition,
   upsertMuseum,
   updateMuseumLocation,
+  updateMuseumSchedule,
 } from "./upsert";
 
 export interface ImportRunStats {
@@ -36,6 +37,8 @@ export interface ImportRunStats {
   groupedExamples: string[];
   /** Titles classified as `kind = "notice"`, for reviewing false positives. */
   noticeTitles: string[];
+  /** Museums whose opening hours were missing or unparseable; their previous hours are kept. */
+  hoursUnparsed: string[];
 }
 
 async function reportGroupingAndNotices(
@@ -170,6 +173,7 @@ export async function runImport(
       errorMessage,
       groupedExamples: [],
       noticeTitles: [],
+      hoursUnparsed: [],
     };
   }
 }
@@ -256,19 +260,26 @@ async function performImport(
   }
 
   let museumFailures = 0;
-  if (adapter.fetchMuseumLocation) {
+  const hoursUnparsed: string[] = [];
+  if (adapter.fetchMuseumPage) {
     const changedMuseumIds = new Set(
       result.changed.map((item) => item.museum.sourceId),
     );
     for (const [sourceId, museum] of existingMuseums) {
-      if (museum.address && !changedMuseumIds.has(sourceId)) continue;
       try {
-        const location = await adapter.fetchMuseumLocation(
-          sourceId,
-          museum.city,
-        );
-        if (location)
-          await updateMuseumLocation(db, museum.id, location, museum.address);
+        const page = await adapter.fetchMuseumPage(sourceId, museum.city);
+        if (
+          page.location &&
+          (!museum.address || changedMuseumIds.has(sourceId))
+        )
+          await updateMuseumLocation(
+            db,
+            museum.id,
+            page.location,
+            museum.address,
+          );
+        if (!page.openingHours) hoursUnparsed.push(museum.name);
+        await updateMuseumSchedule(db, museum, page);
       } catch {
         museumFailures++;
       }
@@ -317,5 +328,6 @@ async function performImport(
     itemsFailed: result.failedCount + museumFailures,
     groupedExamples,
     noticeTitles,
+    hoursUnparsed,
   };
 }

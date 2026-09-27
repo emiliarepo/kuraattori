@@ -20,12 +20,16 @@ import {
   urgencyLabelText,
 } from "~/app/_lib/exhibition-format";
 import { toRowView } from "~/app/_lib/row";
-import { todayInHelsinki } from "~/domain/dates";
+import { getPhase, todayInHelsinki } from "~/domain/dates";
 import { archivedImagePath, imageSources } from "~/domain/images";
+import { formatHours, hoursOn, nextFreeDay } from "~/domain/opening-hours";
 import { t } from "~/i18n/fi";
+import { formatDayMonth } from "~/i18n/format";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { siteUrl } from "~/app/_lib/site-url";
+
+const FREE_DAY_WINDOW_DAYS = 14;
 
 const dateTimeFormat = new Intl.DateTimeFormat("fi-FI", {
   day: "numeric",
@@ -89,6 +93,13 @@ export default async function ExhibitionDetailPage({
     : t.time.indefinite;
 
   const city = exhibition.museum.city;
+  const isCurrent = getPhase(exhibition, today) === "current";
+  const todayHours = isCurrent
+    ? hoursOn(exhibition.museum.openingHours?.days, today)
+    : undefined;
+  const freeDay = isCurrent
+    ? nextFreeDay(exhibition.museum.freeDays, today, FREE_DAY_WINDOW_DAYS)
+    : undefined;
 
   return (
     <article className="py-8">
@@ -187,6 +198,27 @@ export default async function ExhibitionDetailPage({
               <dt className="text-kicker text-muted">{t.pages.detail.open}</dt>
               <dd className="tabular-nums">{openLabel}</dd>
             </div>
+            {(todayHours !== undefined || freeDay) && (
+              <div className="col-span-2 grid grid-cols-subgrid items-baseline py-2.5">
+                <dt className="text-kicker text-muted">
+                  {t.pages.hours.label}
+                </dt>
+                <dd className="flex flex-col gap-1 tabular-nums">
+                  {todayHours !== undefined && (
+                    <span>
+                      {todayHours
+                        ? t.pages.hours.openToday(formatHours(todayHours))
+                        : t.pages.hours.closedToday}
+                    </span>
+                  )}
+                  {freeDay && (
+                    <span>
+                      {t.pages.hours.nextFreeDay(formatDayMonth(freeDay))}
+                    </span>
+                  )}
+                </dd>
+              </div>
+            )}
             {!exhibition.museumCardEligible && (
               <>
                 <div className="col-span-2 grid grid-cols-subgrid items-baseline py-2.5">

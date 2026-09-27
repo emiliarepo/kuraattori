@@ -7,6 +7,8 @@ import {
 } from "drizzle-orm/sqlite-core";
 import type { AdapterAccount } from "next-auth/adapters";
 
+import type { OpeningHours } from "../../domain/opening-hours";
+
 /**
  * Use the same database instance for multiple projects.
  *
@@ -134,6 +136,9 @@ export const museums = createTable(
     geocodedAddress: d.text(),
     museumCardEligible: d.integer({ mode: "boolean" }).notNull().default(false),
     websiteUrl: d.text(),
+    openingHours: d.text({ mode: "json" }).$type<OpeningHours>(),
+    /** Upcoming free-entry dates, ISO, as listed in the museum's events. */
+    freeDays: d.text({ mode: "json" }).$type<string[]>(),
     createdAt: d
       .integer({ mode: "timestamp" })
       .default(sql`(unixepoch())`)
