@@ -5,6 +5,7 @@ import { useId, useState } from "react";
 
 import { persistRegionsCookie } from "~/app/_components/region-cookie-action";
 import { refreshHeaderData } from "~/app/_components/refresh-header-action";
+import { useBackToClose } from "~/app/_lib/use-back-to-close";
 import { groupRegions } from "~/domain/regions";
 import { t } from "~/i18n/fi";
 import { api } from "~/trpc/react";
@@ -23,6 +24,7 @@ export function RegionSelector({
   isSignedIn: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  useBackToClose(open, () => setOpen(false));
   const [selected, setSelected] = useState<readonly string[]>(initialSelected);
   const panelId = useId();
   const groups = groupRegions(allRegions);

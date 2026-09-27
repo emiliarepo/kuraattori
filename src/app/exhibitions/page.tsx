@@ -6,9 +6,10 @@ import { FilterSheet } from "~/app/_components/FilterSheet";
 import { StaleDataNotice } from "~/app/_components/StaleDataNotice";
 import {
   browseFiltersToListInput,
+  browseFiltersToParams,
   parseBrowseFilters,
 } from "~/app/_lib/browse-filters";
-import { listAcrossRegions } from "~/app/_lib/list-across-regions";
+import { listAcrossRegionsPages } from "~/app/_lib/list-across-regions";
 import { todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
 import { auth } from "~/server/auth";
@@ -51,16 +52,14 @@ export default async function ExhibitionsPage({
     ...browseFiltersToListInput(filters),
     limit: PAGE_SIZE,
   };
-  const { items, nextCursor } = await listAcrossRegions(
+  const { items, nextCursor } = await listAcrossRegionsPages(
     activeRegions,
     listInputBase,
+    filters.page,
   );
-  // Mirrors listAcrossRegions' own region resolution so "load more" keeps
-  // filtering by the same region it was seeded with.
-  const listInput = {
-    ...listInputBase,
-    region: activeRegions.length === 1 ? activeRegions[0] : undefined,
-  };
+  const loadMoreHref = nextCursor
+    ? `/exhibitions?${browseFiltersToParams({ ...filters, page: filters.page + 1 }).toString()}`
+    : null;
 
   const cities = [
     ...new Set(
@@ -100,10 +99,8 @@ export default async function ExhibitionsPage({
       </aside>
       <div>
         <ExhibitionListClient
-          key={JSON.stringify(listInput)}
-          initialItems={items}
-          initialNextCursor={nextCursor}
-          input={listInput}
+          items={items}
+          loadMoreHref={loadMoreHref}
           today={today}
           emptyMessage={t.pages.browse.empty}
           signedIn={signedIn}

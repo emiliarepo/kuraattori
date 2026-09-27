@@ -8,9 +8,14 @@ export interface BrowseFilters {
   readonly museumCardOnly: boolean;
   readonly state: BrowseState;
   readonly endingWithinDays: number | null;
+  /** How many `PAGE_SIZE` pages are loaded, so "Näytä lisää" survives back navigation and a reload. */
+  readonly page: number;
 }
 
 const DEFAULT_STATE: BrowseState = "current";
+const DEFAULT_PAGE = 1;
+/** A generous cap on server-side "load more" pages per request, not a realistic browsing depth. */
+const MAX_PAGE = 20;
 
 export const ENDING_WITHIN_OPTIONS = [7, 14, 30, 60] as const;
 
@@ -41,6 +46,7 @@ export function parseBrowseFilters(
   };
 
   const endingWithinDays = Number(get("ending"));
+  const page = Number(get("page"));
   return {
     search: nullIfBlank(get("q")?.trim()),
     city: get("city") ?? null,
@@ -52,6 +58,10 @@ export function parseBrowseFilters(
       Number.isInteger(endingWithinDays) && endingWithinDays > 0
         ? endingWithinDays
         : null,
+    page:
+      Number.isInteger(page) && page > DEFAULT_PAGE
+        ? Math.min(page, MAX_PAGE)
+        : DEFAULT_PAGE,
   };
 }
 
@@ -68,6 +78,7 @@ export function browseFiltersToParams(filters: BrowseFilters): URLSearchParams {
   if (filters.state !== DEFAULT_STATE) params.set("state", filters.state);
   if (filters.endingWithinDays)
     params.set("ending", String(filters.endingWithinDays));
+  if (filters.page !== DEFAULT_PAGE) params.set("page", String(filters.page));
   return params;
 }
 

@@ -16,7 +16,19 @@ describe("parseBrowseFilters", () => {
       museumCardOnly: false,
       state: "current",
       endingWithinDays: null,
+      page: 1,
     });
+  });
+
+  it("parses page, ignoring non-positive or non-integer values", () => {
+    expect(parseBrowseFilters({ page: "3" }).page).toBe(3);
+    expect(parseBrowseFilters({ page: "0" }).page).toBe(1);
+    expect(parseBrowseFilters({ page: "-1" }).page).toBe(1);
+    expect(parseBrowseFilters({ page: "abc" }).page).toBe(1);
+  });
+
+  it("clamps page to a sane maximum", () => {
+    expect(parseBrowseFilters({ page: "9999" }).page).toBe(20);
   });
 
   it("parses comma-separated ids, dedupes and drops non-positive values", () => {
@@ -51,11 +63,17 @@ describe("browseFiltersToParams", () => {
       card: "1",
       state: "upcoming",
       ending: "14",
+      page: "3",
     });
     const roundTripped = parseBrowseFilters(
       Object.fromEntries(browseFiltersToParams(filters)),
     );
     expect(roundTripped).toEqual(filters);
+  });
+
+  it("omits page from the query string at its default", () => {
+    const params = browseFiltersToParams(parseBrowseFilters({ page: "1" }));
+    expect(params.toString()).toBe("");
   });
 });
 

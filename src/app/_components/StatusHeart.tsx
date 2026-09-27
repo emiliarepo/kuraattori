@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { refreshStatusData } from "~/app/_components/refresh-status-action";
 import { type ExhibitionStatus } from "~/app/_components/StatusActions";
 import { t } from "~/i18n/fi";
 import { api } from "~/trpc/react";
@@ -41,7 +42,10 @@ export function StatusHeart({
     );
     mutation.mutate(
       { exhibitionId, status: "interested" },
-      { onError: () => setCurrent(previous) },
+      {
+        onSuccess: () => void refreshStatusData(),
+        onError: () => setCurrent(previous),
+      },
     );
   }
 
