@@ -1,9 +1,9 @@
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { exhibitions, museums, userExhibitions } from "~/server/db/schema";
-import { exhibitionRouter } from "./exhibition";
+import { exhibitions, museums } from "~/server/db/schema";
+import { exhibitionRouter, whereVisible } from "./exhibition";
 
 export const museumRouter = createTRPCRouter({
   list: publicProcedure.query(({ ctx }) =>
@@ -37,13 +37,16 @@ export const museumRouter = createTRPCRouter({
           .limit(1)
       )[0];
       if (!museum) return [];
-      const visibleToUser = ctx.session?.user?.id
-        ? sql`not exists (select 1 from ${userExhibitions} where ${userExhibitions.userId} = ${ctx.session.user.id} and ${userExhibitions.exhibitionId} = ${exhibitions.id} and ${userExhibitions.status} = 'hidden')`
-        : undefined;
       const result = await ctx.db
         .select({ slug: exhibitions.slug })
         .from(exhibitions)
-        .where(and(eq(exhibitions.museumId, museum.id), visibleToUser))
+        .where(
+          and(
+            eq(exhibitions.museumId, museum.id),
+            eq(exhibitions.kind, "exhibition"),
+            whereVisible(ctx.session?.user?.id ?? null),
+          ),
+        )
         .orderBy(asc(exhibitions.startDate));
       const items = await Promise.all(
         result.map(({ slug }) =>

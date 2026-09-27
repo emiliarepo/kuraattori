@@ -108,7 +108,7 @@ export default async function ExhibitionDetailPage({
           {exhibition.titleFi}
         </h1>
         <p className="text-muted text-xl italic">
-          {exhibition.museum.name}
+          {exhibition.venues.map((venue) => venue.name).join(", ")}
           {city && `, ${city}`}
         </p>
       </header>
@@ -127,12 +127,17 @@ export default async function ExhibitionDetailPage({
           <dl className="divide-rule-soft border-rule-soft grid grid-cols-[auto_1fr] gap-x-4 divide-y border-y [&>*]:py-2.5">
             <dt className="text-kicker text-muted">{t.pages.detail.museum}</dt>
             <dd>
-              <Link
-                href={`/museums/${exhibition.museum.slug}`}
-                className="hover:text-signal underline decoration-1 underline-offset-4"
-              >
-                {exhibition.museum.name}
-              </Link>
+              {exhibition.venues.map((venue, index) => (
+                <span key={venue.slug}>
+                  {index > 0 && ", "}
+                  <Link
+                    href={`/museums/${venue.slug}`}
+                    className="hover:text-signal underline decoration-1 underline-offset-4"
+                  >
+                    {venue.name}
+                  </Link>
+                </span>
+              ))}
             </dd>
             <dt className="text-kicker text-muted">{t.pages.detail.city}</dt>
             <dd>{city}</dd>

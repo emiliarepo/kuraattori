@@ -1,4 +1,4 @@
-import { asc, count, eq, inArray, or, sql } from "drizzle-orm";
+import { and, asc, count, eq, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { todayInHelsinki } from "~/domain/dates";
@@ -6,6 +6,7 @@ import { getRelevance, type RelevanceReason } from "~/domain/relevance";
 import { getSinulleScore, isSinulleEligible } from "~/domain/ranking";
 import { getUrgency } from "~/domain/urgency";
 import { t } from "~/i18n/fi";
+import { groupExhibitionRows } from "~/server/api/grouping";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
   categories,
@@ -74,9 +75,12 @@ export const recommendationRouter = createTRPCRouter({
             .from(exhibitions)
             .innerJoin(museums, eq(exhibitions.museumId, museums.id))
             .where(
-              or(
-                sql`${exhibitions.endDate} is null`,
-                sql`${exhibitions.endDate} >= ${todayInHelsinki()}`,
+              and(
+                eq(exhibitions.kind, "exhibition"),
+                or(
+                  sql`${exhibitions.endDate} is null`,
+                  sql`${exhibitions.endDate} >= ${todayInHelsinki()}`,
+                ),
               ),
             )
             .orderBy(asc(exhibitions.startDate))
@@ -119,8 +123,9 @@ export const recommendationRouter = createTRPCRouter({
       };
       const today = todayInHelsinki();
       const hasMultipleImports = (importRunCount[0]?.count ?? 0) > 1;
-      return rows
-        .flatMap(({ exhibition, museum }) => {
+      const groups = groupExhibitionRows(rows);
+      return groups
+        .flatMap(({ exhibition, museum, venues, memberIds }) => {
           const relevance = getRelevance(
             {
               categoryIds: categoryRows
@@ -136,7 +141,7 @@ export const recommendationRouter = createTRPCRouter({
             today,
           );
           const status =
-            states.find((x) => x.id === exhibition.id)?.status ?? null;
+            states.find((x) => memberIds.includes(x.id))?.status ?? null;
           if (
             !isSinulleEligible({
               relevance,
@@ -159,6 +164,7 @@ export const recommendationRouter = createTRPCRouter({
             {
               exhibition,
               museum,
+              venues,
               relevance,
               reasons,
               urgency,
