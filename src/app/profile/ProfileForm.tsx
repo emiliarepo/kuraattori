@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { refreshHeaderData } from "~/app/_components/refresh-header-action";
@@ -24,9 +25,15 @@ export function ProfileForm({
   const [interestIds, setInterestIds] =
     useState<readonly number[]>(initialInterestIds);
   const [regions, setRegions] = useState<readonly string[]>(initialRegions);
+  const router = useRouter();
 
   const updateInterests = api.profile.updateInterests.useMutation();
   const updateRegions = api.profile.updateRegions.useMutation();
+
+  async function syncHeader() {
+    await refreshHeaderData();
+    router.refresh();
+  }
 
   function toggleInterest(id: number) {
     const next = interestIds.includes(id)
@@ -35,7 +42,7 @@ export function ProfileForm({
     setInterestIds(next);
     updateInterests.mutate(
       { interests: next.map((categoryId) => ({ categoryId, weight: 1 })) },
-      { onSuccess: () => void refreshHeaderData() },
+      { onSuccess: () => void syncHeader() },
     );
   }
 
@@ -46,7 +53,7 @@ export function ProfileForm({
     setRegions(next);
     updateRegions.mutate(
       { regions: next },
-      { onSuccess: () => void refreshHeaderData() },
+      { onSuccess: () => void syncHeader() },
     );
   }
 

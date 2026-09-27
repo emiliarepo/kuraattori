@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 
 import { persistRegionsCookie } from "~/app/_components/region-cookie-action";
@@ -23,10 +24,16 @@ export function RegionSelector({
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<readonly string[]>(initialSelected);
   const panelId = useId();
+  const router = useRouter();
   const updateRegions = api.profile.updateRegions.useMutation();
 
   const summary =
     selected.length > 0 ? selected.join(", ") : t.ui.region.allRegions;
+
+  async function syncHeader() {
+    await refreshHeaderData();
+    router.refresh();
+  }
 
   function toggle(region: string) {
     const next = selected.includes(region)
@@ -36,10 +43,10 @@ export function RegionSelector({
     if (isSignedIn) {
       updateRegions.mutate(
         { regions: next },
-        { onSuccess: () => void refreshHeaderData() },
+        { onSuccess: () => void syncHeader() },
       );
     } else {
-      void persistRegionsCookie(next);
+      void persistRegionsCookie(next).then(() => router.refresh());
     }
   }
 
