@@ -2,6 +2,10 @@ import { drizzle } from "drizzle-orm/d1";
 import { getPlatformProxy } from "wrangler";
 
 import { createMuseotFiAdapter } from "~/server/import/museot-fi/adapter";
+import {
+  createNominatimGeocoder,
+  geocodeMuseums,
+} from "~/server/import/geocode";
 import { runImport } from "~/server/import/run-import";
 import * as schema from "~/server/db/schema";
 import { type Db } from "~/server/db";
@@ -35,7 +39,12 @@ async function main() {
   try {
     const stats = await runImport(db, createMuseotFiAdapter());
     console.log(JSON.stringify(stats, null, 2));
-    if (stats.status === "failed") process.exitCode = 1;
+    if (stats.status === "failed") {
+      process.exitCode = 1;
+      return;
+    }
+    const geocoding = await geocodeMuseums(db, createNominatimGeocoder());
+    console.log(JSON.stringify({ geocoding }, null, 2));
   } finally {
     await dispose();
   }

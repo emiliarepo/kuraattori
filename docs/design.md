@@ -48,7 +48,7 @@ A Sunday culture supplement. A serif masthead with the date, one lead recommenda
 
 ## Navigation and screens
 
-Mobile first. Bottom tab bar on mobile: **Koti · Selaa · Omat · Profiili** (keys `home`, `browse`, `mine`, `profile`). On desktop the tabs sit in the masthead date line, between the date and the RegionSelector. Both bars mark Omat with a small rust dot when a signed-in user has an interested exhibition ending within 7 days, and fold the count into the tab's accessible name ("Omat, 2 päättyy pian"). Code identifiers and routes are English, including public paths; only visible text is Finnish (from `src/i18n/fi.ts`). Slugs come from Finnish titles because they are data.
+Mobile first. Bottom tab bar on mobile: **Koti · Selaa · Matkalla · Omat · Profiili** (keys `home`, `browse`, `trip`, `mine`, `profile`); at 375 px each tab is 75 px wide and 44 px tall. On desktop the tabs sit in the masthead date line, between the date and the RegionSelector. Both bars mark Omat with a small rust dot when a signed-in user has an interested exhibition ending within 7 days, and fold the count into the tab's accessible name ("Omat, 2 päättyy pian"). Code identifiers and routes are English, including public paths; only visible text is Finnish (from `src/i18n/fi.ts`). Slugs come from Finnish titles because they are data.
 
 | Route | Content |
 |---|---|
@@ -57,6 +57,7 @@ Mobile first. Bottom tab bar on mobile: **Koti · Selaa · Omat · Profiili** (k
 | `/exhibitions/[slug]` | Detail: breadcrumb (Näyttelyt / city / museum), UrgencyLabel, large serif title, italic byline. Below it a 1.6fr/1fr grid: image then description on the left; a sticky right column with the meta list (Museo, Kaupunki, Avoinna, Museokortti, Aiheet), TimeBar, StatusActions, source link and last update. On mobile the order is image, meta column, description. |
 | `/museums`, `/museums/[slug]` | Museum list and museum page with its exhibitions (current, upcoming, past). |
 | `/my` | Tabs (`/my/interested`, `/my/visited`, `/my/hidden`): Kiinnostavat, Käydyt (history, including ended ones), Piilotetut. `/my/interested` also has a compact calendar line under the tabs: a link to `/profile/calendar`, or, once a feed exists, a direct "Lisää kalenteriin" webcal link plus "Asetukset". |
+| `/trip`, `/trip/day` | Matkalla, with sub-tabs in the `/my` style. Saved trips (signed in) sit above the tabs. *Matka* (`/trip?place&from&to`): what is open at a place during a date range, "Suunnittele museopäivä" (a city and a day of the trip) and "Tallenna matka". *Museopäivä* (`/trip/day?city&date&ids&start`, keeping the trip's `place/from/to`): candidates are the user's Kiinnostaa exhibitions open that day in the city, plus a "Lisää" list of the rest; choosing 2–6 gives a numbered itinerary. The museum page links here for its city and today. |
 | `/profile` | Redirects to `/profile/interests`. Tabs (`/profile/interests`, `/profile/regions`, `/profile/calendar`, `/profile/account`): Kiinnostukset (category weight rows, selected ones first), Alueet (`groupRegions()`), Kalenteri (the feed from ticket 16), Tili (name/email, sign out). Each change saves automatically with a "Tallennettu" confirmation. `/welcome` is onboarding after first login, skippable, reusing the same interest and region components. |
 | `/sign-in` | Google sign-in. |
 
@@ -70,6 +71,14 @@ Mobile first. Bottom tab bar on mobile: **Koti · Selaa · Omat · Profiili** (k
 - **Regions:** product regions map from the city (municipality). `Pääkaupunkiseutu` = Helsinki, Espoo, Vantaa, Kauniainen. `Tampere` = Tampere. `Turku` = Turku. Every other place maps to its maakunta name from museot.fi (`maakunta_id`). The mapping lives in `src/domain/regions.ts`.
 - **i18n:** all UI strings live in `src/i18n/fi.ts`, accessed through a typed `t` object. Formatting uses `Intl` with `fi-FI`.
 
+## Museum day planner
+
+- **Order:** nearest neighbour from the first chosen stop, then 2-opt with that stop fixed, on haversine distances (`src/domain/day-plan.ts`). "Aloita tästä" moves a stop first. Stops without coordinates go last, marked "sijainti ei tiedossa".
+- **Legs:** straight line at 5 km/h, rounded to whole minutes (at least 1). No routing API; the page says the times are straight-line.
+- **Visits:** 90 minutes each, back to back from the start time (default 11:00, in the URL as `start`). "Lisää kalenteriin" downloads `/api/trip/day?…` with one timed event per stop in Helsinki time.
+- **Route link:** Apple Maps (`maps.apple.com/directions`) on Apple devices, Google Maps (`/maps/dir/?api=1`) elsewhere, walking, with the stops as waypoints in order. Coordinates when known, otherwise name and address.
+- **Saved trips** (`saved_trip`): one row per user, place and date range, holding the day plans as JSON (one per city and date; saving again replaces it) and the union of their exhibitions. Included in the data export and account deletion.
+
 ## Import
 
 - Runs as a Node script (`pnpm import:museot`) on a GitHub Actions schedule (daily, 04:00 Helsinki time). It writes to D1 locally through wrangler's platform proxy and remotely through the D1 HTTP API. Not a Workers cron: the free plan's 10 ms CPU limit per run makes one impractical.
@@ -80,4 +89,5 @@ Mobile first. Bottom tab bar on mobile: **Koti · Selaa · Omat · Profiili** (k
   4. The detail page (`nayttely_id=N`) only for new exhibitions or ones whose listing hash changed. This adds the full description, `museo_id`, Museum Card status (entrance image "Sisäänpääsy Museokortilla") and the text languages. Rate-limited to about 2 requests per second.
 - The `museokortti=1` listing filter returns the full list, so card status comes from detail pages (`div.sisaanpaasy_museokortilla`). A 52-exhibition sample on 27.9.2026 was 100% eligible: museot.fi is run by Museoliitto, which also runs Museokortti. Keep parsing it anyway for future sources.
 - Upsert keyed by (`source`, `source_id`). Every run touches `last_seen_at`; a record isn't deleted when it goes missing. Each run is recorded in `import_runs` with its counts. If one record fails validation, it's counted in `items_failed` and the rest are still imported. If the whole fetch fails, the run is marked failed and nothing is touched.
+- **Coordinates:** museum pages usually carry coordinates. For a museum with an address and none, the import script (never a request) asks OpenStreetMap Nominatim, following its usage policy: at most 1 request per second, the bot's User-Agent, results stored in `museums.latitude/longitude`. The attempted address is stored in `geocodedAddress`, so a miss is only retried when the address changes. Attribution is on `/privacy` and under the itinerary.
 - Fixtures in `fixtures/museot/` (snapshot of 27.9.2026) back the parser tests.

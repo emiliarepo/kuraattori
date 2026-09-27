@@ -4,6 +4,7 @@ import {
   escapeCalendarText,
   foldCalendarLine,
   formatCalendar,
+  helsinkiTimeToUtc,
 } from "./calendar";
 
 describe("calendar formatting", () => {
@@ -40,5 +41,14 @@ describe("calendar formatting", () => {
     expect(output).toContain("LOCATION:Museo\\; Helsinki\r\n");
     expect(output.endsWith("\r\n")).toBe(true);
     expect(output.replaceAll("\r\n", "")).not.toMatch(/[\r\n]/);
+  });
+
+  it("converts Helsinki wall-clock time across daylight saving", () => {
+    expect(helsinkiTimeToUtc("2026-07-01", "11:00").toISOString()).toBe(
+      "2026-07-01T08:00:00.000Z",
+    );
+    expect(helsinkiTimeToUtc("2026-12-01", "11:00").toISOString()).toBe(
+      "2026-12-01T09:00:00.000Z",
+    );
   });
 });

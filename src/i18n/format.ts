@@ -25,6 +25,18 @@ export function formatDate(isoDate: string): string {
   return fullDateFormatter.format(parseIsoDate(isoDate));
 }
 
+const weekdayDateFormatter = new Intl.DateTimeFormat("fi-FI", {
+  weekday: "short",
+  day: "numeric",
+  month: "numeric",
+  timeZone: "UTC",
+});
+
+/** `pe 2.10.` */
+export function formatWeekdayDate(isoDate: string): string {
+  return weekdayDateFormatter.format(parseIsoDate(isoDate));
+}
+
 /** `2.10.` */
 export function formatDayMonth(isoDate: string): string {
   return dayMonthFormatter.format(parseIsoDate(isoDate));

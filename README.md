@@ -10,7 +10,7 @@ Live at **https://kuraattori.emialis.com**.
 - **Browse:** filters by region, city, museum, category and dates, with results and paging kept in the URL.
 - **Personal state:** mark exhibitions *Kiinnostaa*, *Käyty* or *Piilota*, add a visit date and a private note, and sort the Omat lists.
 - **Explainable recommendations:** a deterministic score from weighted interests (Kiinnostaa, Erityisesti, Ei kiinnosta), preferred regions and followed museums. Closing dates only break ties; they never push an unrelated exhibition to the top. Every recommendation shows its reasons.
-- **Travel mode:** what is open in a given place over a date range.
+- **Matkalla:** what is open in a given place over a date range, a museum day planner that orders the chosen exhibitions into a walking route (map link and `.ics`), and saved trips.
 - **Museum pages:** addresses with a map link (Apple Maps on Apple devices, Google Maps elsewhere) and a follow button.
 - **Museokortti savings and year in review:** admission prices you saved with the Museum Card, and a yearly summary of your visits.
 - **Calendar feed:** a private `.ics` subscription with the closing dates of the exhibitions you are interested in.

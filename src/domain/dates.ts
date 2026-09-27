@@ -17,6 +17,22 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((parseIsoDate(to) - parseIsoDate(from)) / 86_400_000);
 }
 
+/** Every date from `from` to `to` inclusive, at most `limit` of them. */
+export function datesInRange(
+  from: string,
+  to: string,
+  limit: number,
+): string[] {
+  const dates: string[] = [];
+  for (
+    let day = parseIsoDate(from);
+    day <= parseIsoDate(to) && dates.length < limit;
+    day += 86_400_000
+  )
+    dates.push(new Date(day).toISOString().slice(0, 10));
+  return dates;
+}
+
 /** Today's date as `YYYY-MM-DD` in Europe/Helsinki. */
 export function todayInHelsinki(reference = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {

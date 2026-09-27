@@ -267,7 +267,8 @@ async function performImport(
           sourceId,
           museum.city,
         );
-        if (location) await updateMuseumLocation(db, museum.id, location);
+        if (location)
+          await updateMuseumLocation(db, museum.id, location, museum.address);
       } catch {
         museumFailures++;
       }

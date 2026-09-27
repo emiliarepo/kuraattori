@@ -58,7 +58,12 @@ export async function updateMuseumLocation(
   db: Db,
   id: number,
   location: MuseumLocation,
+  previousAddress: string | null | undefined,
 ): Promise<void> {
+  const hasSourceCoordinates =
+    location.latitude !== undefined && location.longitude !== undefined;
+  // Geocoded coordinates stay valid while the address is unchanged.
+  if (!hasSourceCoordinates && location.address === previousAddress) return;
   await db
     .update(museums)
     .set({

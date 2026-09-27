@@ -61,6 +61,21 @@ async function seedUser(id: string) {
   await libsql
     .insert(schema.calendarFeeds)
     .values({ userId: id, token: `feed-${id}` });
+  await libsql.insert(schema.savedTrips).values({
+    userId: id,
+    place: "Tampere",
+    fromDate: "2026-10-01",
+    toDate: "2026-10-03",
+    exhibitionIds: [1],
+    days: [
+      {
+        city: "Tampere",
+        date: "2026-10-02",
+        exhibitionIds: [1],
+        start: "11:00",
+      },
+    ],
+  });
 }
 
 await libsql.insert(schema.museums).values({
@@ -118,6 +133,9 @@ describe("account data", () => {
       { status: "visited", note: "Hieno" },
     ]);
     expect(data.calendarFeed?.token).toBe("feed-kept");
+    expect(data.savedTrips).toMatchObject([
+      { place: "Tampere", days: [{ date: "2026-10-02", exhibitionIds: [1] }] },
+    ]);
   });
 
   it("deletes every row linked to the user and nothing else", async () => {

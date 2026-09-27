@@ -1,5 +1,5 @@
 # 36 Matkalla: trip planning tab with a museum day planner
-Status: todo · Model: Opus 5.5 (low effort) · Blocked by: 30
+Status: done · Model: Opus 5.5 (low effort) · Blocked by: 30
 
 Turn travel mode into a proper planning feature with its own navigation tab, and add a museum day planner inside it.
 
