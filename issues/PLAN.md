@@ -21,3 +21,10 @@ Migrations are serialized (one migration-adding ticket in flight at a time): 14 
 
 After each merge: typecheck, lint, test, format, build on main; push; confirm deploy; spot-check the changed screens in the browser.
 Commits use the repo-local identity emilia@repo.codes; rebase agent branches if needed.
+
+## Update (27.9.2026, afternoon)
+
+1. 30 design verification (Opus low) — now, before new features.
+2. Then in parallel where files allow: 35 Museopassi (Opus low), 36 day planner (Opus low), 22 en/sv (Opus low); 34 Sunday edition (Sonnet, low priority) last.
+3. 37 final verification (Opus low) after everything.
+4. Before going public: minimal fixtures (chore/minimal-fixtures), then rewrite history with git filter-repo to drop the old fixture snapshots, force-push main (approved by the user).
