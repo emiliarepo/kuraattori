@@ -44,7 +44,7 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   expect: {
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.001,
+      maxDiffPixels: 20,
       animations: "disabled",
       caret: "hide",
       scale: "css",
