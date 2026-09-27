@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import Link from "next/link";
 
 import { DaysNumeral } from "~/app/_components/DaysNumeral";
 import { LeadStory } from "~/app/_components/LeadStory";
@@ -63,6 +64,15 @@ export default async function HomePage() {
   return (
     <div className="pt-6 sm:pt-8">
       <h1 className="sr-only">{t.app.name}</h1>
+
+      <div className="mb-4 flex justify-end">
+        <Link
+          href="/trip"
+          className="hover:text-signal font-sans text-sm underline underline-offset-4"
+        >
+          {t.pages.trip.entry}
+        </Link>
+      </div>
 
       {lead ? (
         <LeadStory

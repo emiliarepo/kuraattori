@@ -45,6 +45,18 @@ export function getDaysRemaining(
   return daysBetween(today, exhibition.endDate);
 }
 
+/** Whether the run overlaps `[from, to]`: starts on/before `to`, and ends on/after `from` or never ends. */
+export function overlapsRange(
+  exhibition: ExhibitionDates,
+  from: string,
+  to: string,
+): boolean {
+  return (
+    exhibition.startDate <= to &&
+    (exhibition.endDate === null || exhibition.endDate >= from)
+  );
+}
+
 /** Percentage through the run, clamped to [0, 100]; null with no end date (no bar). */
 export function getTimeBarProgress(
   exhibition: ExhibitionDates,

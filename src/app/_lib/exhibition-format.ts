@@ -132,6 +132,28 @@ export function urgencyLabelText(
   return t.time.daysRemaining(daysRemaining);
 }
 
+/**
+ * Trip mode's "why" kicker: closing during the trip takes priority over
+ * opening during it, since it's the more actionable thing to know.
+ */
+export function tripWhyLabel(
+  exhibition: ExhibitionDates,
+  from: string,
+  to: string,
+): string | null {
+  if (
+    exhibition.endDate !== null &&
+    exhibition.endDate >= from &&
+    exhibition.endDate <= to
+  ) {
+    return t.pages.trip.endsDuringTrip;
+  }
+  if (exhibition.startDate >= from && exhibition.startDate <= to) {
+    return t.pages.trip.opensDuringTrip(formatShortDate(exhibition.startDate));
+  }
+  return null;
+}
+
 export function dayCaption(days: number): string {
   return t.pages.days.caption(days);
 }
