@@ -8,6 +8,7 @@ import { recommendationRouter } from "~/server/api/routers/recommendation";
 import { metaRouter } from "~/server/api/routers/meta";
 import { myRouter } from "~/server/api/routers/my";
 import { tripRouter } from "~/server/api/routers/trip";
+import { pushRouter } from "~/server/api/routers/push";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   meta: metaRouter,
   my: myRouter,
   trip: tripRouter,
+  push: pushRouter,
 });
 
 // export type definition of API

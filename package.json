@@ -12,6 +12,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "import:museot": "tsx scripts/import-museot.ts",
+    "push:closing": "tsx scripts/send-closing-push.ts",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
@@ -52,6 +53,7 @@
     "@types/node": "^20.14.10",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/web-push": "^3.6.4",
     "drizzle-kit": "^0.30.5",
     "eslint": "^9.23.0",
     "eslint-config-next": "^15.2.3",
@@ -65,6 +67,7 @@
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.27.0",
     "vitest": "^5.0.2",
+    "web-push": "^3.6.7",
     "wrangler": "^4.141.0"
   },
   "ct3aMetadata": {

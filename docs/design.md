@@ -81,6 +81,10 @@ Mobile first. Bottom tab bar on mobile: **Koti · Selaa · Matkalla · Omat · P
 - **Route link:** Apple Maps (`maps.apple.com/directions`) on Apple devices, Google Maps (`/maps/dir/?api=1`) elsewhere, walking, with the stops as waypoints in order. Coordinates when known, otherwise name and address.
 - **Saved trips** (`saved_trip`): one row per user, place and date range, holding the day plans as JSON (one per city and date; saving again replaces it) and the union of their exhibitions. Included in the data export and account deletion.
 
+## Closing-soon notifications
+
+- Web Push, opt-in from Profiili → Kalenteri, never prompted on load. A nightly step after the import (`pnpm push:closing`) sends one notification per user and day for Kiinnostaa exhibitions with 1–7 days left that haven't been notified before (`push_sent`). Several are bundled into one that links to `/my/interested`. The VAPID private key lives only in the `VAPID_PRIVATE_KEY` GitHub secret, and subscriptions answering 404/410 are deleted.
+
 ## Import
 
 - Runs as a Node script (`pnpm import:museot`) on a GitHub Actions schedule (daily, 04:00 Helsinki time). It writes to D1 locally through wrangler's platform proxy and remotely through the D1 HTTP API. Not a Workers cron: the free plan's 10 ms CPU limit per run makes one impractical.

@@ -382,3 +382,40 @@ export const savedTrips = createTable(
     unique("saved_trip_user_idx").on(t.userId, t.place, t.fromDate, t.toDate),
   ],
 );
+
+export const pushSubscriptions = createTable(
+  "push_subscription",
+  (d) => ({
+    endpoint: d.text().primaryKey(),
+    userId: d
+      .text({ length: 255 })
+      .notNull()
+      .references(() => users.id),
+    p256dh: d.text().notNull(),
+    auth: d.text().notNull(),
+    createdAt: d
+      .integer({ mode: "timestamp" })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+  }),
+  (t) => [index("push_subscription_user_idx").on(t.userId)],
+);
+
+export const pushSent = createTable(
+  "push_sent",
+  (d) => ({
+    userId: d
+      .text({ length: 255 })
+      .notNull()
+      .references(() => users.id),
+    exhibitionId: d
+      .integer()
+      .notNull()
+      .references(() => exhibitions.id),
+    sentOn: d.text().notNull(),
+  }),
+  (t) => [
+    primaryKey({ columns: [t.userId, t.exhibitionId] }),
+    index("push_sent_user_day_idx").on(t.userId, t.sentOn),
+  ],
+);
