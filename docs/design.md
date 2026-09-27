@@ -22,6 +22,8 @@ A Sunday culture supplement. A serif masthead with the date, one lead recommenda
 | `--surface` | `#ece4d6` | `#26201a` |
 
   `--signal` (rust) is only for urgency, "why recommended" and the active state. Every text/background pair (`fg`, `muted` and `signal` on `bg` and `surface`, `on-signal` on `signal`, `bg` on `fg`) passes WCAG AA (4.5:1) in both modes; `src/styles/tokens.test.ts` enforces it, so change a token and the test tells you. `--rule` is for the masthead and section rules, `--rule-soft` for dividers between rows and meta lines.
+- **Spacing:** Tailwind steps 1, 2, 3, 4, 6, 8, 10, 12 (4–48 px). Page edges `px-4` / `sm:px-6` come from the masthead and `main`; pages never add their own. Every page starts `py-8` (32 px) below the masthead; the page title (H1) sits `mb-6` (24 px) above its first content, unless an italic byline follows it directly (`mt-2`). Home sections are `mt-10` apart, `Section` headings sit `pt-3` below their rule and 16 px above their content, and the footer is `mt-12` below the page. Rows use `py-5` with `gap-1.5` between lines; cards use their fixed line budget.
+- **Touch targets:** every button, form control, tab and checkbox row is at least 44 px tall (`min-h-11`). Inline text links in running text, meta values and breadcrumbs are exempt. The dense desktop filter sidebar keeps 28 px checkbox rows.
 - **Motion:** short transitions (≤150 ms) on state changes only. No looping animation. Everything off under `prefers-reduced-motion`.
 
 ## Components
@@ -40,7 +42,8 @@ A Sunday culture supplement. A serif masthead with the date, one lead recommenda
 - **Museokortti:** mark only the exception ("Ei Museokorttia"). No badge when eligible. The Museokortti filter is rendered only when some current exhibition is not eligible.
 - **CategoryList:** plain sans text links separated by `·`, not chips.
 - **ImageFallback:** if the image is missing or broken, the title is set in serif on `--surface`. It keeps the aspect ratio, so it never collapses the layout.
-- **Forms** (filters, profile, onboarding, sign-in): kicker labels, `--rule-soft` input borders on `--bg`, checkboxes with a rust accent, primary buttons `--fg` with `--bg` text.
+- **Forms** (filters, profile, onboarding, sign-in): kicker labels, `--rule-soft` input borders on `--bg`, checkboxes with a rust accent.
+- **Buttons:** the `btn` utility (sans 14 px semibold, 44 px minimum height) plus `btn-primary` (`--fg` with `--bg` text) for the one main action in a view, or `btn-secondary` (1 px `--rule` border, `--surface` on hover) for the rest. Segmented controls (StatusActions, interest weights) and the follow toggle keep their own shape but the same height.
 
 ## Navigation and screens
 

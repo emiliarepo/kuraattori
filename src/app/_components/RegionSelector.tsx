@@ -69,7 +69,7 @@ export function RegionSelector({
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
         title={summary}
-        className="hover:text-signal flex max-w-56 items-center gap-1 font-sans text-xs font-semibold"
+        className="hover:text-signal -my-3.5 flex min-h-11 max-w-56 items-center gap-1 font-sans text-xs font-semibold"
       >
         <span className="truncate">{summary}</span>
         <span aria-hidden>▾</span>
@@ -100,11 +100,11 @@ export function RegionSelector({
                 .map((group, index) => (
                   <ul
                     key={index}
-                    className={`flex flex-col gap-2 ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
+                    className={`flex flex-col ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
                   >
                     {group.map((region) => (
                       <li key={region}>
-                        <label className="flex items-center gap-2 py-0.5">
+                        <label className="flex min-h-11 items-center gap-2">
                           <input
                             type="checkbox"
                             checked={selected.includes(region)}
@@ -121,7 +121,7 @@ export function RegionSelector({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="bg-fg text-bg mt-4 w-full py-2.5 font-sans text-sm font-semibold"
+              className="btn btn-primary mt-4 w-full"
             >
               {t.ui.region.apply}
             </button>

@@ -23,3 +23,9 @@ Deliverables: fixes committed per area, before/after screenshots for anything vi
 | Masthead | First region toggle closed the popover (the `RegionSelector` key included the active regions, so `router.refresh()` remounted it) | Key by user only and adopt new server regions without remounting; E2E `region-selector.spec.ts` | region |
 | Masthead (390 px) | Date wrapped onto two lines next to a long region label | Date `whitespace-nowrap`, selector shrinks | region |
 | Masthead (desktop, signed in) | After UserMenu → Profiili the menu stayed open; its full-screen overlay swallowed the next click anywhere | Close the menu on link click; E2E `user-menu.spec.ts` | behaviour |
+| All pages | Page top padding varied 24/32/48/64 px under the masthead (home, detail, profile, sign-in, welcome, legal, 404, error, offline) | One step: `py-8` everywhere; documented in design.md | spacing |
+| /my | Title to tabs 16 px, other pages 24 px | `mb-6` | spacing |
+| /profile (390 px) | Five tabs (467 px) overflowed a 358 px column and scrolled the whole page sideways | Tab row scrolls inside itself | spacing |
+| /offline | Nested `<main>` plus its own `px-5` doubled the page-edge padding | Plain `div`, shared edges | spacing |
+| All screens | Buttons used four paddings (py-1.5 to py-3), 34 to 46 px tall; only secondary buttons had hover | `btn` / `btn-primary` / `btn-secondary` utilities, 44 px minimum | consistency |
+| Masthead, /my, /profile, detail, museum, trip, filters | Touch targets under 44 px: region trigger 16, tabs 40, StatusActions 40, follow 34, sort select 33, form controls 40–42, checkbox rows 20–28 | `min-h-11` (region trigger via negative margin so the date line keeps its height); desktop filter sidebar stays dense | consistency |

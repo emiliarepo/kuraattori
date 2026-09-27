@@ -66,7 +66,7 @@ export default async function TripPage({
           <select
             name="place"
             defaultValue={filters.place ?? ""}
-            className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
+            className="border-rule-soft bg-bg focus:border-fg min-h-11 border px-2 py-2 text-base font-normal tracking-normal normal-case"
           >
             <option value="">{t.pages.trip.allPlaces}</option>
             {cityRegions.length > 0 && (
@@ -105,7 +105,7 @@ export default async function TripPage({
             type="date"
             name="from"
             defaultValue={filters.from ?? ""}
-            className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
+            className="border-rule-soft bg-bg focus:border-fg min-h-11 border px-2 py-2 text-base font-normal tracking-normal normal-case"
           />
         </label>
 
@@ -115,14 +115,11 @@ export default async function TripPage({
             type="date"
             name="to"
             defaultValue={filters.to ?? ""}
-            className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
+            className="border-rule-soft bg-bg focus:border-fg min-h-11 border px-2 py-2 text-base font-normal tracking-normal normal-case"
           />
         </label>
 
-        <button
-          type="submit"
-          className="bg-fg text-bg px-4 py-2.5 font-sans text-sm font-semibold"
-        >
+        <button type="submit" className="btn btn-primary">
           {t.pages.trip.submit}
         </button>
       </form>

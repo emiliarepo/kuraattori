@@ -86,7 +86,7 @@ export default async function ExhibitionDetailPage({
   const city = exhibition.museum.city;
 
   return (
-    <article className="py-6 sm:py-8">
+    <article className="py-8">
       <nav
         aria-label={t.pages.detail.breadcrumb}
         className="text-muted font-sans text-xs"

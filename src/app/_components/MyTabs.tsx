@@ -32,7 +32,7 @@ export function MyTabs() {
               key={tab.href}
               href={tab.href}
               aria-current={active ? "page" : undefined}
-              className={`text-kicker -mb-px border-b-2 px-3 py-3 whitespace-nowrap transition-colors duration-150 first:pl-0 sm:px-4 ${
+              className={`text-kicker -mb-px border-b-2 px-3 py-3.5 whitespace-nowrap transition-colors duration-150 first:pl-0 sm:px-4 ${
                 active ? "border-b-signal text-signal" : "border-b-transparent"
               }`}
             >
@@ -56,7 +56,7 @@ export function MyTabs() {
                 scroll: false,
               });
             }}
-            className="border-rule-soft bg-bg text-fg focus:border-fg border px-2 py-1.5 text-sm font-normal tracking-normal normal-case"
+            className="border-rule-soft bg-bg text-fg focus:border-fg min-h-11 border px-2 py-1.5 text-sm font-normal tracking-normal normal-case"
           >
             {MY_SORTS[status].map((option) => (
               <option key={option} value={option}>

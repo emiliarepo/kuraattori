@@ -57,7 +57,7 @@ export function FollowToggle({
             ? t.ui.follow.unfollowLabel(museumName)
             : t.ui.follow.followLabel(museumName)
         }
-        className={`border-rule border px-3 py-1.5 font-sans text-sm font-semibold transition-colors duration-150 ${
+        className={`border-rule min-h-11 border px-3 py-1.5 font-sans text-sm font-semibold transition-colors duration-150 ${
           following ? "bg-signal text-on-signal" : "hover:bg-surface"
         } ${className}`}
       >

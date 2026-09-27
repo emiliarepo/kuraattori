@@ -108,7 +108,7 @@ export function ExhibitionStatusControl({
               updateVisit.mutate({ exhibitionId, visitedOn, note })
             }
             disabled={updateVisit.isPending}
-            className="bg-fg text-bg self-start px-4 py-2 font-semibold disabled:opacity-60"
+            className="btn btn-primary self-start disabled:opacity-60"
           >
             {updateVisit.isPending
               ? t.pages.detail.saving

@@ -94,7 +94,7 @@ export default async function HomePage() {
   const [lead, ...forYouRest] = forYou;
 
   return (
-    <div className="pt-6 sm:pt-8">
+    <div className="pt-8">
       <h1 className="sr-only">{t.app.name}</h1>
 
       <div className="mb-4 flex justify-end">

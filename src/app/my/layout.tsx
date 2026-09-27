@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function MyLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="py-8">
-      <h1 className="text-headline mb-4 text-4xl sm:text-5xl">
+      <h1 className="text-headline mb-6 text-4xl sm:text-5xl">
         {t.ui.nav.mine}
       </h1>
       <MyTabs />

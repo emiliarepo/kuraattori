@@ -48,7 +48,7 @@ export function ExhibitionListClient({
           type="button"
           onClick={loadMore}
           disabled={loading}
-          className="border-rule hover:bg-surface mt-6 w-full border py-3 font-sans text-sm font-semibold disabled:opacity-60"
+          className="btn btn-secondary mt-6 w-full disabled:opacity-60"
         >
           {loading ? t.pages.browse.loading : t.pages.browse.loadMore}
         </button>
