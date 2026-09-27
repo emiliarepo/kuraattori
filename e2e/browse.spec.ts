@@ -73,3 +73,25 @@ test("load more keeps the scroll position and focus", async ({ page }) => {
   expect(await page.evaluate(() => window.scrollY)).toBe(scrollY);
   await expect(loadMore).toBeFocused();
 });
+
+test("a city filter overrides the masthead region", async ({ page }) => {
+  await page.goto("/exhibitions");
+  const byline = await page
+    .getByRole("main")
+    .locator("ul > li p.italic")
+    .first()
+    .textContent();
+  const city = byline!.split(", ").at(-1)!;
+  const capital = ["Helsinki", "Espoo", "Vantaa", "Kauniainen"];
+  const otherRegion = capital.includes(city) ? "Tampere" : "Pääkaupunkiseutu";
+
+  await page.getByRole("button", { name: t.ui.region.allRegions }).click();
+  const dialog = page.getByRole("dialog", { name: t.ui.region.sheetTitle });
+  await dialog.getByRole("checkbox", { name: otherRegion }).check();
+  await page.waitForLoadState("networkidle");
+
+  await page.goto(`/exhibitions?city=${encodeURIComponent(city)}`);
+  await expect(page.getByRole("main").locator("ul > li").first()).toContainText(
+    city,
+  );
+});

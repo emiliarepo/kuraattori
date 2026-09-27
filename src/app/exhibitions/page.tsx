@@ -8,6 +8,7 @@ import { StaleDataNotice } from "~/app/_components/StaleDataNotice";
 import {
   browseFiltersToListInput,
   browseFiltersToParams,
+  regionsForBrowse,
   parseBrowseFilters,
 } from "~/app/_lib/browse-filters";
 import { listAcrossRegionsPages } from "~/app/_lib/list-across-regions";
@@ -66,7 +67,7 @@ export default async function ExhibitionsPage({
     limit: await browsePageSize(),
   };
   const { items, nextCursor } = await listAcrossRegionsPages(
-    activeRegions,
+    regionsForBrowse(filters, activeRegions),
     listInputBase,
     filters.page,
   );
