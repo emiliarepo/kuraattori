@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "kuraattori-v2";
+const CACHE_NAME = "kuraattori-v3";
 const worker = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (globalThis)
 );
