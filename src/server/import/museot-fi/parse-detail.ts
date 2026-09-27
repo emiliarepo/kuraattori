@@ -84,7 +84,7 @@ export function parseDetailPage(html: string): RawDetail | undefined {
 function parseAdmissionText(root: HTMLElement): string | undefined {
   const lines: string[] = [];
   let node = root.querySelector("h2.paasymaksut")?.nextElementSibling;
-  while (node && node.tagName === "P") {
+  while (node?.tagName === "P") {
     if (!node.querySelector("a[href*='/osta']")) {
       const text = node.text.replace(/\s+/g, " ").trim();
       if (text) lines.push(text);
