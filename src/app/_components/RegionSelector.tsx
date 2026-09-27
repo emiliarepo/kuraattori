@@ -104,7 +104,7 @@ export function RegionSelector({
                   >
                     {group.map((region) => (
                       <li key={region}>
-                        <label className="flex min-h-11 items-center gap-2">
+                        <label className="flex min-h-11 items-center gap-2 sm:min-h-8">
                           <input
                             type="checkbox"
                             checked={selected.includes(region)}

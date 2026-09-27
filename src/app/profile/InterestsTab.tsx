@@ -55,8 +55,11 @@ export function InterestsTab({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <p aria-live="polite" className="text-kicker text-muted min-h-[1lh]">
+    <div className="relative flex flex-col gap-3">
+      <p
+        aria-live="polite"
+        className="text-kicker text-muted absolute -top-5 right-0"
+      >
         {announcement}
       </p>
       <InterestsList
