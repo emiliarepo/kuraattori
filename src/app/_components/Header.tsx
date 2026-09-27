@@ -32,13 +32,7 @@ export async function Header({
       <LandingSwitch
         signedIn={!!session?.user}
         landing={
-          <div className="relative flex flex-col items-center pt-10 sm:pt-16">
-            <Link
-              href="/sign-in"
-              className="hover:text-signal absolute top-4 right-0 hidden font-sans text-[0.8125rem] sm:top-7 sm:inline"
-            >
-              {t.auth.signInLink}
-            </Link>
+          <div className="flex flex-col items-center pt-10 sm:pt-16">
             <h1 className="landing-rise text-headline text-center text-[20vw] leading-[0.85] tracking-[-0.04em] italic sm:text-[9.5rem]">
               {t.app.name}
             </h1>
