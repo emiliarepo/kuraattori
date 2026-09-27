@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useOptimistic, useTransition } from "react";
 
 import { MY_SORTS, sortForStatus, type MyStatus } from "~/domain/my-sort";
 import { t } from "~/i18n/fi";
@@ -22,6 +23,8 @@ export function MyTabs() {
     status && status in MY_SORTS
       ? sortForStatus(status, searchParams.get("sort"))
       : null;
+  const [, startTransition] = useTransition();
+  const [shownSort, setShownSort] = useOptimistic(sort);
 
   return (
     <div className="border-rule-soft flex flex-col border-b lg:flex-row lg:items-center lg:justify-between">
@@ -49,15 +52,18 @@ export function MyTabs() {
         <label className="text-kicker flex items-center gap-2 self-end py-2 lg:self-auto lg:py-0">
           {t.pages.my.sortLabel}
           <select
-            value={sort}
+            value={shownSort ?? undefined}
             onChange={(event) => {
-              const next = event.target.value;
+              const next = event.target.value as NonNullable<typeof sort>;
               const params = new URLSearchParams(searchParams);
               if (next === MY_SORTS[status][0]) params.delete("sort");
               else params.set("sort", next);
               const query = params.toString();
-              router.push(query ? `${pathname}?${query}` : pathname, {
-                scroll: false,
+              startTransition(() => {
+                setShownSort(next);
+                router.push(query ? `${pathname}?${query}` : pathname, {
+                  scroll: false,
+                });
               });
             }}
             className="border-rule-soft bg-bg text-fg focus:border-fg h-11 border px-2 text-sm font-normal tracking-normal normal-case lg:h-9"
