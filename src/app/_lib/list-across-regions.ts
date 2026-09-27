@@ -33,3 +33,27 @@ export async function listAcrossRegions(
     .slice(0, input.limit ?? 20);
   return { items, nextCursor: null };
 }
+
+interface NewInput {
+  limit?: number;
+}
+
+/** Same merge as `listAcrossRegions`, for `exhibition.new`'s unpaged array shape, newest first. */
+export async function listNewAcrossRegions(
+  activeRegions: readonly string[],
+  input: NewInput,
+): Promise<ExhibitionWithDetails[]> {
+  if (activeRegions.length <= 1) {
+    return api.exhibition.new({ ...input, region: activeRegions[0] });
+  }
+
+  const pages = await Promise.all(
+    activeRegions.map((region) => api.exhibition.new({ ...input, region })),
+  );
+  const seen = new Set<number>();
+  return pages
+    .flat()
+    .filter((item) => (seen.has(item.id) ? false : (seen.add(item.id), true)))
+    .sort((a, b) => b.startDate.localeCompare(a.startDate) || b.id - a.id)
+    .slice(0, input.limit ?? 20);
+}

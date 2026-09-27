@@ -27,6 +27,8 @@ import {
 import type { createTRPCContext } from "~/server/api/trpc";
 import type { Db } from "~/server/db";
 
+const NEW_WITHIN_DAYS = 30;
+
 const ids = z.array(z.number().int().positive()).max(40);
 const listInput = z.object({
   region: z.string().min(1).optional(),
@@ -245,16 +247,28 @@ export const exhibitionRouter = createTRPCRouter({
   new: publicProcedure
     .input(
       z
-        .object({ limit: z.number().int().min(1).max(50).default(20) })
+        .object({
+          region: z.string().min(1).optional(),
+          limit: z.number().int().min(1).max(50).default(20),
+        })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
+      const today = todayInHelsinki();
+      const openedSince = new Date(`${today}T00:00:00Z`);
+      openedSince.setUTCDate(openedSince.getUTCDate() - NEW_WITHIN_DAYS);
+      const filters = [
+        whereVisible(ctx.session?.user?.id ?? null),
+        gte(exhibitions.startDate, openedSince.toISOString().slice(0, 10)),
+        lte(exhibitions.startDate, today),
+      ];
+      if (input?.region) filters.push(eq(museums.region, input.region));
       const rows = await ctx.db
         .select(selectExhibitions())
         .from(exhibitions)
         .innerJoin(museums, eq(exhibitions.museumId, museums.id))
-        .where(whereVisible(ctx.session?.user?.id ?? null))
-        .orderBy(desc(exhibitions.createdAt), desc(exhibitions.id))
+        .where(and(...filters))
+        .orderBy(desc(exhibitions.startDate), desc(exhibitions.id))
         .limit(input?.limit ?? 20);
       return withDetails(ctx.db, rows, ctx.session?.user?.id ?? null);
     }),
