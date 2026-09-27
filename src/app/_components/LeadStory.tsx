@@ -32,6 +32,7 @@ export function LeadStory({
         alt={imageAlt}
         title={title}
         aspectRatio="3 / 2"
+        priority
       />
       <div className="flex flex-col gap-2 sm:pb-1">
         <p className="text-kicker text-signal">{kicker}</p>

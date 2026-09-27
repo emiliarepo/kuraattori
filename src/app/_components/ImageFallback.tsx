@@ -7,11 +7,14 @@ export function ImageFallback({
   alt,
   title,
   aspectRatio = "4 / 3",
+  priority = false,
 }: {
   src?: string | null;
   alt: string;
   title: string;
   aspectRatio?: string;
+  /** The lead story image: loads eagerly at high priority instead of lazily. */
+  priority?: boolean;
 }) {
   const [broken, setBroken] = useState(false);
   const checkedRef = useRef(false);
@@ -44,6 +47,9 @@ export function ImageFallback({
         src={src}
         alt={alt}
         onError={() => setBroken(true)}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        fetchPriority={priority ? "high" : undefined}
         className="h-full w-full object-cover"
       />
     </div>
