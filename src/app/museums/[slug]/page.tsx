@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
+import { MuseumAddress } from "~/app/_components/MuseumAddress";
 import { Section } from "~/app/_components/Section";
 import { toRowView } from "~/app/_lib/row";
 import { todayInHelsinki } from "~/domain/dates";
@@ -65,6 +66,11 @@ export default async function MuseumDetailPage({
       <h1 className="text-headline text-4xl sm:text-6xl">{museum.name}</h1>
       {museum.city && (
         <p className="text-muted mt-2 text-xl italic">{museum.city}</p>
+      )}
+      {museum.address && (
+        <div className="mt-3">
+          <MuseumAddress name={museum.name} address={museum.address} />
+        </div>
       )}
       {museum.websiteUrl && (
         <a

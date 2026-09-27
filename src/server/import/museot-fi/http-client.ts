@@ -3,12 +3,13 @@ const USER_AGENT =
 const MIN_INTERVAL_MS = 550; // stays under museot.fi's ~2 req/s budget
 
 export class MuseotFiHttpClient {
-  private lastRequestAt = 0;
+  private nextRequestAt = 0;
 
   async getText(path: string): Promise<string> {
-    const wait = this.lastRequestAt + MIN_INTERVAL_MS - Date.now();
+    const requestAt = Math.max(this.nextRequestAt, Date.now());
+    this.nextRequestAt = requestAt + MIN_INTERVAL_MS;
+    const wait = requestAt - Date.now();
     if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
-    this.lastRequestAt = Date.now();
 
     const url = new URL(path, "https://museot.fi/");
     const response = await fetch(url, {

@@ -20,6 +20,7 @@ import {
   upsertCategory,
   upsertExhibition,
   upsertMuseum,
+  updateMuseumLocation,
 } from "./upsert";
 
 export interface ImportRunStats {
@@ -254,6 +255,25 @@ async function performImport(
     );
   }
 
+  let museumFailures = 0;
+  if (adapter.fetchMuseumLocation) {
+    const changedMuseumIds = new Set(
+      result.changed.map((item) => item.museum.sourceId),
+    );
+    for (const [sourceId, museum] of existingMuseums) {
+      if (museum.address && !changedMuseumIds.has(sourceId)) continue;
+      try {
+        const location = await adapter.fetchMuseumLocation(
+          sourceId,
+          museum.city,
+        );
+        if (location) await updateMuseumLocation(db, museum.id, location);
+      } catch {
+        museumFailures++;
+      }
+    }
+  }
+
   let itemsUnchanged = 0;
   for (const exhibition of result.unchanged) {
     seenSourceIds.add(exhibition.sourceId);
@@ -293,7 +313,7 @@ async function performImport(
     itemsUpdated,
     itemsUnchanged,
     itemsMissing,
-    itemsFailed: result.failedCount,
+    itemsFailed: result.failedCount + museumFailures,
     groupedExamples,
     noticeTitles,
   };

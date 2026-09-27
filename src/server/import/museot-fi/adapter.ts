@@ -7,6 +7,7 @@ import { MuseotFiHttpClient } from "./http-client";
 import { hashListingItem, normalizeExhibition } from "./normalize";
 import { parseDetailPage } from "./parse-detail";
 import { parseListingPage, type RawListingItem } from "./parse-listing";
+import { parseMuseumPage } from "./parse-museum";
 
 const LISTING_PATH = "/nayttelykalenteri/index.php?kaikki=1";
 
@@ -47,11 +48,16 @@ async function fetchMaakuntaByCity(
 }
 
 export function createMuseotFiAdapter(): ExhibitionSourceAdapter {
+  const client = new MuseotFiHttpClient();
   return {
     name: "museot.fi",
+    async fetchMuseumLocation(sourceId, city) {
+      const html = await client.getText(
+        `/museohaku/index.php?museo_id=${sourceId}`,
+      );
+      return parseMuseumPage(html, city);
+    },
     async fetchExhibitions(knownHashes): Promise<FetchExhibitionsResult> {
-      const client = new MuseotFiHttpClient();
-
       const listingHtml = await client.getText(LISTING_PATH);
       const listing = parseListingPage(listingHtml);
 

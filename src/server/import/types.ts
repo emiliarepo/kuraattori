@@ -12,6 +12,12 @@ export interface NormalizedMuseum {
   websiteUrl: string | undefined;
 }
 
+export interface MuseumLocation {
+  address: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 export interface NormalizedExhibition {
   sourceId: string;
   museum: NormalizedMuseum;
@@ -66,4 +72,8 @@ export interface ExhibitionSourceAdapter {
     knownHashes: ReadonlyMap<string, string>,
   ) => Promise<FetchExhibitionsResult>;
   fetchMuseums?: () => Promise<NormalizedMuseum[]>;
+  fetchMuseumLocation?: (
+    sourceId: string,
+    city: string | null | undefined,
+  ) => Promise<MuseumLocation | undefined>;
 }
