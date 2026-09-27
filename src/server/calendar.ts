@@ -38,40 +38,104 @@ export function foldCalendarLine(line: string) {
   return folded.join("\r\n");
 }
 
-export function formatCalendar(
-  events: readonly CalendarEvent[],
-  now = new Date(),
-) {
-  const stamp = now
+function calendarStamp(date: Date) {
+  return date
     .toISOString()
     .replaceAll("-", "")
     .replaceAll(":", "")
     .replace(/\.\d{3}Z$/, "Z");
+}
+
+function wrapCalendar(events: readonly string[][]) {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Kuraattori//Calendar//FI",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
+    ...events.flatMap((event) => ["BEGIN:VEVENT", ...event, "END:VEVENT"]),
+    "END:VCALENDAR",
   ];
-  for (const event of events) {
-    const end = new Date(`${event.endDate}T00:00:00Z`);
-    end.setUTCDate(end.getUTCDate() + 1);
-    lines.push(
-      "BEGIN:VEVENT",
+  return `${lines.map(foldCalendarLine).join("\r\n")}\r\n`;
+}
+
+export function formatCalendar(
+  events: readonly CalendarEvent[],
+  now = new Date(),
+) {
+  const stamp = calendarStamp(now);
+  return wrapCalendar(
+    events.map((event) => {
+      const end = new Date(`${event.endDate}T00:00:00Z`);
+      end.setUTCDate(end.getUTCDate() + 1);
+      return [
+        `UID:${escapeCalendarText(event.uid)}`,
+        `DTSTAMP:${stamp}`,
+        `DTSTART;VALUE=DATE:${event.endDate.replaceAll("-", "")}`,
+        `DTEND;VALUE=DATE:${end.toISOString().slice(0, 10).replaceAll("-", "")}`,
+        `SUMMARY:${escapeCalendarText(`Päättyy: ${event.title}`)}`,
+        `LOCATION:${escapeCalendarText(event.location)}`,
+        `DESCRIPTION:${escapeCalendarText(`${event.startDate}–${event.endDate}\n${event.url}`)}`,
+        `URL:${escapeCalendarText(event.url)}`,
+      ];
+    }),
+  );
+}
+
+/** The UTC instant of a wall-clock `date` + `time` in Europe/Helsinki. */
+export function helsinkiTimeToUtc(date: string, time: string): Date {
+  const wall = Date.parse(`${date}T${time}:00Z`);
+  const offsetAt = (instant: number) => {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Helsinki",
+        hourCycle: "h23",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+        .formatToParts(new Date(instant))
+        .map((part) => [part.type, part.value]),
+    );
+    return (
+      Date.parse(
+        `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}:00Z`,
+      ) - instant
+    );
+  };
+  const guess = wall - offsetAt(wall);
+  return new Date(wall - offsetAt(guess));
+}
+
+export type TimedCalendarEvent = {
+  uid: string;
+  start: Date;
+  end: Date;
+  title: string;
+  location: string;
+  description: string;
+  url: string;
+};
+
+export function formatTimedCalendar(
+  events: readonly TimedCalendarEvent[],
+  now = new Date(),
+) {
+  const stamp = calendarStamp(now);
+  return wrapCalendar(
+    events.map((event) => [
       `UID:${escapeCalendarText(event.uid)}`,
       `DTSTAMP:${stamp}`,
-      `DTSTART;VALUE=DATE:${event.endDate.replaceAll("-", "")}`,
-      `DTEND;VALUE=DATE:${end.toISOString().slice(0, 10).replaceAll("-", "")}`,
-      `SUMMARY:${escapeCalendarText(`Päättyy: ${event.title}`)}`,
+      `DTSTART:${calendarStamp(event.start)}`,
+      `DTEND:${calendarStamp(event.end)}`,
+      `SUMMARY:${escapeCalendarText(event.title)}`,
       `LOCATION:${escapeCalendarText(event.location)}`,
-      `DESCRIPTION:${escapeCalendarText(`${event.startDate}–${event.endDate}\n${event.url}`)}`,
+      `DESCRIPTION:${escapeCalendarText(event.description)}`,
       `URL:${escapeCalendarText(event.url)}`,
-      "END:VEVENT",
-    );
-  }
-  lines.push("END:VCALENDAR");
-  return `${lines.map(foldCalendarLine).join("\r\n")}\r\n`;
+    ]),
+  );
 }
 
 export type CalendarEvent = {
