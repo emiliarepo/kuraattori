@@ -64,6 +64,13 @@
       "when": 1790507346272,
       "tag": "0008_complete_chronomancer",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1790508863324,
+      "tag": "0009_luxuriant_eternals",
+      "breakpoints": true
     }
   ]
 }
