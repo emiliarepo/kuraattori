@@ -9,7 +9,7 @@ test("a visited museum shows a stamp in the Museopassi", async ({
 }) => {
   await devSignIn(page, uniqueEmail("passport"), "/");
   await page
-    .getByRole("link", { name: /Oliver Beer/ })
+    .getByRole("link", { name: /Intervallum/ })
     .first()
     .click();
   await Promise.all([
@@ -26,7 +26,7 @@ test("a visited museum shows a stamp in the Museopassi", async ({
 
   await page.goto("/my/passport");
   const stamp = page.getByRole("link", {
-    name: /^Museopassi-leima: Nykytaiteen museo Kiasma, Helsinki, käyty \d{1,2}\.\d{1,2}\.\d{4}$/,
+    name: /^Museopassi-leima: LUOMUS Kaisaniemen kasvitieteellinen puutarha, Helsinki, käyty \d{1,2}\.\d{1,2}\.\d{4}$/,
   });
   await expect(stamp).toBeVisible();
   await expect(page.getByText(/^1 \/ \d+ museota$/)).toBeVisible();
