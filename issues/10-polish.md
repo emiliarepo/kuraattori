@@ -1,5 +1,5 @@
 # 10 Polish from the end-to-end walk
-Status: todo · Model: Sonnet 5 · Blocked by: none
+Status: done · Model: Sonnet 5 · Blocked by: none
 
 Found while walking the MVP flow on 27.9.2026 against the real import:
 
