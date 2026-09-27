@@ -67,3 +67,7 @@ signed-in path adds per-user D1 reads (session, locale, hidden, interested, save
 some of them run one after another. That path, or a cold isolate, is the remaining suspect.
 To continue, capture one slow click in DevTools (HAR, or the `/trip/day?...&_rsc=` request's
 timing) while signed in.
+
+## Follow-up (orchestrator, 27.9.2026)
+
+Likely cause of the reported slowness: the zone WAF rate limit (60 requests / 10 s per IP, 10 s block) combined with Next.js viewport prefetching of every list link. A blocked `_rsc` request looks like a very slow click. Prefetching now happens on intent only (commit "Prefetch list links on intent"), and the owner is raising the rule to 200 / 10 s. Reopen with a signed-in timing capture if it is still slow after both.
