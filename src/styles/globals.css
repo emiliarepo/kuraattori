@@ -11,20 +11,46 @@
   --color-on-signal: var(--on-signal);
   --color-surface: var(--surface);
 
-  --font-sans: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif,
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
-/* Heavy wall-label headline: 44px/0.92 tracked to -0.05em is the reference size; callers set font-size. */
 @utility text-headline {
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  line-height: 0.92;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  font-variant-numeric: lining-nums;
+}
+
+@utility text-kicker {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+@utility rail {
+  display: flex;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-soft) transparent;
+
+  & > * {
+    flex: none;
+    scroll-snap-align: start;
+  }
 }
 
 @layer base {
   body {
-    @apply bg-bg text-fg;
+    @apply bg-bg text-fg font-serif;
+    font-variant-numeric: lining-nums;
   }
 
   :focus-visible {

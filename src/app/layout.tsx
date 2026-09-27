@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Archivo } from "next/font/google";
+import { Inter, Newsreader } from "next/font/google";
 
 import { AppShell } from "~/app/_components/AppShell";
 import { t } from "~/i18n/fi";
@@ -20,17 +20,23 @@ export const metadata: Metadata = {
   },
 };
 
-const grotesk = Archivo({
+const newsreader = Newsreader({
   subsets: ["latin"],
-  weight: ["400", "600", "800"],
-  variable: "--font-grotesk",
+  style: ["normal", "italic"],
+  axes: ["opsz"],
+  variable: "--font-newsreader",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="fi" className={grotesk.variable}>
+    <html lang="fi" className={`${newsreader.variable} ${inter.variable}`}>
       <body className="bg-bg text-fg">
         <TRPCReactProvider>
           <AppShell>{children}</AppShell>
