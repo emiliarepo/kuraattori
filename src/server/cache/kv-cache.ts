@@ -1,5 +1,11 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
+import journal from "../../../drizzle/meta/_journal.json";
+
+// Cached shapes follow the schema: a new migration starts fresh keys instead
+// of serving pre-migration entries until their TTL runs out.
+const KEY_PREFIX = `${journal.entries.at(-1)?.tag ?? "0"}:`;
+
 async function getCacheBinding(): Promise<KVNamespace | null> {
   try {
     const { env } = await getCloudflareContext({ async: true });
@@ -24,10 +30,12 @@ export async function cached<T>(
   const kv = await getCacheBinding();
   if (!kv) return load();
 
-  const stored = await kv.get<T>(key, "json");
+  const stored = await kv.get<T>(KEY_PREFIX + key, "json");
   if (stored !== null) return stored;
 
   const value = await load();
-  await kv.put(key, JSON.stringify(value), { expirationTtl: ttlSeconds });
+  await kv.put(KEY_PREFIX + key, JSON.stringify(value), {
+    expirationTtl: ttlSeconds,
+  });
   return value;
 }

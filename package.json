@@ -18,7 +18,7 @@
     "start": "next start",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "e2e:prepare": "wrangler d1 migrations apply DB --local --persist-to .wrangler/state-e2e && wrangler d1 migrations apply DB --local --persist-to .wrangler/state-e2e-prodcheck && tsx scripts/e2e-seed.ts",
+    "e2e:prepare": "rm -rf .wrangler/state-e2e/v3/kv && wrangler d1 migrations apply DB --local --persist-to .wrangler/state-e2e && wrangler d1 migrations apply DB --local --persist-to .wrangler/state-e2e-prodcheck && tsx scripts/e2e-seed.ts",
     "test:e2e": "opennextjs-cloudflare build && pnpm run e2e:prepare && playwright test",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
