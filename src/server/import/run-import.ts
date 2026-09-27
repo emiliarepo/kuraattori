@@ -12,6 +12,7 @@ import { classify } from "./grouping";
 import { importSanityError } from "./sanity";
 import type { ExhibitionSourceAdapter } from "./types";
 import {
+  applyTranslation,
   loadExistingCategories,
   loadExistingExhibitions,
   loadExistingMuseums,
@@ -39,6 +40,12 @@ export interface ImportRunStats {
   noticeTitles: string[];
   /** Museums whose opening hours were missing or unparseable; their previous hours are kept. */
   hoursUnparsed: string[];
+  /** Exhibitions whose English/Swedish text was stored this run. */
+  translationsUpdated: number;
+  /** Translated detail pages that failed; retried next run. */
+  translationsFailed: number;
+  /** Requests made for English and Swedish pages. */
+  translationRequests: number;
 }
 
 async function reportGroupingAndNotices(
@@ -174,6 +181,9 @@ export async function runImport(
       groupedExamples: [],
       noticeTitles: [],
       hoursUnparsed: [],
+      translationsUpdated: 0,
+      translationsFailed: 0,
+      translationRequests: 0,
     };
   }
 }
@@ -195,7 +205,15 @@ async function performImport(
       row.sourcePayloadHash,
     ]),
   );
-  const result = await adapter.fetchExhibitions(knownHashes);
+  const knownTranslationHashes = new Map(
+    [...existingExhibitions].flatMap(([sourceId, row]) =>
+      row.translationHash ? [[sourceId, row.translationHash] as const] : [],
+    ),
+  );
+  const result = await adapter.fetchExhibitions(
+    knownHashes,
+    knownTranslationHashes,
+  );
 
   const museumSlugs = new Set(
     [...existingMuseums.values()].map((row) => row.slug),
@@ -313,6 +331,14 @@ async function performImport(
 
   await syncExhibitionCategories(db, membershipByExhibitionId);
 
+  let translationsUpdated = 0;
+  for (const translation of result.translations) {
+    const existing = existingExhibitions.get(translation.sourceId);
+    if (!existing) continue; // its Finnish detail failed this run; retried with it
+    await applyTranslation(db, existing, translation);
+    translationsUpdated++;
+  }
+
   const itemsMissing = [...previousSourceIds].filter(
     (id) => !seenSourceIds.has(id),
   ).length;
@@ -329,5 +355,8 @@ async function performImport(
     groupedExamples,
     noticeTitles,
     hoursUnparsed,
+    translationsUpdated,
+    translationsFailed: result.translationsFailed,
+    translationRequests: result.translationRequests,
   };
 }

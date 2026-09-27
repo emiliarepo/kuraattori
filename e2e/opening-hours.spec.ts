@@ -50,7 +50,7 @@ test("museum page lists the week's hours with today marked", async ({
   const freeDay = nextFreeDay(kiasmaFreeDays, today);
   if (freeDay)
     await expect(hours).toContainText(
-      t.pages.hours.nextFreeDay(formatDayMonth(freeDay)),
+      t.pages.hours.nextFreeDay(formatDayMonth(freeDay, "fi")),
     );
   assertPageClean();
 });
@@ -79,7 +79,7 @@ test("exhibition page says whether the museum is open today", async ({
   const freeDay = nextFreeDay(kiasmaFreeDays, today, 14);
   if (freeDay)
     await expect(meta).toContainText(
-      t.pages.hours.nextFreeDay(formatDayMonth(freeDay)),
+      t.pages.hours.nextFreeDay(formatDayMonth(freeDay, "fi")),
     );
   assertPageClean();
 });

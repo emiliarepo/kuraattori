@@ -1,26 +1,28 @@
-const monthFormat = new Intl.DateTimeFormat("fi-FI", {
-  month: "short",
-  timeZone: "UTC",
-});
-const monthLongFormat = new Intl.DateTimeFormat("fi-FI", {
-  month: "long",
-  timeZone: "UTC",
-});
-const dateFormat = new Intl.DateTimeFormat("fi-FI", {
-  timeZone: "Europe/Helsinki",
-  day: "numeric",
-  month: "numeric",
-  year: "numeric",
-});
+import { INTL_LOCALE, type Locale } from "~/i18n/locales";
 
-export function monthLabel(month: number): string {
-  return monthFormat.format(new Date(Date.UTC(2024, month - 1, 1)));
+function monthDate(month: number): Date {
+  return new Date(Date.UTC(2024, month - 1, 1));
 }
 
-export function monthName(month: number): string {
-  return monthLongFormat.format(new Date(Date.UTC(2024, month - 1, 1)));
+export function monthLabel(month: number, locale: Locale): string {
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+    month: "short",
+    timeZone: "UTC",
+  }).format(monthDate(month));
 }
 
-export function formatVisitDate(visitedAt: Date): string {
-  return dateFormat.format(visitedAt);
+export function monthName(month: number, locale: Locale): string {
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+    month: "long",
+    timeZone: "UTC",
+  }).format(monthDate(month));
+}
+
+export function formatVisitDate(visitedAt: Date, locale: Locale): string {
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+    timeZone: "Europe/Helsinki",
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  }).format(visitedAt);
 }

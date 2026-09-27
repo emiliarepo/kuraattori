@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 export type ExhibitionStatus = "interested" | "visited" | "hidden";
 
@@ -11,12 +11,6 @@ const STATUS_ORDER: readonly ExhibitionStatus[] = [
   "visited",
   "hidden",
 ];
-
-export const STATUS_LABEL: Record<ExhibitionStatus, string> = {
-  interested: t.ui.status.interested,
-  visited: t.ui.status.visited,
-  hidden: t.ui.status.hidden,
-};
 
 export function StatusActions({
   status,
@@ -27,13 +21,14 @@ export function StatusActions({
   onChange: (status: ExhibitionStatus | null) => void;
   disabledStatuses?: readonly ExhibitionStatus[];
 }) {
+  const { t } = useI18n();
   const [announcement, setAnnouncement] = useState("");
 
   function handleClick(value: ExhibitionStatus) {
     const next = status === value ? null : value;
     setAnnouncement(
       next
-        ? t.ui.status.announceSet(STATUS_LABEL[next])
+        ? t.ui.status.announceSet(t.ui.status[next])
         : t.ui.status.announceCleared,
     );
     onChange(next);
@@ -55,7 +50,7 @@ export function StatusActions({
                 index > 0 ? "border-l" : ""
               } ${pressed ? "bg-signal text-on-signal" : "hover:bg-surface"} ${disabledStatuses.includes(value) ? "cursor-not-allowed opacity-50" : ""}`}
             >
-              {STATUS_LABEL[value]}
+              {t.ui.status[value]}
             </button>
           );
         })}

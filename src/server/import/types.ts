@@ -3,6 +3,8 @@ import type { OpeningHours } from "~/domain/opening-hours";
 export interface NormalizedCategory {
   sourceId: string;
   name: string;
+  nameEn?: string;
+  nameSv?: string;
 }
 
 export interface NormalizedMuseum {
@@ -58,12 +60,35 @@ export interface UnchangedExhibition {
   categorySourceIds: string[];
 }
 
+/** Text from an English or Swedish page; a field is undefined when absent. */
+export interface TranslatedText {
+  title?: string;
+  description?: string;
+  museumName?: string;
+}
+
+/**
+ * English and Swedish text for one exhibition, produced only when its
+ * translated listing rows changed since `hash` was last stored.
+ */
+export interface ExhibitionTranslation {
+  sourceId: string;
+  hash: string;
+  en: TranslatedText;
+  sv: TranslatedText;
+}
+
 export interface FetchExhibitionsResult {
   categories: NormalizedCategory[];
   changed: NormalizedExhibition[];
   unchanged: UnchangedExhibition[];
+  translations: ExhibitionTranslation[];
   /** Listing rows that failed validation; counted, not thrown. */
   failedCount: number;
+  /** Translated detail pages that failed to load; retried next run. */
+  translationsFailed: number;
+  /** Requests made for English and Swedish pages this run. */
+  translationRequests: number;
 }
 
 /**
@@ -75,10 +100,12 @@ export interface ExhibitionSourceAdapter {
   readonly name: string;
   /**
    * `knownHashes` (source id → last-seen listing hash) lets the adapter skip
-   * re-fetching detail pages for exhibitions that haven't changed.
+   * re-fetching detail pages for exhibitions that haven't changed;
+   * `knownTranslationHashes` does the same for the English and Swedish pages.
    */
   fetchExhibitions: (
     knownHashes: ReadonlyMap<string, string>,
+    knownTranslationHashes: ReadonlyMap<string, string>,
   ) => Promise<FetchExhibitionsResult>;
   fetchMuseums?: () => Promise<NormalizedMuseum[]>;
   fetchMuseumPage?: (

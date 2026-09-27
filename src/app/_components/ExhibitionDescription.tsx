@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 
-import { t } from "~/i18n/fi";
+import { type LocalizedText } from "~/domain/localized";
+import { useI18n } from "~/i18n/client";
 
 const COLLAPSE_LENGTH = 600;
 
-export function ExhibitionDescription({ text }: { text: string }) {
+export function ExhibitionDescription({
+  description: { text, lang },
+}: {
+  description: LocalizedText;
+}) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const isLong = text.length > COLLAPSE_LENGTH;
   const shown =
@@ -14,7 +20,9 @@ export function ExhibitionDescription({ text }: { text: string }) {
 
   return (
     <div>
-      <p className="text-lg leading-relaxed whitespace-pre-line">{shown}</p>
+      <p lang={lang} className="text-lg leading-relaxed whitespace-pre-line">
+        {shown}
+      </p>
       {isLong && (
         <button
           type="button"

@@ -3,10 +3,13 @@
 import { useRef, useState } from "react";
 
 import { type VisitRating as Rating } from "~/domain/rating-nudges";
-import { t } from "~/i18n/fi";
+import type { Messages } from "~/i18n";
+import { useI18n } from "~/i18n/client";
 import { api } from "~/trpc/react";
 
-const OPTIONS: readonly { value: Rating; glyph: string; label: string }[] = [
+const options = (
+  t: Messages,
+): readonly { value: Rating; glyph: string; label: string }[] => [
   { value: "up", glyph: "👍", label: t.ui.rating.up },
   { value: "down", glyph: "👎", label: t.ui.rating.down },
 ];
@@ -18,6 +21,7 @@ export function VisitRating({
   exhibitionId: number;
   initialRating: Rating | null;
 }) {
+  const { t } = useI18n();
   const [rating, setRating] = useState(initialRating);
   const [announcement, setAnnouncement] = useState("");
   const [failed, setFailed] = useState(false);
@@ -33,7 +37,7 @@ export function VisitRating({
     setAnnouncement(
       next
         ? t.ui.rating.announceSet(
-            OPTIONS.find((option) => option.value === next)!.label,
+            options(t).find((option) => option.value === next)!.label,
           )
         : t.ui.rating.announceCleared,
     );
@@ -60,7 +64,7 @@ export function VisitRating({
         aria-label={t.ui.rating.group}
         className="border-rule flex border"
       >
-        {OPTIONS.map(({ value, glyph, label }, index) => {
+        {options(t).map(({ value, glyph, label }, index) => {
           const pressed = rating === value;
           return (
             <button

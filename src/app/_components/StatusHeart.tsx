@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { refreshStatusData } from "~/app/_components/refresh-status-action";
 import { type ExhibitionStatus } from "~/app/_components/StatusActions";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 import { api } from "~/trpc/react";
 
 const GLYPH: Record<"none" | ExhibitionStatus, string> = {
@@ -26,6 +26,7 @@ export function StatusHeart({
   status: ExhibitionStatus | null;
   className?: string;
 }) {
+  const { t } = useI18n();
   const [current, setCurrent] = useState(status);
   const [announcement, setAnnouncement] = useState("");
   const mutation = api.userExhibition.setStatus.useMutation();

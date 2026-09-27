@@ -4,6 +4,8 @@ import { z } from "zod";
 
 import { todayInHelsinki } from "~/domain/dates";
 import { MAX_DAY_STOPS } from "~/domain/day-plan";
+import { localized } from "~/domain/localized";
+import { INTL_LOCALE, LOCALES } from "~/i18n/locales";
 import { getRelevance, type UserPreferences } from "~/domain/relevance";
 import {
   createTRPCRouter,
@@ -151,7 +153,13 @@ export const tripRouter = createTRPCRouter({
    * exhibition at two museums in the same city is two possible stops.
    */
   day: publicProcedure
-    .input(z.object({ city: z.string().min(1), date: isoDate }))
+    .input(
+      z.object({
+        city: z.string().min(1),
+        date: isoDate,
+        locale: z.enum(LOCALES).default("fi"),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id ?? null;
       const [pool, isHidden] = await Promise.all([
@@ -189,29 +197,36 @@ export const tripRouter = createTRPCRouter({
         interested.map((row) => row.group).filter((group) => group !== null),
       );
 
+      const collator = new Intl.Collator(INTL_LOCALE[input.locale]);
       return rows
-        .map(({ exhibition, museum }) => ({
-          id: exhibition.id,
-          slug: exhibition.slug,
-          title: exhibition.titleFi,
-          startDate: exhibition.startDate,
-          endDate: exhibition.endDate,
-          museumName: museum.name,
-          museumSlug: museum.slug,
-          address: museum.address,
-          latitude: museum.latitude,
-          longitude: museum.longitude,
-          openingHours: museum.openingHours?.days ?? null,
-          interested:
-            interestedIds.has(exhibition.id) ||
-            (exhibition.exhibitionGroup !== null &&
-              interestedGroups.has(exhibition.exhibitionGroup)),
-        }))
+        .map(({ exhibition, museum }) => {
+          const title = localized(exhibition, "title", input.locale);
+          const museumName = localized(museum, "name", input.locale);
+          return {
+            id: exhibition.id,
+            slug: exhibition.slug,
+            title: title.text,
+            titleLang: title.lang,
+            startDate: exhibition.startDate,
+            endDate: exhibition.endDate,
+            museumName: museumName.text,
+            museumLang: museumName.lang,
+            museumSlug: museum.slug,
+            address: museum.address,
+            latitude: museum.latitude,
+            longitude: museum.longitude,
+            openingHours: museum.openingHours?.days ?? null,
+            interested:
+              interestedIds.has(exhibition.id) ||
+              (exhibition.exhibitionGroup !== null &&
+                interestedGroups.has(exhibition.exhibitionGroup)),
+          };
+        })
         .sort(
           (a, b) =>
             Number(b.interested) - Number(a.interested) ||
-            a.museumName.localeCompare(b.museumName, "fi") ||
-            a.title.localeCompare(b.title, "fi"),
+            collator.compare(a.museumName, b.museumName) ||
+            collator.compare(a.title, b.title),
         );
     }),
 

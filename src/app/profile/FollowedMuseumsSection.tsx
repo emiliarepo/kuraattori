@@ -3,11 +3,12 @@
 import { useState } from "react";
 
 import { FollowToggle } from "~/app/_components/FollowToggle";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 export interface FollowedMuseum {
   id: number;
   name: string;
+  lang?: "fi";
   slug: string;
   city: string | null;
 }
@@ -17,6 +18,7 @@ export function FollowedMuseumsSection({
 }: {
   initialMuseums: readonly FollowedMuseum[];
 }) {
+  const { t } = useI18n();
   const [museums, setMuseums] = useState(initialMuseums);
 
   return (
@@ -32,7 +34,7 @@ export function FollowedMuseumsSection({
               className="flex items-center justify-between gap-4"
             >
               <span className="text-lg">
-                {museum.name}
+                <span lang={museum.lang}>{museum.name}</span>
                 {museum.city && (
                   <span className="text-muted ml-2 text-sm italic">
                     {museum.city}

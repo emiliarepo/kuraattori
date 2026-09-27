@@ -11,7 +11,7 @@ import { StatFigure } from "~/app/profile/year/[yyyy]/StatFigure";
 import { toYearReviewVisits } from "~/app/profile/year/visits";
 import { formatEuros, summarizeSavings } from "~/domain/savings";
 import { summarizeYear } from "~/domain/year-review";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { api } from "~/trpc/server";
 
 export default async function ProfileYearPage({
@@ -19,6 +19,7 @@ export default async function ProfileYearPage({
 }: {
   params: Promise<{ yyyy: string }>;
 }) {
+  const { t, locale } = await getI18n();
   const { yyyy } = await params;
   if (!/^\d{4}$/.test(yyyy)) notFound();
   const requestedYear = Number(yyyy);
@@ -26,8 +27,9 @@ export default async function ProfileYearPage({
   const items = await api.my.list({
     status: "visited",
     sort: "visited-newest",
+    locale,
   });
-  const visits = toYearReviewVisits(items);
+  const visits = toYearReviewVisits(items, locale);
   const review = summarizeYear(visits, requestedYear);
   if (review?.year !== requestedYear) notFound();
 
@@ -77,11 +79,11 @@ export default async function ProfileYearPage({
 
       <Section title={t.pages.my.savings.label}>
         <p className="text-headline text-4xl tabular-nums sm:text-5xl">
-          {formatEuros(savings.savedCents)}
+          {formatEuros(savings.savedCents, locale)}
         </p>
         <p className="text-muted mt-2 text-lg italic">
           {t.pages.my.savings.sentence(
-            formatEuros(savings.savedCents),
+            formatEuros(savings.savedCents, locale),
             review.year,
           )}
         </p>
@@ -109,7 +111,7 @@ export default async function ProfileYearPage({
       <Section title={t.profile.year.months}>
         <p className="text-muted mb-3 italic">
           {t.profile.year.busiestMonth(
-            monthName(review.busiestMonth.month),
+            monthName(review.busiestMonth.month, locale),
             review.busiestMonth.count,
           )}
         </p>
@@ -120,7 +122,7 @@ export default async function ProfileYearPage({
               className="col-span-3 grid grid-cols-subgrid items-center py-1"
             >
               <span className="text-kicker text-muted">
-                {monthLabel(month.month)}
+                {monthLabel(month.month, locale)}
               </span>
               <span className="bg-rule-soft h-3 flex-1" aria-hidden>
                 <span
@@ -153,7 +155,7 @@ export default async function ProfileYearPage({
             <dd className="text-headline text-xl">{review.firstVisit.title}</dd>
             <dd className="text-muted italic">
               {review.firstVisit.museumName} ·{" "}
-              {formatVisitDate(review.firstVisit.visitedAt)}
+              {formatVisitDate(review.firstVisit.visitedAt, locale)}
             </dd>
           </div>
           {review.visitCount > 1 && (
@@ -166,7 +168,7 @@ export default async function ProfileYearPage({
               </dd>
               <dd className="text-muted italic">
                 {review.latestVisit.museumName} ·{" "}
-                {formatVisitDate(review.latestVisit.visitedAt)}
+                {formatVisitDate(review.latestVisit.visitedAt, locale)}
               </dd>
             </div>
           )}

@@ -8,7 +8,12 @@ import type { OpeningHours } from "~/domain/opening-hours";
 import { type Db } from "~/server/db";
 import * as schema from "~/server/db/schema";
 
-import { loadExistingMuseums, updateMuseumSchedule } from "./upsert";
+import {
+  applyTranslation,
+  loadExistingExhibitions,
+  loadExistingMuseums,
+  updateMuseumSchedule,
+} from "./upsert";
 
 const client = createClient({ url: ":memory:" });
 const db = drizzle(client, { schema }) as unknown as Db;
@@ -41,5 +46,61 @@ describe("updateMuseumSchedule", () => {
       .where(eq(schema.museums.id, existing.id));
     expect(row?.openingHours).toEqual(tuesdaysOnly);
     expect(row?.freeDays).toEqual(["2026-11-06"]);
+  });
+});
+
+describe("applyTranslation", () => {
+  it("stores translations, drops a description that repeats the Finnish one and names the museum", async () => {
+    const [museum] = await db
+      .insert(schema.museums)
+      .values({
+        source: "test",
+        sourceId: "m2",
+        name: "Kiasma",
+        slug: "kiasma",
+      })
+      .returning();
+    await db.insert(schema.exhibitions).values({
+      source: "test",
+      sourceId: "e1",
+      museumId: museum!.id,
+      slug: "luola",
+      titleFi: "Luola",
+      descriptionFi: "Suomeksi.",
+      startDate: "2026-09-01",
+      sourcePayloadHash: "h",
+    });
+    const existing = (await loadExistingExhibitions(db, "test")).get("e1")!;
+
+    await applyTranslation(db, existing, {
+      sourceId: "e1",
+      hash: "t1",
+      en: {
+        title: "The Cave",
+        description: "In English.",
+        museumName: "Museum of Contemporary Art Kiasma",
+      },
+      sv: { description: " Suomeksi. " },
+    });
+
+    const [row] = await db
+      .select()
+      .from(schema.exhibitions)
+      .where(eq(schema.exhibitions.id, existing.id));
+    expect(row).toMatchObject({
+      titleEn: "The Cave",
+      titleSv: null,
+      descriptionEn: "In English.",
+      descriptionSv: null,
+      translationHash: "t1",
+    });
+    const [museumRow] = await db
+      .select()
+      .from(schema.museums)
+      .where(eq(schema.museums.id, museum!.id));
+    expect(museumRow).toMatchObject({
+      nameEn: "Museum of Contemporary Art Kiasma",
+      nameSv: null,
+    });
   });
 });

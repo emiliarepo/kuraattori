@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useId, useState } from "react";
 
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 export function UserMenu({
   label,
@@ -12,6 +12,7 @@ export function UserMenu({
   label: string;
   signOutAction: () => Promise<void>;
 }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const panelId = useId();
 
@@ -31,7 +32,7 @@ export function UserMenu({
         <>
           <button
             type="button"
-            aria-label="Sulje"
+            aria-label={t.pages.browse.closeFilters}
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-10"
           />

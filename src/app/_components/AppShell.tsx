@@ -9,9 +9,10 @@ import {
 import { StaleDataNotice } from "~/app/_components/StaleDataNotice";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
+  const { t } = await getI18n();
   const session = await auth();
   // Falls back to 0 rather than crashing the masthead; the underlying
   // failure is already logged by the tRPC error-logging middleware.

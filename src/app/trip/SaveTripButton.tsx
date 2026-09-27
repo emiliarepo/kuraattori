@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 import { api, type RouterInputs } from "~/trpc/react";
 
 export function SaveTripButton({
@@ -11,6 +11,7 @@ export function SaveTripButton({
 }: {
   trip: RouterInputs["trip"]["save"];
 }) {
+  const { t } = useI18n();
   const router = useRouter();
   const [message, setMessage] = useState("");
   const save = api.trip.save.useMutation({

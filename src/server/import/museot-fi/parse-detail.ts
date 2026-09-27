@@ -31,12 +31,7 @@ export function parseDetailPage(html: string): RawDetail | undefined {
     city = cityText.replace(/^[,\s]+/, "").trim() || undefined;
   }
 
-  const description = root
-    .querySelector(".p_1")
-    ?.children.filter((child) => child.tagName === "P")
-    .map((p) => p.text.trim())
-    .filter(Boolean)
-    .join("\n\n");
+  const description = parseDescription(root);
 
   const imageSrc = root
     .querySelector(".paakuva img")
@@ -67,7 +62,7 @@ export function parseDetailPage(html: string): RawDetail | undefined {
     museumSourceId,
     museumName,
     city,
-    description: description === "" ? undefined : description,
+    description,
     startDate: range?.startDate,
     endDate: range?.endDate,
     imageUrl: imageSrc ? new URL(imageSrc, BASE_URL).href : undefined,
@@ -79,6 +74,17 @@ export function parseDetailPage(html: string): RawDetail | undefined {
 
   const result = detailSchema.safeParse(candidate);
   return result.success ? result.data : undefined;
+}
+
+/** The description paragraphs, the same on the Finnish, English and Swedish pages. */
+export function parseDescription(root: HTMLElement): string | undefined {
+  const text = root
+    .querySelector(".p_1")
+    ?.children.filter((child) => child.tagName === "P")
+    .map((p) => p.text.trim())
+    .filter(Boolean)
+    .join("\n\n");
+  return text === "" ? undefined : text;
 }
 
 function parseAdmissionText(root: HTMLElement): string | undefined {

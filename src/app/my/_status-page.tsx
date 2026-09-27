@@ -3,7 +3,7 @@ import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import { toRowView } from "~/app/_lib/row";
 import { todayInHelsinki } from "~/domain/dates";
 import { sortForStatus, type MyStatus } from "~/domain/my-sort";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
@@ -20,11 +20,13 @@ export async function MyStatusPage({
   searchParams: Promise<{ sort?: string | string[] }>;
   renderHeader?: (items: MyListItem[]) => React.ReactNode;
 }) {
+  const i18n = await getI18n();
+  const { t, locale } = i18n;
   const session = await auth();
   if (!session?.user) return <SignInPrompt message={t.pages.signIn.my} />;
 
   const sort = sortForStatus(status, (await searchParams).sort);
-  const items = await api.my.list({ status, sort });
+  const items = await api.my.list({ status, sort, locale });
   const today = todayInHelsinki();
   const endedAt =
     status === "interested" && sort === "ending"
@@ -38,7 +40,7 @@ export async function MyStatusPage({
         <ExhibitionList
           items={items
             .slice(0, endedAt < 0 ? undefined : endedAt)
-            .map((item) => toRowView(item, today))}
+            .map((item) => toRowView(item, today, i18n))}
           emptyMessage={emptyMessage}
           signedIn
           ratable={status === "visited"}
@@ -50,7 +52,9 @@ export async function MyStatusPage({
             {t.pages.my.ended}
           </h2>
           <ExhibitionList
-            items={items.slice(endedAt).map((item) => toRowView(item, today))}
+            items={items
+              .slice(endedAt)
+              .map((item) => toRowView(item, today, i18n))}
             emptyMessage={emptyMessage}
             signedIn
             ratable={status === "visited"}

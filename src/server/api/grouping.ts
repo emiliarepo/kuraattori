@@ -2,6 +2,8 @@ import type { exhibitions, museums } from "~/server/db/schema";
 
 export interface Venue {
   name: string;
+  nameEn: string | null;
+  nameSv: string | null;
   city: string | null;
   slug: string;
 }
@@ -47,6 +49,8 @@ export function groupExhibitionRows<Row extends ExhibitionMuseumRow>(
       museum: canonical.museum,
       venues: members.map((member) => ({
         name: member.museum.name,
+        nameEn: member.museum.nameEn,
+        nameSv: member.museum.nameSv,
         city: member.museum.city,
         slug: member.museum.slug,
       })),

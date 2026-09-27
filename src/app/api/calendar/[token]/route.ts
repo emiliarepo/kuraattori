@@ -1,5 +1,8 @@
 import { and, eq, inArray } from "drizzle-orm";
 
+import { localized } from "~/domain/localized";
+import { i18nFor } from "~/i18n";
+import { resolveLocale } from "~/i18n/locales";
 import { groupExhibitionRows } from "~/server/api/grouping";
 import { formatCalendar } from "~/server/calendar";
 import { getDb } from "~/server/db";
@@ -8,6 +11,7 @@ import {
   exhibitions,
   museums,
   userExhibitions,
+  users,
 } from "~/server/db/schema";
 import { siteUrl } from "~/app/_lib/site-url";
 
@@ -21,8 +25,9 @@ export async function GET(
   const token = routeToken.slice(0, -4);
   const db = await getDb();
   const [feed] = await db
-    .select({ userId: calendarFeeds.userId })
+    .select({ userId: calendarFeeds.userId, locale: users.locale })
     .from(calendarFeeds)
+    .innerJoin(users, eq(users.id, calendarFeeds.userId))
     .where(eq(calendarFeeds.token, token))
     .limit(1);
   if (!feed)
@@ -78,20 +83,30 @@ export async function GET(
         )),
     );
   }
+  const locale = resolveLocale(feed.locale, null);
   const events = groupExhibitionRows(rows)
     .filter(({ exhibition }) => exhibition.endDate !== null)
     .map(({ exhibition, museum }) => ({
       uid: `${exhibition.exhibitionGroup ?? `exhibition-${exhibition.id}`}@kuraattori.emialis.com`,
       endDate: exhibition.endDate!,
       startDate: exhibition.startDate,
-      title: exhibition.titleFi,
-      location: [museum.name, museum.city].filter(Boolean).join(", "),
+      title: localized(exhibition, "title", locale).text,
+      location: [localized(museum, "name", locale).text, museum.city]
+        .filter(Boolean)
+        .join(", "),
       url: new URL(`/exhibitions/${exhibition.slug}`, siteUrl).toString(),
     }));
-  return new Response(formatCalendar(events), {
-    headers: {
-      "Content-Type": "text/calendar; charset=utf-8",
-      "Cache-Control": "no-store",
+  return new Response(
+    formatCalendar(
+      events,
+      new Date(),
+      i18nFor(locale).t.notifications.calendarEnds,
+    ),
+    {
+      headers: {
+        "Content-Type": "text/calendar; charset=utf-8",
+        "Cache-Control": "no-store",
+      },
     },
-  });
+  );
 }

@@ -2,21 +2,27 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { t } from "~/i18n/fi";
-import { auth, signIn } from "~/server/auth";
-import { isTestAuthEnabled } from "~/server/auth/test-auth";
 import { type Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Kirjaudu sisään",
-  robots: { index: false, follow: false },
-};
+import { LanguageSelector } from "~/app/_components/LanguageSelector";
+import { getI18n } from "~/i18n/server";
+import { auth, signIn } from "~/server/auth";
+import { isTestAuthEnabled } from "~/server/auth/test-auth";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return {
+    title: t.auth.signIn.title,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function SignInPage({
   searchParams,
 }: {
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
+  const { t } = await getI18n();
   const [session, { callbackUrl }, testAuthEnabled] = await Promise.all([
     auth(),
     searchParams,
@@ -88,6 +94,10 @@ export default async function SignInPage({
           </button>
         </form>
       )}
+
+      <footer className="border-rule-soft border-t pt-6">
+        <LanguageSelector />
+      </footer>
     </div>
   );
 }

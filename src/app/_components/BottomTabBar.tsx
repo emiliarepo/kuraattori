@@ -4,18 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { isNavItemActive, NAV_ITEMS } from "~/app/_components/nav";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 export function BottomTabBar({
   omatEndingSoonCount = 0,
 }: {
   omatEndingSoonCount?: number;
 }) {
+  const { t } = useI18n();
   const pathname = usePathname();
 
   return (
     <nav
-      aria-label="Päänavigaatio"
+      aria-label={t.ui.nav.main}
       className="border-rule-soft bg-bg standalone:pb-[max(0.75rem,env(safe-area-inset-bottom))] fixed inset-x-0 bottom-0 z-10 flex border-t pb-[env(safe-area-inset-bottom)] font-sans sm:hidden"
     >
       {NAV_ITEMS.map((item) => {
@@ -35,7 +36,7 @@ export function BottomTabBar({
                 : "border-t-transparent"
             }`}
           >
-            {item.label}
+            {t.ui.nav[item.key]}
             {showDot && (
               <span
                 aria-hidden="true"

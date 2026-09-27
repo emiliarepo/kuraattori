@@ -1,3 +1,5 @@
+import { t as fi } from "~/i18n/fi";
+
 export function createCalendarToken() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   let binary = "";
@@ -62,6 +64,7 @@ function wrapCalendar(events: readonly string[][]) {
 export function formatCalendar(
   events: readonly CalendarEvent[],
   now = new Date(),
+  summary: (title: string) => string = fi.notifications.calendarEnds,
 ) {
   const stamp = calendarStamp(now);
   return wrapCalendar(
@@ -73,7 +76,7 @@ export function formatCalendar(
         `DTSTAMP:${stamp}`,
         `DTSTART;VALUE=DATE:${event.endDate.replaceAll("-", "")}`,
         `DTEND;VALUE=DATE:${end.toISOString().slice(0, 10).replaceAll("-", "")}`,
-        `SUMMARY:${escapeCalendarText(`Päättyy: ${event.title}`)}`,
+        `SUMMARY:${escapeCalendarText(summary(event.title))}`,
         `LOCATION:${escapeCalendarText(event.location)}`,
         `DESCRIPTION:${escapeCalendarText(`${event.startDate}–${event.endDate}\n${event.url}`)}`,
         `URL:${escapeCalendarText(event.url)}`,

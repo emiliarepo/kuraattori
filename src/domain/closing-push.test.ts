@@ -8,6 +8,7 @@ function item(
   exhibitionId: number,
   endDate: string,
   userId = "u1",
+  locale: InterestedEnding["locale"] = "fi",
 ): InterestedEnding {
   return {
     userId,
@@ -16,6 +17,7 @@ function item(
     museum: "Kiasma",
     slug: `nayttely-${exhibitionId}`,
     endDate,
+    locale,
   };
 }
 
@@ -82,5 +84,14 @@ describe("selectClosingPushes", () => {
         url: "/my/interested",
       },
     ]);
+  });
+
+  it("writes the notification in the user's language", () => {
+    const [push] = selectClosingPushes(
+      [item(1, "2026-09-28", "u1", "en")],
+      [],
+      TODAY,
+    );
+    expect(push?.title).toBe("Closes tomorrow: Näyttely 1, Kiasma");
   });
 });

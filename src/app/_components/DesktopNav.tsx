@@ -4,17 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { isNavItemActive, NAV_ITEMS } from "~/app/_components/nav";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 export function DesktopNav({
   omatEndingSoonCount = 0,
 }: {
   omatEndingSoonCount?: number;
 }) {
+  const { t } = useI18n();
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Päänavigaatio" className="hidden gap-6 sm:flex">
+    <nav aria-label={t.ui.nav.main} className="hidden gap-6 sm:flex">
       {NAV_ITEMS.map((item) => {
         const active = isNavItemActive(item.href, pathname);
         const showDot = item.key === "mine" && omatEndingSoonCount > 0;
@@ -30,7 +31,7 @@ export function DesktopNav({
               active ? "text-signal" : ""
             }`}
           >
-            {item.label}
+            {t.ui.nav[item.key]}
             {showDot && (
               <span
                 aria-hidden="true"

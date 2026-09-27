@@ -2,9 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
-const copy = t.pages.my.passport;
 const COPIED_MS = 2500;
 
 async function loadImage() {
@@ -35,6 +34,7 @@ export function SharePassportButton({
   text: string;
   url: string;
 }) {
+  const copy = useI18n().t.pages.my.passport;
   const image = useRef<Promise<File | null>>(null);
   const [busy, setBusy] = useState(false);
   const [preparing, setPreparing] = useState(false);

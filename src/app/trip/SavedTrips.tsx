@@ -4,17 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { dayPlanHref } from "~/app/_lib/day-plan-params";
-import { t } from "~/i18n/fi";
+import type { I18n } from "~/i18n";
+import { useI18n } from "~/i18n/client";
 import { formatDate, formatDayMonth } from "~/i18n/format";
 import { api, type RouterOutputs } from "~/trpc/react";
 
 type SavedTrip = RouterOutputs["trip"]["saved"][number];
 
-function tripLabel(trip: SavedTrip) {
-  return `${trip.place || t.pages.trip.allPlacesTrip} · ${formatDayMonth(trip.fromDate)}–${formatDate(trip.toDate)}`;
+function tripLabel(trip: SavedTrip, { t, locale }: I18n) {
+  return `${trip.place || t.pages.trip.allPlacesTrip} · ${formatDayMonth(trip.fromDate, locale)}–${formatDate(trip.toDate, locale)}`;
 }
 
 export function SavedTrips({ trips }: { trips: SavedTrip[] }) {
+  const i18n = useI18n();
+  const { t, locale } = i18n;
   const router = useRouter();
   const remove = api.trip.remove.useMutation({
     onSuccess: () => router.refresh(),
@@ -47,7 +50,7 @@ export function SavedTrips({ trips }: { trips: SavedTrip[] }) {
                 href={`/trip?${params.toString()}`}
                 className="hover:text-signal inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
               >
-                {tripLabel(trip)}
+                {tripLabel(trip, i18n)}
               </Link>
               {trip.days.map((day) => (
                 <Link
@@ -59,12 +62,12 @@ export function SavedTrips({ trips }: { trips: SavedTrip[] }) {
                   })}
                   className="hover:text-signal inline-flex min-h-11 items-center underline underline-offset-4"
                 >
-                  {`${t.pages.trip.tabDay} ${formatDayMonth(day.date)} ${day.city}`}
+                  {`${t.pages.trip.tabDay} ${formatDayMonth(day.date, locale)} ${day.city}`}
                 </Link>
               ))}
               <button
                 type="button"
-                aria-label={t.pages.trip.removeTrip(tripLabel(trip))}
+                aria-label={t.pages.trip.removeTrip(tripLabel(trip, i18n))}
                 disabled={remove.isPending}
                 onClick={() => remove.mutate({ id: trip.id })}
                 className="text-muted hover:text-signal ml-auto min-h-11 px-2 underline underline-offset-4"

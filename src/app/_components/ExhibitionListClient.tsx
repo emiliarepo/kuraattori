@@ -5,7 +5,7 @@ import { useLayoutEffect, useRef, useTransition } from "react";
 
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
 import { toRowView, type ExhibitionWithDetails } from "~/app/_lib/row";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
 // With a loading.tsx boundary above the page, production Next.js resets
 // scroll and focus on this navigation despite `scroll: false`. The page
@@ -31,6 +31,8 @@ export function ExhibitionListClient({
   emptyMessage: string;
   signedIn?: boolean;
 }) {
+  const i18n = useI18n();
+  const { t } = i18n;
   const router = useRouter();
   const [loading, startTransition] = useTransition();
   const loadMoreRef = useRef<HTMLButtonElement>(null);
@@ -58,7 +60,7 @@ export function ExhibitionListClient({
   return (
     <div>
       <ExhibitionList
-        items={items.map((item) => toRowView(item, today))}
+        items={items.map((item) => toRowView(item, today, i18n))}
         emptyMessage={emptyMessage}
         signedIn={signedIn}
       />

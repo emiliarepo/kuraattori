@@ -242,8 +242,8 @@ function toView(
   return {
     exhibitionId: index + 1,
     href: `/exhibitions/${exhibition.slug}`,
-    title: exhibition.title,
-    museum: exhibition.museum,
+    title: { text: exhibition.title, lang: undefined },
+    museum: { text: exhibition.museum, lang: undefined },
     city: exhibition.city,
     imageSources: exhibition.imageUrl ? [exhibition.imageUrl] : [],
     imageAlt: `${exhibition.title}, ${exhibition.museum}`,
@@ -275,8 +275,8 @@ export default function ComponentLibraryPage() {
           imageSources={LEAD.imageUrl ? [LEAD.imageUrl] : []}
           imageAlt={`${LEAD.title}, ${LEAD.museum}`}
           kicker="Sinulle · Luonto ja eläimet · Pääkaupunkiseutu"
-          title={LEAD.title}
-          museum={LEAD.museum}
+          title={{ text: LEAD.title, lang: undefined }}
+          museum={{ text: LEAD.museum, lang: undefined }}
           city={LEAD.city}
           urgencyLabel="126 päivää jäljellä"
         />

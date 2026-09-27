@@ -7,7 +7,7 @@ import { type InterestWeight } from "~/app/_components/InterestControl";
 import { InterestsList, type Category } from "~/app/_components/InterestsList";
 import { RegionsList } from "~/app/_components/RegionsList";
 import { markOnboardingDone } from "~/app/welcome/onboarding-action";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 import { api } from "~/trpc/react";
 
 type Step = "interests" | "regions";
@@ -23,6 +23,7 @@ export function WelcomeFlow({
   initialInterests: readonly { categoryId: number; weight: number }[];
   initialRegions: readonly string[];
 }) {
+  const { t } = useI18n();
   const router = useRouter();
   const [step, setStep] = useState<Step>("interests");
   const [interests, setInterests] = useState<

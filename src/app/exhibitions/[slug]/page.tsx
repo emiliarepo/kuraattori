@@ -14,7 +14,6 @@ import { TimeBar } from "~/app/_components/TimeBar";
 import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
 import {
   excerpt,
-  formatLongDate,
   imageAlt,
   timeBarProps,
   urgencyLabelText,
@@ -22,20 +21,16 @@ import {
 import { toRowView } from "~/app/_lib/row";
 import { getPhase, todayInHelsinki } from "~/domain/dates";
 import { archivedImagePath, imageSources } from "~/domain/images";
+import { localized } from "~/domain/localized";
 import { formatHours, hoursOn, nextFreeDay } from "~/domain/opening-hours";
-import { t } from "~/i18n/fi";
-import { formatDayMonth } from "~/i18n/format";
+import { getI18n } from "~/i18n/server";
+import { formatDate, formatDayMonth } from "~/i18n/format";
+import { INTL_LOCALE } from "~/i18n/locales";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { siteUrl } from "~/app/_lib/site-url";
 
 const FREE_DAY_WINDOW_DAYS = 14;
-
-const dateTimeFormat = new Intl.DateTimeFormat("fi-FI", {
-  day: "numeric",
-  month: "numeric",
-  year: "numeric",
-});
 
 /** Shared with the page body: `generateMetadata` and the component both run per request, so this dedupes the query. */
 const getExhibition = cache((slug: string) => api.exhibition.bySlug({ slug }));
@@ -46,20 +41,22 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const exhibition = await getExhibition(slug);
+  const [exhibition, { t, locale }] = await Promise.all([
+    getExhibition(slug),
+    getI18n(),
+  ]);
   if (!exhibition) return {};
+  const title = localized(exhibition, "title", locale).text;
+  const museum = localized(exhibition.museum, "name", locale).text;
+  const description = localized(exhibition, "description", locale).text;
   return {
-    title: `${exhibition.titleFi} — ${exhibition.museum.name} — ${t.app.name}`,
-    description: exhibition.descriptionFi
-      ? excerpt(exhibition.descriptionFi, 200)
-      : undefined,
+    title: `${title} — ${museum} — ${t.app.name}`,
+    description: description ? excerpt(description, 200) : undefined,
     alternates: { canonical: `/exhibitions/${exhibition.slug}` },
     openGraph: {
       type: "article",
-      title: `${exhibition.titleFi} — ${exhibition.museum.name}`,
-      description: exhibition.descriptionFi
-        ? excerpt(exhibition.descriptionFi, 200)
-        : undefined,
+      title: `${title} — ${museum}`,
+      description: description ? excerpt(description, 200) : undefined,
       url: new URL(`/exhibitions/${exhibition.slug}`, siteUrl),
       images: [
         exhibition.imageArchiveKey
@@ -75,6 +72,8 @@ export default async function ExhibitionDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const i18n = await getI18n();
+  const { t, locale } = i18n;
   const { slug } = await params;
   const [exhibition, session] = await Promise.all([
     getExhibition(slug),
@@ -87,10 +86,13 @@ export default async function ExhibitionDetailPage({
   // sinking the whole page. Already logged by the tRPC error-logging
   // middleware.
   const similar = await api.exhibition.similar({ slug }).catch(() => []);
-  const urgencyLabel = urgencyLabelText(exhibition, today);
+  const urgencyLabel = urgencyLabelText(exhibition, today, i18n);
   const openLabel = exhibition.endDate
-    ? `${formatLongDate(exhibition.startDate)}–${formatLongDate(exhibition.endDate)}`
+    ? `${formatDate(exhibition.startDate, locale)}–${formatDate(exhibition.endDate, locale)}`
     : t.time.indefinite;
+  const title = localized(exhibition, "title", locale);
+  const museumName = localized(exhibition.museum, "name", locale);
+  const description = localized(exhibition, "description", locale);
 
   const city = exhibition.museum.city;
   const isCurrent = getPhase(exhibition, today) === "current";
@@ -126,7 +128,7 @@ export default async function ExhibitionDetailPage({
           href={`/museums/${exhibition.museum.slug}`}
           className="hover:text-fg hover:underline"
         >
-          {exhibition.museum.name}
+          <span lang={museumName.lang}>{museumName.text}</span>
         </Link>
       </nav>
 
@@ -136,11 +138,19 @@ export default async function ExhibitionDetailPage({
             <UrgencyLabel label={urgencyLabel} />
           </div>
         )}
-        <h1 className="text-headline text-4xl sm:text-6xl">
-          {exhibition.titleFi}
+        <h1 lang={title.lang} className="text-headline text-4xl sm:text-6xl">
+          {title.text}
         </h1>
         <p className="text-muted text-xl italic">
-          {exhibition.venues.map((venue) => venue.name).join(", ")}
+          {exhibition.venues.map((venue, index) => {
+            const name = localized(venue, "name", locale);
+            return (
+              <span key={venue.slug}>
+                {index > 0 && ", "}
+                <span lang={name.lang}>{name.text}</span>
+              </span>
+            );
+          })}
           {city && `, ${city}`}
         </p>
       </header>
@@ -149,8 +159,8 @@ export default async function ExhibitionDetailPage({
         <div className="sm:col-start-1">
           <ImageFallback
             sources={imageSources(exhibition, today)}
-            alt={imageAlt(exhibition.titleFi, exhibition.museum.name)}
-            title={exhibition.titleFi}
+            alt={imageAlt(title.text, museumName.text)}
+            title={title.text}
             aspectRatio="3 / 2"
           />
         </div>
@@ -162,17 +172,21 @@ export default async function ExhibitionDetailPage({
                 {t.pages.detail.museum}
               </dt>
               <dd>
-                {exhibition.venues.map((venue, index) => (
-                  <span key={venue.slug}>
-                    {index > 0 && ", "}
-                    <Link
-                      href={`/museums/${venue.slug}`}
-                      className="hover:text-signal underline decoration-1 underline-offset-4"
-                    >
-                      {venue.name}
-                    </Link>
-                  </span>
-                ))}
+                {exhibition.venues.map((venue, index) => {
+                  const name = localized(venue, "name", locale);
+                  return (
+                    <span key={venue.slug}>
+                      {index > 0 && ", "}
+                      <Link
+                        href={`/museums/${venue.slug}`}
+                        lang={name.lang}
+                        className="hover:text-signal underline decoration-1 underline-offset-4"
+                      >
+                        {name.text}
+                      </Link>
+                    </span>
+                  );
+                })}
               </dd>
             </div>
             <div className="col-span-2 grid grid-cols-subgrid items-baseline py-2.5">
@@ -187,7 +201,7 @@ export default async function ExhibitionDetailPage({
                   </dt>
                   <dd>
                     <MuseumAddress
-                      name={exhibition.museum.name}
+                      name={museumName.text}
                       address={exhibition.museum.address}
                     />
                   </dd>
@@ -213,7 +227,9 @@ export default async function ExhibitionDetailPage({
                   )}
                   {freeDay && (
                     <span>
-                      {t.pages.hours.nextFreeDay(formatDayMonth(freeDay))}
+                      {t.pages.hours.nextFreeDay(
+                        formatDayMonth(freeDay, locale),
+                      )}
                     </span>
                   )}
                 </dd>
@@ -240,10 +256,14 @@ export default async function ExhibitionDetailPage({
                   <dd>
                     <CategoryList
                       className="text-sm leading-snug"
-                      categories={exhibition.categories.map((category) => ({
-                        label: category.name,
-                        href: `/exhibitions?category=${category.id}`,
-                      }))}
+                      categories={exhibition.categories.map((category) => {
+                        const name = localized(category, "name", locale);
+                        return {
+                          label: name.text,
+                          lang: name.lang,
+                          href: `/exhibitions?category=${category.id}`,
+                        };
+                      })}
                     />
                   </dd>
                 </div>
@@ -251,7 +271,7 @@ export default async function ExhibitionDetailPage({
             )}
           </dl>
 
-          <TimeBar {...timeBarProps(exhibition, today)} />
+          <TimeBar {...timeBarProps(exhibition, today, i18n)} />
 
           {session?.user ? (
             <ExhibitionStatusControl
@@ -280,23 +300,27 @@ export default async function ExhibitionDetailPage({
             {exhibition.lastFetchedAt && (
               <p className="text-muted">
                 {t.pages.updated(
-                  dateTimeFormat.format(exhibition.lastFetchedAt),
+                  new Intl.DateTimeFormat(INTL_LOCALE[locale], {
+                    day: "numeric",
+                    month: "numeric",
+                    year: "numeric",
+                  }).format(exhibition.lastFetchedAt),
                 )}
               </p>
             )}
           </div>
         </aside>
 
-        {exhibition.descriptionFi && (
+        {description.text && (
           <div className="max-w-prose sm:col-start-1">
-            <ExhibitionDescription text={exhibition.descriptionFi} />
+            <ExhibitionDescription description={description} />
           </div>
         )}
       </div>
       <Rail
-        title="Samankaltaisia"
-        items={similar.map((item) => ({ view: toRowView(item, today) }))}
-        emptyMessage="Ei samankaltaisia näyttelyitä."
+        title={t.pages.detail.similar}
+        items={similar.map((item) => ({ view: toRowView(item, today, i18n) }))}
+        emptyMessage={t.pages.detail.similarEmpty}
         signedIn={Boolean(session?.user)}
       />
     </article>

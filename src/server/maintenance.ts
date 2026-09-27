@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-import { t } from "~/i18n/fi";
+import { i18nFor } from "~/i18n";
+import { type Locale } from "~/i18n/locales";
 
 export const MAINTENANCE_KV_KEY = "maintenance";
 
@@ -53,13 +54,17 @@ export function resetMaintenanceFlagCache(): void {
   isolateCachedAt = 0;
 }
 
-export function buildMaintenanceResponse(flag: MaintenanceFlag): Response {
+export function buildMaintenanceResponse(
+  flag: MaintenanceFlag,
+  locale: Locale = "fi",
+): Response {
+  const { t } = i18nFor(locale);
   const retryAfterSeconds = Math.max(
     60,
     Math.round((Date.parse(flag.expiresAt) - Date.now()) / 1000),
   );
   const html = `<!doctype html>
-<html lang="fi">
+<html lang="${locale}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

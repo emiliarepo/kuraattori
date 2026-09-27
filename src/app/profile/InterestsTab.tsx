@@ -6,7 +6,7 @@ import { useState } from "react";
 import { InterestsList, type Category } from "~/app/_components/InterestsList";
 import { type InterestWeight } from "~/app/_components/InterestControl";
 import { refreshHeaderData } from "~/app/_components/refresh-header-action";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 import { api } from "~/trpc/react";
 
 export function InterestsTab({
@@ -16,6 +16,7 @@ export function InterestsTab({
   categories: readonly Category[];
   initialInterests: readonly { categoryId: number; weight: number }[];
 }) {
+  const { t } = useI18n();
   const [interests, setInterests] = useState<
     ReadonlyMap<number, InterestWeight>
   >(

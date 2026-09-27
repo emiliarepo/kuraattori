@@ -2,19 +2,23 @@ import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ProfileTabs } from "~/app/_components/ProfileTabs";
-import { t } from "~/i18n/fi";
+import { getI18n } from "~/i18n/server";
 import { auth } from "~/server/auth";
 
-export const metadata: Metadata = {
-  title: t.profile.title,
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n();
+  return {
+    title: t.profile.title,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = await getI18n();
   const session = await auth();
   if (!session?.user) redirect("/sign-in?callbackUrl=/profile");
 

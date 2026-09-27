@@ -11,9 +11,9 @@ import {
 } from "~/app/_lib/browse-filters";
 import { usePendingNavigation } from "~/app/_components/PendingNavigation";
 import { useBackToClose } from "~/app/_lib/use-back-to-close";
-import { t } from "~/i18n/fi";
+import { useI18n } from "~/i18n/client";
 
-export type FilterOption = { id: number; label: string };
+export type FilterOption = { id: number; label: string; lang?: "fi" };
 
 function toFormValue(value: FormDataEntryValue | null): string | undefined {
   return typeof value === "string" ? value : undefined;
@@ -38,6 +38,7 @@ function FilterFields({
   categories: readonly FilterOption[];
   showMuseumCardFilter: boolean;
 }) {
+  const { t } = useI18n();
   const [museumFilter, setMuseumFilter] = useState("");
   const normalizedMuseumFilter = museumFilter.trim().toLowerCase();
 
@@ -151,7 +152,7 @@ function FilterFields({
                   defaultChecked={filters.museumIds.includes(museum.id)}
                   className="accent-signal h-4 w-4 flex-none"
                 />
-                {museum.label}
+                <span lang={museum.lang}>{museum.label}</span>
               </label>
             ))}
           </div>
@@ -176,7 +177,7 @@ function FilterFields({
                   defaultChecked={filters.categoryIds.includes(category.id)}
                   className="accent-signal h-4 w-4 flex-none"
                 />
-                {category.label}
+                <span lang={category.lang}>{category.label}</span>
               </label>
             ))}
           </div>
@@ -193,6 +194,7 @@ export function FilterSheet(props: {
   categories: readonly FilterOption[];
   showMuseumCardFilter: boolean;
 }) {
+  const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const { pending, start } = usePendingNavigation();

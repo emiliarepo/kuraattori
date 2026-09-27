@@ -11,7 +11,9 @@ import {
 
 import type { Classification } from "./grouping";
 import { uniqueSlug } from "./slug";
+import { distinctTranslation } from "./museot-fi/translations";
 import type {
+  ExhibitionTranslation,
   NormalizedCategory,
   NormalizedExhibition,
   NormalizedMuseum,
@@ -33,7 +35,9 @@ export interface ExistingMuseumRow extends ExistingRow {
 }
 
 export interface ExistingExhibitionRow extends ExistingRow {
+  museumId: number;
   sourcePayloadHash: string;
+  translationHash: string | null;
   titleFi: string;
   startDate: string;
   endDate: string | null;
@@ -89,7 +93,9 @@ export async function loadExistingExhibitions(
       sourceId: exhibitions.sourceId,
       id: exhibitions.id,
       slug: exhibitions.slug,
+      museumId: exhibitions.museumId,
       sourcePayloadHash: exhibitions.sourcePayloadHash,
+      translationHash: exhibitions.translationHash,
       titleFi: exhibitions.titleFi,
       startDate: exhibitions.startDate,
       endDate: exhibitions.endDate,
@@ -97,20 +103,7 @@ export async function loadExistingExhibitions(
     })
     .from(exhibitions)
     .where(eq(exhibitions.source, source));
-  return new Map(
-    rows.map((row) => [
-      row.sourceId,
-      {
-        id: row.id,
-        slug: row.slug,
-        sourcePayloadHash: row.sourcePayloadHash,
-        titleFi: row.titleFi,
-        startDate: row.startDate,
-        endDate: row.endDate,
-        descriptionFi: row.descriptionFi,
-      },
-    ]),
-  );
+  return new Map(rows.map(({ sourceId, ...row }) => [sourceId, row]));
 }
 
 export async function loadExistingCategories(
@@ -219,6 +212,8 @@ export async function upsertExhibition(
         lastSeenAt: now,
       })
       .where(eq(exhibitions.id, found.id));
+    found.museumId = museumId;
+    found.descriptionFi = exhibition.description ?? null;
     return { id: found.id, created: false };
   }
 
@@ -256,7 +251,9 @@ export async function upsertExhibition(
   existing.set(exhibition.sourceId, {
     id: row.id,
     slug,
+    museumId,
     sourcePayloadHash: exhibition.payloadHash,
+    translationHash: null,
     titleFi: exhibition.title,
     startDate: exhibition.startDate,
     endDate: exhibition.endDate ?? null,
@@ -293,7 +290,11 @@ export async function upsertCategory(
   if (found) {
     await db
       .update(categories)
-      .set({ name: category.name })
+      .set({
+        name: category.name,
+        nameEn: category.nameEn ?? null,
+        nameSv: category.nameSv ?? null,
+      })
       .where(eq(categories.id, found.id));
     return found.id;
   }
@@ -305,12 +306,52 @@ export async function upsertCategory(
 
   const [row] = await db
     .insert(categories)
-    .values({ source, sourceId: category.sourceId, name: category.name, slug })
+    .values({
+      source,
+      sourceId: category.sourceId,
+      name: category.name,
+      nameEn: category.nameEn,
+      nameSv: category.nameSv,
+      slug,
+    })
     .returning({ id: categories.id });
   if (!row) throw new Error(`Failed to insert category ${category.sourceId}`);
 
   existing.set(category.sourceId, { id: row.id, slug });
   return row.id;
+}
+
+/**
+ * Stores an exhibition's English and Swedish text, and its museum's
+ * translated name when the listing had one. A description that only repeats
+ * the Finnish one is stored as missing.
+ */
+export async function applyTranslation(
+  db: Db,
+  existing: ExistingExhibitionRow,
+  translation: ExhibitionTranslation,
+): Promise<void> {
+  const description = (text: string | undefined) =>
+    distinctTranslation(text, existing.descriptionFi) ?? null;
+  await db
+    .update(exhibitions)
+    .set({
+      titleEn: translation.en.title ?? null,
+      titleSv: translation.sv.title ?? null,
+      descriptionEn: description(translation.en.description),
+      descriptionSv: description(translation.sv.description),
+      translationHash: translation.hash,
+    })
+    .where(eq(exhibitions.id, existing.id));
+  const museumNames = {
+    ...(translation.en.museumName && { nameEn: translation.en.museumName }),
+    ...(translation.sv.museumName && { nameSv: translation.sv.museumName }),
+  };
+  if (Object.keys(museumNames).length > 0)
+    await db
+      .update(museums)
+      .set(museumNames)
+      .where(eq(museums.id, existing.museumId));
 }
 
 function chunk<T>(items: T[], size: number): T[][] {
