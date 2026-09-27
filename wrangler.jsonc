@@ -3,7 +3,10 @@
 	"main": ".open-next/worker.js",
 	"name": "kuraattori",
 	"compatibility_date": "2026-09-26",
-	"routes": [{ "pattern": "kuraattori.emialis.com", "custom_domain": true }],
+	"routes": [
+		{ "pattern": "kuraattori.emiliarepo.dev", "custom_domain": true },
+		{ "pattern": "kuraattori.emialis.com", "custom_domain": true },
+	],
 	"compatibility_flags": [
 		"nodejs_compat",
 		"global_fetch_strictly_public"
