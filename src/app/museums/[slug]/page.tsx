@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
+import { FollowToggle } from "~/app/_components/FollowToggle";
 import { Section } from "~/app/_components/Section";
 import { toRowView } from "~/app/_lib/row";
 import { todayInHelsinki } from "~/domain/dates";
@@ -54,6 +55,8 @@ export default async function MuseumDetailPage({
 
   const today = todayInHelsinki();
   const signedIn = Boolean(session?.user);
+  const followed = signedIn ? await api.museum.followed() : [];
+  const isFollowing = followed.some((entry) => entry.id === museum.id);
   const byPhase = {
     current: exhibitions.filter((item) => item.phase === "current"),
     upcoming: exhibitions.filter((item) => item.phase === "upcoming"),
@@ -62,7 +65,16 @@ export default async function MuseumDetailPage({
 
   return (
     <div className="py-8">
-      <h1 className="text-headline text-4xl sm:text-6xl">{museum.name}</h1>
+      <div className="flex flex-wrap items-baseline gap-4">
+        <h1 className="text-headline text-4xl sm:text-6xl">{museum.name}</h1>
+        {signedIn && (
+          <FollowToggle
+            museumId={museum.id}
+            museumName={museum.name}
+            initialFollowing={isFollowing}
+          />
+        )}
+      </div>
       {museum.city && (
         <p className="text-muted mt-2 text-xl italic">{museum.city}</p>
       )}

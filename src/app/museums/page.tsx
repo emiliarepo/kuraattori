@@ -1,7 +1,9 @@
 import { type Metadata } from "next";
 import Link from "next/link";
 
+import { FollowToggle } from "~/app/_components/FollowToggle";
 import { t } from "~/i18n/fi";
+import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
 export const metadata: Metadata = {
@@ -10,7 +12,10 @@ export const metadata: Metadata = {
 };
 
 export default async function MuseumsPage() {
-  const museums = await api.museum.list();
+  const [museums, session] = await Promise.all([api.museum.list(), auth()]);
+  const signedIn = Boolean(session?.user);
+  const followed = signedIn ? await api.museum.followed() : [];
+  const followedIds = new Set(followed.map((entry) => entry.id));
 
   return (
     <div className="py-8">
@@ -21,11 +26,11 @@ export default async function MuseumsPage() {
         {museums.map((museum) => (
           <li
             key={museum.id}
-            className="border-rule-soft border-t first:border-t-0"
+            className="border-rule-soft flex items-baseline justify-between gap-4 border-t py-3 first:border-t-0"
           >
             <Link
               href={`/museums/${museum.slug}`}
-              className="group flex items-baseline justify-between gap-4 py-3"
+              className="group flex flex-1 items-baseline justify-between gap-4"
             >
               <span className="text-lg group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">
                 {museum.name}
@@ -36,6 +41,13 @@ export default async function MuseumsPage() {
                 </span>
               )}
             </Link>
+            {signedIn && (
+              <FollowToggle
+                museumId={museum.id}
+                museumName={museum.name}
+                initialFollowing={followedIds.has(museum.id)}
+              />
+            )}
           </li>
         ))}
       </ul>
