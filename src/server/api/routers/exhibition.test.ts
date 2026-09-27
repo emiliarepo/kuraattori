@@ -31,37 +31,31 @@ describe("exhibition API", () => {
       "create table if not exists kuraattori_exhibition_category (exhibition_id integer not null, category_id integer not null, primary key (exhibition_id, category_id))",
       "create table if not exists kuraattori_user_exhibition (user_id text not null, exhibition_id integer not null, status text not null, visited_at integer, created_at integer not null default (unixepoch()), updated_at integer, primary key (user_id, exhibition_id))",
     ]);
-    await db
-      .insert(schema.museums)
-      .values({
-        id: 1,
-        source: "test",
-        sourceId: "m1",
-        name: "Ateneum",
-        slug: "ateneum",
-        city: "Helsinki",
-        region: "Pääkaupunkiseutu",
-      });
-    await db
-      .insert(schema.museums)
-      .values({
-        id: 2,
-        source: "test",
-        sourceId: "m2",
-        name: "Sara Hildén",
-        slug: "sara",
-        city: "Tampere",
-        region: "Tampere",
-      });
-    await db
-      .insert(schema.categories)
-      .values({
-        id: 1,
-        source: "test",
-        sourceId: "c1",
-        name: "Maalaus",
-        slug: "maalaus",
-      });
+    await db.insert(schema.museums).values({
+      id: 1,
+      source: "test",
+      sourceId: "m1",
+      name: "Ateneum",
+      slug: "ateneum",
+      city: "Helsinki",
+      region: "Pääkaupunkiseutu",
+    });
+    await db.insert(schema.museums).values({
+      id: 2,
+      source: "test",
+      sourceId: "m2",
+      name: "Sara Hildén",
+      slug: "sara",
+      city: "Tampere",
+      region: "Tampere",
+    });
+    await db.insert(schema.categories).values({
+      id: 1,
+      source: "test",
+      sourceId: "c1",
+      name: "Maalaus",
+      slug: "maalaus",
+    });
     await db.insert(schema.exhibitions).values([
       {
         id: 1,
