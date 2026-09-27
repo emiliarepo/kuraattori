@@ -48,7 +48,10 @@ export async function Header({
               />
             </div>
           ) : (
-            <Link href="/sign-in" className="hover:text-signal">
+            <Link
+              href="/sign-in"
+              className="hover:text-signal hidden sm:inline"
+            >
               {t.auth.signInLink}
             </Link>
           )}
