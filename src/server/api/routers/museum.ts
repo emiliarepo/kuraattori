@@ -2,7 +2,7 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { exhibitions, museums } from "~/server/db/schema";
+import { exhibitions, museums, userExhibitions } from "~/server/db/schema";
 import { exhibitionRouter } from "./exhibition";
 
 export const museumRouter = createTRPCRouter({
@@ -38,7 +38,7 @@ export const museumRouter = createTRPCRouter({
       )[0];
       if (!museum) return [];
       const visibleToUser = ctx.session?.user?.id
-        ? sql`not exists (select 1 from kuraattori_user_exhibition ue where ue.user_id = ${ctx.session.user.id} and ue.exhibition_id = kuraattori_exhibition.id and ue.status = 'hidden')`
+        ? sql`not exists (select 1 from ${userExhibitions} where ${userExhibitions.userId} = ${ctx.session.user.id} and ${userExhibitions.exhibitionId} = ${exhibitions.id} and ${userExhibitions.status} = 'hidden')`
         : undefined;
       const result = await ctx.db
         .select({ slug: exhibitions.slug })

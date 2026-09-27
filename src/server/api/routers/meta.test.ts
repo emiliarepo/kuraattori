@@ -1,6 +1,7 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
-import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { migrate } from "drizzle-orm/libsql/migrator";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import * as schema from "~/server/db/schema";
 
@@ -8,20 +9,13 @@ process.env.AUTH_SECRET ??= "test-secret";
 vi.mock("~/server/auth", () => ({ auth: vi.fn() }));
 const { createCaller } = await import("~/server/api/root");
 const client = createClient({ url: ":memory:" });
-const db = drizzle(client, { schema, casing: "snake_case" });
+const db = drizzle(client, { schema });
+await migrate(db, { migrationsFolder: "drizzle" });
 const ctx = {
   db,
   session: null,
   headers: new Headers(),
 } as unknown as Parameters<typeof createCaller>[0];
-
-beforeAll(async () => {
-  await client.batch([
-    "create table if not exists kuraattori_data_source (id integer primary key, name text not null unique, adapter text not null, enabled integer not null default 1, last_successful_import_at integer, created_at integer not null default (unixepoch()), updated_at integer)",
-    "create table if not exists kuraattori_museum (id integer primary key, source text not null, source_id text not null, name text not null, slug text not null unique, city text, region text, address text, latitude real, longitude real, museum_card_eligible integer not null default 0, website_url text, created_at integer not null default (unixepoch()), updated_at integer, last_seen_at integer not null default (unixepoch()))",
-    "create table if not exists kuraattori_exhibition (id integer primary key, source text not null, source_id text not null, museum_id integer not null, slug text not null unique, title_fi text not null, title_en text, title_sv text, description_fi text, description_en text, description_sv text, start_date text not null, end_date text, source_url text, image_url text, museum_card_eligible integer not null default 0, source_payload_hash text not null, created_at integer not null default (unixepoch()), updated_at integer, last_fetched_at integer, last_seen_at integer not null default (unixepoch()))",
-  ]);
-});
 
 afterEach(async () => {
   await client.execute("delete from kuraattori_exhibition");

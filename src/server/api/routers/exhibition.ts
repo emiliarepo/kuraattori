@@ -47,7 +47,7 @@ const listInput = z.object({
 const selectExhibitions = () => ({ exhibition: exhibitions, museum: museums });
 const whereVisible = (userId: string | null) =>
   userId
-    ? sql`not exists (select 1 from kuraattori_user_exhibition ue where ue.user_id = ${userId} and ue.exhibition_id = kuraattori_exhibition.id and ue.status = 'hidden')`
+    ? sql`not exists (select 1 from ${userExhibitions} where ${userExhibitions.userId} = ${userId} and ${userExhibitions.exhibitionId} = ${exhibitions.id} and ${userExhibitions.status} = 'hidden')`
     : undefined;
 
 type ApiContext = Awaited<ReturnType<typeof createTRPCContext>>;
