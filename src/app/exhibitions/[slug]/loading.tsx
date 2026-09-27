@@ -2,7 +2,7 @@ import { Skeleton } from "~/app/_components/Skeleton";
 
 export default function ExhibitionDetailLoading() {
   return (
-    <div className="py-6 sm:py-8">
+    <div className="py-8">
       <Skeleton className="h-3 w-1/2" />
       <div className="mt-4 flex max-w-4xl flex-col gap-3">
         <Skeleton className="h-4 w-32" />
