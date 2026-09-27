@@ -1,4 +1,5 @@
 # 39 Cost guardrails: usage kill switch and CPU limit
+
 Status: done · Model: Sonnet 5 · Blocked by: 30
 
 Cloudflare has no hard spending cap on the Workers paid plan. Bound the worst case to about one day of overuse.
@@ -24,16 +25,16 @@ Cloudflare has no hard spending cap on the Workers paid plan. Bound the worst ca
 
 No real 14-day baseline exists: the Worker's first production deploy was today at 08:40 UTC. The numbers below are the account's usage from 00:00 to 10:17 UTC on deploy day, queried with the local `wrangler login` OAuth token against `workersInvocationsAdaptive`, `d1AnalyticsAdaptiveGroups`, `kvOperationsAdaptiveGroups` and `r2OperationsAdaptiveGroups` (dataset and field names confirmed against Cloudflare's docs, not guessed). Budgets are 5× this partial day, per the formula above, with a floor where the measured number is too small or not real app traffic. **Revisit every number here once two real weeks of production data exist** — a single partial day, on the day of a known D1 incident, is a weak basis for a 5× multiplier.
 
-| Metric | Measured (00:00–10:17 UTC) | Budget (repository variable) |
-|---|---:|---:|
-| Worker requests | 7,438 | 37,000 (`BUDGET_WORKER_REQUESTS`) |
-| Worker CPU (median × requests, ms) | ~199,000 | 1,000,000 (`BUDGET_WORKER_CPU_MS`) |
-| D1 rows read | 34,179,591 | 100,000,000 (`BUDGET_D1_ROWS_READ`; the measured day was the incident) |
-| D1 rows written | 47,785 | 240,000 (`BUDGET_D1_ROWS_WRITTEN`) |
-| KV reads | 637 | 100,000 (`BUDGET_KV_READS`; 27.9: 8,101 reads over 12,045 requests after ticket 41 moved more reads to KV) |
-| KV writes | 11 | 200 (`BUDGET_KV_WRITES`, floor) |
-| R2 Class A ops | 5 | 500 (`BUDGET_R2_CLASS_A`, floor) |
-| R2 Class B ops | 0 | 5,000 (`BUDGET_R2_CLASS_B`, floor) |
+| Metric                             | Measured (00:00–10:17 UTC) |                                                                               Budget (repository variable) |
+| ---------------------------------- | -------------------------: | ---------------------------------------------------------------------------------------------------------: |
+| Worker requests                    |                      7,438 |                                                                          37,000 (`BUDGET_WORKER_REQUESTS`) |
+| Worker CPU (median × requests, ms) |                   ~199,000 |                                                                         1,000,000 (`BUDGET_WORKER_CPU_MS`) |
+| D1 rows read                       |                 34,179,591 |                                     100,000,000 (`BUDGET_D1_ROWS_READ`; the measured day was the incident) |
+| D1 rows written                    |                     47,785 |                                                                         240,000 (`BUDGET_D1_ROWS_WRITTEN`) |
+| KV reads                           |                        637 | 100,000 (`BUDGET_KV_READS`; 27.9: 8,101 reads over 12,045 requests after ticket 41 moved more reads to KV) |
+| KV writes                          |                         11 |                                                                            200 (`BUDGET_KV_WRITES`, floor) |
+| R2 Class A ops                     |                          5 |                                                                           500 (`BUDGET_R2_CLASS_A`, floor) |
+| R2 Class B ops                     |                          0 |                                                                         5,000 (`BUDGET_R2_CLASS_B`, floor) |
 
 Worker CPU time has no daily-total field in the Analytics API, only per-request quantiles, so the measured column is an estimate (requests × `cpuTimeP50`), not a real sum; it likely undercounts, since the true mean sits above the median on a right-skewed distribution. Treat the CPU budget as the roughest of the eight.
 

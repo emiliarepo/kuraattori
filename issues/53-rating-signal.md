@@ -1,4 +1,5 @@
 # 53 Visit ratings shape the user's own recommendations
+
 Status: done · Model: Opus 5.5 (low) · Follows: 45
 
 A user's 👍/👎 on visited exhibitions become a learned affinity per category and per museum, which nudges their own Sinulle ranking (rail and home lead pick).

@@ -1,4 +1,5 @@
 # 22 English and Swedish UI
+
 Status: done · Model: Opus 5.5 (low effort) · Blocked by: 13–21 (lowest priority, last)
 
 Add `en` and `sv` alongside `fi`, with a language choice on `/profile`.
@@ -24,4 +25,3 @@ Add `en` and `sv` alongside `fi`, with a language choice on `/profile`.
 - **Content coverage** (same snapshot): English text for 425 / 642 exhibitions, Swedish for 264 / 642; English museum names for most museums, English and Swedish names for every topic. The production numbers come after the first import.
 - **Stays Finnish:** cities, regions, opening-hour notes, admission text, stamp labels and the legal texts (marked `lang="fi"`), the offline page, the day-plan `.ics` download. The calendar feed and closing-soon pushes follow `users.locale`.
 - Migration `0012`: nullable `users.locale`, `museums/categories.name_en/sv`, `exhibitions.translation_hash`. The privacy page lists the new `kuraattori_locale` cookie (version 3).
-

@@ -474,17 +474,11 @@ export const t = {
     metaTitle: "Kuraattori · Utställningar i Finlands museer",
     metaDescription:
       "Utställningar i Finlands museer på ett ställe: vad som visas, när det slutar och vad som passar dig.",
+    hero: "Utställningar i Finlands museer, utvalda för dig.",
     pitch:
-      "Utställningar i Finlands museer på ett ställe. Se vad som visas och när det slutar.",
+      "Se vad som visas och när det slutar. Kuraattori påminner dig innan du missar det.",
     browse: "Bläddra bland utställningar",
     signIn: "Logga in med Google",
-    coverStory: "Omslagsartikel",
-    endingSoon: "Slutar snart",
-    fresh: "Nya",
-    personal: {
-      kicker: "Inloggad",
-      title: "Din egen kurator",
-    },
     forYou: {
       kicker: "För dig",
       title: "Tips som säger varför.",
@@ -507,9 +501,18 @@ export const t = {
     },
     more: {
       title: "Dessutom",
-      trip: "På resa: vad som är öppet i en annan stad under resan.",
-      day: "Museidag: välj utställningar och få en promenadrutt.",
-      nearby: "Öppet nära dig: museer på gångavstånd just nu.",
+      trip: {
+        title: "På resa",
+        body: "Vad som är öppet i en annan stad under resan.",
+      },
+      day: {
+        title: "Museidag",
+        body: "Välj utställningar och få en promenadrutt.",
+      },
+      nearby: {
+        title: "Öppet nära dig",
+        body: "Museer på gångavstånd just nu.",
+      },
     },
     end: "Börja med att bläddra. Du kan logga in senare.",
   },

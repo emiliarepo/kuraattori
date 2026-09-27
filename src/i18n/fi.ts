@@ -476,17 +476,11 @@ export const t = {
     metaTitle: "Kuraattori · Suomen museoiden näyttelyt",
     metaDescription:
       "Suomen museoiden näyttelyt yhdessä paikassa: mitä on auki, milloin se päättyy ja mikä sopii juuri sinulle.",
+    hero: "Suomen museoiden näyttelyt, poimittuna sinulle.",
     pitch:
-      "Suomen museoiden näyttelyt yhdessä paikassa. Näet mitä on auki ja milloin se päättyy.",
+      "Näet mitä on auki ja milloin se päättyy. Kuraattori muistuttaa ennen kuin myöhästyt.",
     browse: "Selaa näyttelyitä",
     signIn: "Kirjaudu Googlella",
-    coverStory: "Kansijuttu",
-    endingSoon: "Päättyy pian",
-    fresh: "Uudet",
-    personal: {
-      kicker: "Kirjautuneena",
-      title: "Oma kuraattorisi",
-    },
     forYou: {
       kicker: "Sinulle",
       title: "Poiminnat, joissa lukee miksi.",
@@ -509,9 +503,18 @@ export const t = {
     },
     more: {
       title: "Lisäksi",
-      trip: "Matkalla: mitä on auki toisessa kaupungissa matkasi aikana.",
-      day: "Museopäivä: valitse näyttelyt ja saat kävelyreitin.",
-      nearby: "Avoinna nyt lähelläsi: museot kävelymatkan päässä.",
+      trip: {
+        title: "Matkalla",
+        body: "Mitä on auki toisessa kaupungissa matkasi aikana.",
+      },
+      day: {
+        title: "Museopäivä",
+        body: "Valitse näyttelyt ja saat kävelyreitin.",
+      },
+      nearby: {
+        title: "Avoinna nyt lähelläsi",
+        body: "Museot kävelymatkan päässä.",
+      },
     },
     end: "Aloita selaamalla. Kirjautua voi myöhemmin.",
   },

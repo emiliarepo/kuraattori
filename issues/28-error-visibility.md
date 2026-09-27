@@ -1,4 +1,5 @@
 # 28 Server error visibility and friendly failure states
+
 Status: done · Model: Sonnet 5 · Blocked by: 23
 
 During the outage `wrangler tail` showed no error at all and users saw Next's generic "Application error … Digest". Fix both.

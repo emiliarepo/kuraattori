@@ -1,4 +1,5 @@
 # 51 Visual regression tests
+
 Status: done · Model: Opus 5.5 (low) · Baselines: pending the first Linux run (no Docker on the authoring machine)
 
 Playwright screenshot tests for the key pages at 390 and 1280 px, light and dark, in Finnish, compared in CI before every deploy.

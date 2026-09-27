@@ -1,4 +1,5 @@
 # 42 Museopassi sharing like the web games
+
 Status: done · Model: Opus 5.5 · Blocked by: 35
 
 "Jaa passi" should share the way Wordle, Pokedoku and the LinkedIn games do: one tap opens the native share sheet with the passport image and a short ready-made text.

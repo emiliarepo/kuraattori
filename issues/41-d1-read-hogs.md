@@ -1,4 +1,5 @@
 # 41 D1 read hogs: sitemap, list index, trip, meta caches
+
 Status: done · Model: Opus 5.5 · Blocked by: 39
 
 Cut D1 rows read per request for the hot spots an audit found: the sitemap, `exhibition.list` ordering, deep browse pages, `trip.list`/`trip.day`, `meta.hasIneligibleExhibitions`, the correlated visibility subqueries, and the `import_run` count.
@@ -21,23 +22,23 @@ Cut D1 rows read per request for the hot spots an audit found: the sitemap, `exh
 
 Synthetic local D1: 5 250 exhibitions (1 958 active, 250 upcoming), 300 museums, 25 categories, ~8.6k category links, 400 import runs, one user with 135 statuses. No ANALYZE, like D1. Each procedure's drizzle statements were captured and re-run through the D1 binding for `meta.rows_read`, with no KV (so cold). The dev read-budget logger undercounts joined selects, because it logs `raw()` row counts, so its list-page numbers are lower bounds. It was used for the sitemap and trip pages (cold then warm) and in the E2E assertion.
 
-| Procedure | Before | After |
-|---|---:|---:|
-| sitemap (old list loop → `meta.sitemapEntries`) | 1 105 074 | 3 319 cold, 0 warm |
-| list current, page 1 | 8 537 | 172 |
-| list current, 20 chained pages (`?page=20`) | 163 068 | 3 459 |
-| list search | 6 928 | 1 343 |
-| list category | 5 535 | 589 |
-| list ending 14 d | 5 193 | 172 |
-| list upcoming | 770 | 821 |
-| list region | 530 | 852 |
-| list current, signed in | 161 946 | 260 |
-| new, signed in | 4 654 | 304 |
-| trip.list all places | 16 560 | ~2 warm (11 014 cold pool) |
-| trip.list region | 861 | ~2 warm |
-| trip.day | 157 | ~2 warm |
-| hasIneligibleExhibitions | 5 (worst case full scan) | 0 warm |
-| forYou `import_run` statement | 400 | 2 |
+| Procedure                                       |                   Before |                      After |
+| ----------------------------------------------- | -----------------------: | -------------------------: |
+| sitemap (old list loop → `meta.sitemapEntries`) |                1 105 074 |         3 319 cold, 0 warm |
+| list current, page 1                            |                    8 537 |                        172 |
+| list current, 20 chained pages (`?page=20`)     |                  163 068 |                      3 459 |
+| list search                                     |                    6 928 |                      1 343 |
+| list category                                   |                    5 535 |                        589 |
+| list ending 14 d                                |                    5 193 |                        172 |
+| list upcoming                                   |                      770 |                        821 |
+| list region                                     |                      530 |                        852 |
+| list current, signed in                         |                  161 946 |                        260 |
+| new, signed in                                  |                    4 654 |                        304 |
+| trip.list all places                            |                   16 560 | ~2 warm (11 014 cold pool) |
+| trip.list region                                |                      861 |                    ~2 warm |
+| trip.day                                        |                      157 |                    ~2 warm |
+| hasIneligibleExhibitions                        | 5 (worst case full scan) |                     0 warm |
+| forYou `import_run` statement                   |                      400 |                          2 |
 
 "After" list numbers include 25 rows for the category list, which KV serves in production. Region and upcoming pages got slightly worse: the region filter sits on `museum`, so the ordered scan reads until it finds `limit` matches. That is bounded by the active set, not the table.
 

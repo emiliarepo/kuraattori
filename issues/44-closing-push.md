@@ -1,4 +1,5 @@
 # 44 "Closing soon" push notifications
+
 Status: done · Model: Opus 5.5 (low) · Blocked by: 43 (migration order)
 
 Web Push for the installed PWA (and desktop browsers). Opt-in only, from Profiili → a new notifications setting, never prompted on page load.

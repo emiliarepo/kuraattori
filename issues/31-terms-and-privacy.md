@@ -1,4 +1,5 @@
 # 31 Terms of use, privacy policy and account deletion
+
 Status: done · Model: Opus 5.5 (low effort) · Blocked by: none
 
 Google's OAuth consent screen needs public links to a privacy policy and terms of use. Keep both as short and plain as possible, in Finnish, based on an existing template rather than written from scratch.

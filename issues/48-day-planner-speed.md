@@ -1,4 +1,5 @@
 # 48 Day planner speed
+
 Status: blocked · slowness not reproduced; needs a signed-in production timing or a HAR from the report
 
 "Järjestä reitti" on `/trip/day` was reported as really slow with 5–6 stops. Measure first,
@@ -19,20 +20,20 @@ interested reads, per user), `trip.saved` in the layout (per user), `orderStops`
 
 Solver alone (`orderStops`, tsx, random Helsinki points, mean of 20 000 runs):
 
-| stops | time |
-|---|---|
-| 2 | 0.3 µs |
-| 4 | 5.4 µs |
-| 6 | 45 µs |
+| stops | time   |
+| ----- | ------ |
+| 2     | 0.3 µs |
+| 4     | 5.4 µs |
+| 6     | 45 µs  |
 
 Production, anonymous, read-only GETs of `/trip/day?city=Helsinki&date=2026-09-29&ids=…`
 (5 samples each, from Helsinki):
 
-| stops | HTML TTFB | RSC TTFB (`RSC: 1`) |
-|---|---|---|
-| 2 | 0.21–0.40 s | 0.11–0.18 s |
-| 4 | 0.23–0.32 s | 0.13–0.14 s |
-| 6 | 0.18–0.25 s | 0.11–0.15 s |
+| stops | HTML TTFB   | RSC TTFB (`RSC: 1`) |
+| ----- | ----------- | ------------------- |
+| 2     | 0.21–0.40 s | 0.11–0.18 s         |
+| 4     | 0.23–0.32 s | 0.13–0.14 s         |
+| 6     | 0.18–0.25 s | 0.11–0.15 s         |
 
 Production, anonymous, Chromium, from the click until `#itinerary` is visible: 318 ms (2
 stops), 313 ms (4), 309 ms (6). The only other requests are the footer's `/terms` and `/privacy`
@@ -43,15 +44,15 @@ doesn't depend on the stop count.
 Local, signed in (dev credentials), Worker build via `opennextjs-cloudflare` + wrangler, with
 temporary timing logs:
 
-| part | time |
-|---|---|
-| i18n + auth | 2–3 ms |
-| museum.list (KV) | 1–2 ms |
-| trip.day: pool KV get (36 kB, 16 entries) | 1–2 ms |
-| trip.day: hidden + interested reads | 1–3 ms |
-| orderStops + scheduleVisits | < 1 ms |
-| page total before render | 7 ms |
-| click until itinerary visible | 107–108 ms |
+| part                                      | time       |
+| ----------------------------------------- | ---------- |
+| i18n + auth                               | 2–3 ms     |
+| museum.list (KV)                          | 1–2 ms     |
+| trip.day: pool KV get (36 kB, 16 entries) | 1–2 ms     |
+| trip.day: hidden + interested reads       | 1–3 ms     |
+| orderStops + scheduleVisits               | < 1 ms     |
+| page total before render                  | 7 ms       |
+| click until itinerary visible             | 107–108 ms |
 
 The local seed has only 3 Helsinki candidates, so locally n ≤ 3.
 

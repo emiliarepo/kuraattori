@@ -1,4 +1,5 @@
 # 43 Opening hours and free days
+
 Status: done · Model: Opus 5.5 (low) · Blocked by: 41 (migration order)
 
 museot.fi museum pages carry weekly hours in a regular block (`fixtures/museot/museum-21118.html`: "Aukioloajat Ma Suljettu Ti 10:00-20:00 … Su 10:00-17:00"). The museum's event list also names free days ("Kiasman ilmaispäivä 2.10.2026").

@@ -1,4 +1,5 @@
 # 15 Visit date and note
+
 Status: done · Implemented visit date and private note tracking.
 Model: GPT-6 Luna · Blocked by: 12
 

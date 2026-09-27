@@ -1,4 +1,5 @@
 # 26 Production health checks and import sanity
+
 Status: done · Model: GPT-6 Sol · Blocked by: 23
 
 Today's outage (D1 read limit, 27.9.2026) was noticed by the user, not by us. Make GitHub tell us first.

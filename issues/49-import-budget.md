@@ -1,4 +1,5 @@
 # 49 Nightly import time budget
+
 Status: done · Model: Opus 5.5 (low) · Blocked by: 38, 43 (migration order: after 34)
 
 The manual import on 27.9.2026 (run 36320009784) hit the job's 30-minute `timeout-minutes`. The data phase finished (translationsUpdated 642, translationRequests 708, hoursUnparsed []). The rest of the time went to the first full R2 image backfill (ticket 38), where downloads failed with `fetch failed … SocketError: other side closed`, which means the image host was throttling us. That run also fetched every museum page (ticket 43).
@@ -12,10 +13,10 @@ The manual import on 27.9.2026 (run 36320009784) hit the job's 30-minute `timeou
 
 Fixed requests every run: the listing, 2 translated listings, 29 topic listings and ~19 region listings, ≈ 51 requests.
 
-| Night | Before | After |
-|---|---|---|
-| Ordinary night (~15 changed details, a few translations, ~10 new images) | 51 + 15 + 5 + **250 museum pages** + 10 ≈ **330 requests, ~3 min** of pacing | 51 + 15 + 5 + **~36 museum pages** + 10 ≈ **120 requests, ~1 min** |
-| 27.9.2026 run (708 translations, 642-image backfill) | 51 + 708 + 250 + 642 ≈ **1 650 requests, ~15 min of pacing alone**. Throttled downloads with no timeout used the rest of the 30 min | Data phase unchanged, ≈ 1 000 requests, ~9 min. Images stop at 150 or 10 min: **≤ ~20 min total**, and the backlog drains in ~5 nights |
+| Night                                                                    | Before                                                                                                                              | After                                                                                                                                  |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Ordinary night (~15 changed details, a few translations, ~10 new images) | 51 + 15 + 5 + **250 museum pages** + 10 ≈ **330 requests, ~3 min** of pacing                                                        | 51 + 15 + 5 + **~36 museum pages** + 10 ≈ **120 requests, ~1 min**                                                                     |
+| 27.9.2026 run (708 translations, 642-image backfill)                     | 51 + 708 + 250 + 642 ≈ **1 650 requests, ~15 min of pacing alone**. Throttled downloads with no timeout used the rest of the 30 min | Data phase unchanged, ≈ 1 000 requests, ~9 min. Images stop at 150 or 10 min: **≤ ~20 min total**, and the backlog drains in ~5 nights |
 
 The minutes cover request pacing only. D1 HTTP writes and resizing add to them, and the new `budget` block measures both.
 

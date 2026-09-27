@@ -1,4 +1,5 @@
 # 47 Postmark ring text runs in a straight line
+
 Status: done
 
 The Museopassi postmark should read "KURAATTORI" around the ring, like a real postmark. In the share image (`/my/passport/share.png`) it was a flat, tiny line of text above the date.

@@ -1,4 +1,5 @@
 # 12 Serif redesign: "Aikakauslehti" direction
+
 Status: done · Model: Opus 5.5 · Blocked by: none
 
 Replace the "Galleria" direction (heavy grotesk, black rules, vermilion) with direction B "Aikakauslehti" from the first UI mocks: a Sunday culture supplement. Serif masthead with a date line, one lead recommendation, horizontal card rails, a warm rust accent on paper.

@@ -2,7 +2,7 @@ import { expect, test } from "./fixtures";
 import { devSignIn, uniqueEmail } from "./dev-sign-in";
 import { t } from "../src/i18n/fi";
 
-const personalHeading = { name: t.landing.personal.title };
+const personalHeading = { name: t.landing.hero };
 
 test("anonymous / is the landing page, with its actions above the fold on a phone", async ({
   page,

@@ -1,4 +1,5 @@
 # 20 Museokortti savings tracker
+
 Status: done · Model: Opus 5.5 (low effort) · Blocked by: 14, 15
 
 Show how much the user has saved with the Museum Card: sum of adult admission prices of their visited exhibitions.

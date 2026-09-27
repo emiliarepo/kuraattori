@@ -473,17 +473,11 @@ export const t = {
     metaTitle: "Kuraattori · Exhibitions in Finnish museums",
     metaDescription:
       "Exhibitions in Finnish museums in one place: what is on, when it closes and what suits you.",
+    hero: "Exhibitions in Finnish museums, picked for you.",
     pitch:
-      "Exhibitions in Finnish museums in one place. See what is on and when it closes.",
+      "See what is on and when it closes. Kuraattori reminds you before you miss it.",
     browse: "Browse exhibitions",
     signIn: "Sign in with Google",
-    coverStory: "Cover story",
-    endingSoon: "Closing soon",
-    fresh: "New",
-    personal: {
-      kicker: "Signed in",
-      title: "Your own curator",
-    },
     forYou: {
       kicker: "For you",
       title: "Picks that say why.",
@@ -506,9 +500,18 @@ export const t = {
     },
     more: {
       title: "Also",
-      trip: "Travelling: what is open in another city during your trip.",
-      day: "Museum day: pick exhibitions and get a walking route.",
-      nearby: "Open near you: museums within walking distance right now.",
+      trip: {
+        title: "Travelling",
+        body: "What is open in another city during your trip.",
+      },
+      day: {
+        title: "Museum day",
+        body: "Pick exhibitions and get a walking route.",
+      },
+      nearby: {
+        title: "Open near you",
+        body: "Museums within walking distance right now.",
+      },
     },
     end: "Start by browsing. You can sign in later.",
   },

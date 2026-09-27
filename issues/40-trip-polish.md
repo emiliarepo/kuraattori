@@ -1,4 +1,5 @@
 # 40 Matkalla polish: ending-soon first, walking legs between stops
+
 Status: done · Model: Opus 5.5 · Blocked by: 36
 
 Two follow-ups to ticket 36 (`/trip` and `/trip/day`).

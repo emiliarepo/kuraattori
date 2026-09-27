@@ -1,4 +1,5 @@
 # 03 Domain logic: dates, urgency, relevance, user state
+
 Status: done · Model: Sonnet 5 · Blocked by: 01
 
 Pure functions in `src/domain/` per the Data and domain decisions section of `docs/design.md`: exhibition phase (current/upcoming/ended) in Europe/Helsinki, days remaining, urgency, TimeBar progress, relevance with reasons, Sinulle ranking, and the status transition rules. Add Finnish formatting helpers (`27.9.2026`, `3 päivää jäljellä`, `Päättyy tänään`, `Alkaa 2.10.`) in `src/i18n`.

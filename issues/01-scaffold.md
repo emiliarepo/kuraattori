@@ -1,4 +1,5 @@
 # 01 Scaffold: T3 app on Cloudflare Workers + D1 schema
+
 Status: done · Model: Sonnet 5 · Blocked by: none
 
 Create the app with create-t3-app (Next.js App Router, TypeScript, Tailwind, tRPC, Drizzle, NextAuth) in the repo root, using pnpm. Make it run on Cloudflare Workers through `@opennextjs/cloudflare` with a D1 binding (`DB`), and use `wrangler dev` / `pnpm preview` with local D1.

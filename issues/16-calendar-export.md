@@ -1,4 +1,5 @@
 # 16 Calendar export for interested exhibitions
+
 Status: done
 
 Let users see end dates of their Kiinnostaa exhibitions in their own calendar.

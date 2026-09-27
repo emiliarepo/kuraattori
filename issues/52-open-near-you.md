@@ -1,4 +1,5 @@
 # 52 Avoinna nyt lähelläsi (open now near you)
+
 Status: done · Model: Opus 5.5 (low) · No migration
 
 Museums open right now within walking distance, from the browser's location or a chosen city.

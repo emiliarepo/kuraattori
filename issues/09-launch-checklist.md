@@ -1,4 +1,5 @@
 # 09 Launch prerequisites
+
 Status: doing · Model: orchestrator + human · Blocked by: 07
 
 - [x] museot.fi terms checked (findings below); decided not to contact Museoliitto

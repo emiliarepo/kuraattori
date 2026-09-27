@@ -1,4 +1,5 @@
 # 27 End-to-end tests in the deploy pipeline
+
 Status: done · Model: Sonnet 5 · Blocked by: 23
 
 Two production breakages today (signed-in home crash, D1 limit) would have been caught by a browser test of the real flow. Add a small, fast Playwright suite and run it in `deploy.yml` before the deploy step.

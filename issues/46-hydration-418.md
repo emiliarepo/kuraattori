@@ -1,4 +1,5 @@
 # 46 Intermittent React #418 hydration mismatch
+
 Status: done · Model: Opus 5.5 (low)
 
 Under the parallel E2E run, about 1 run in 3 or 4 failed with "Minified React error #418" (`args[]=HTML`) on a first page load. It hit the home, day planner, region selector, opening-hours and detail tests, never alone. Production runs the same build.
@@ -31,15 +32,15 @@ Ruled out: KV hit/miss differences (the served HTML and payload matched), dates,
 
 `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test` pass. `SKIP_ENV_VALIDATION=1 pnpm test:e2e`, 8 runs in a row (each rebuilds):
 
-| Run | Result |
-|---:|---|
-| 1 | 42 passed (18.1s) |
-| 2 | 42 passed (18.9s) |
-| 3 | 42 passed (16.8s) |
-| 4 | 42 passed (17.0s) |
-| 5 | 42 passed (16.9s) |
-| 6 | 42 passed (17.4s) |
-| 7 | 42 passed (17.7s) |
-| 8 | 42 passed (17.7s) |
+| Run | Result            |
+| --: | ----------------- |
+|   1 | 42 passed (18.1s) |
+|   2 | 42 passed (18.9s) |
+|   3 | 42 passed (16.8s) |
+|   4 | 42 passed (17.0s) |
+|   5 | 42 passed (16.9s) |
+|   6 | 42 passed (17.4s) |
+|   7 | 42 passed (17.7s) |
+|   8 | 42 passed (17.7s) |
 
 No `Hydration`/`#418` line in any run's log. Before the fix, the same local loop failed on runs 4, 11, 24, 31 and 41 of the diagnostic batches.

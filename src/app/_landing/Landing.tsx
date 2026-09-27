@@ -1,16 +1,14 @@
 import Link from "next/link";
 
-import { DaysNumeral } from "~/app/_components/DaysNumeral";
 import { ExhibitionCard } from "~/app/_components/ExhibitionCard";
 import { SECTION_LIMIT } from "~/app/_components/HomeFeed";
 import { ImageFallback } from "~/app/_components/ImageFallback";
 import { Stamp } from "~/app/_components/Stamp";
-import { dayCaption } from "~/app/_lib/exhibition-format";
 import { toRowView } from "~/app/_lib/row";
 import { Actions } from "~/app/_landing/Actions";
 import { ForYouDemo } from "~/app/_landing/ForYouDemo";
 import { Reveal } from "~/app/_landing/Reveal";
-import { getDaysRemaining, todayInHelsinki } from "~/domain/dates";
+import { todayInHelsinki } from "~/domain/dates";
 import {
   postmarkDate,
   progressBar,
@@ -51,41 +49,36 @@ export async function Landing() {
       .catch(() => []),
   ]);
 
-  const view = (item: (typeof freshest)[number]) =>
-    toRowView(item, today, i18n);
-  const leadItem = freshest[0] ?? endingSoon.items[0];
-  const lead = leadItem && view(leadItem);
-  const fresh = freshest
-    .filter((item) => item !== leadItem)
-    .slice(0, 3)
-    .map(view);
-  const closing = endingSoon.items.slice(0, 4).map((item) => ({
-    view: view(item),
-    days: getDaysRemaining(item, today) ?? 0,
-  }));
+  type Item = (typeof freshest)[number];
+  const all: Item[] = [...freshest, ...endingSoon.items];
+  const withReason = (item: Item) => {
+    const row = toRowView(item, today, i18n);
+    const place = item.museum.region
+      ? t.regionName(item.museum.region)
+      : row.city;
+    const category = row.categories[0]?.label;
+    return {
+      ...row,
+      whyLabel: [category && `${category} ★`, place]
+        .filter(Boolean)
+        .join(" · "),
+    };
+  };
 
-  const all = [...freshest, ...endingSoon.items];
-  const picks = all
-    .filter((item) => item.categories.length > 0 && item !== leadItem)
+  const [heroItem, ...rest] = all.filter((item) => item.categories.length);
+  const hero = heroItem && withReason(heroItem);
+  const picks = rest
+    .filter((item) => item.id !== heroItem?.id)
     .slice(0, 2)
-    .map((item) => {
-      const row = view(item);
-      const place = item.museum.region
-        ? t.regionName(item.museum.region)
-        : row.city;
-      return {
-        ...row,
-        whyLabel: [`${row.categories[0]!.label} ★`, place]
-          .filter(Boolean)
-          .join(" · "),
-      };
-    });
+    .map(withReason);
   const interestNames = [
     ...new Set(picks.flatMap((pick) => pick.categories.map((c) => c.label))),
   ].slice(0, 2);
 
-  const reminder =
-    closing.find(({ days }) => days >= 7)?.view ?? closing[0]?.view;
+  const reminderItem =
+    endingSoon.items.find((item) => item.endDate && item.endDate > today) ??
+    endingSoon.items[0];
+  const reminder = reminderItem && toRowView(reminderItem, today, i18n);
 
   const year = Number(today.slice(0, 4));
   const seenMuseums = new Set<number>();
@@ -113,6 +106,7 @@ export async function Landing() {
         },
       };
     });
+  const [heroStamp] = stamps;
   const shareText = [
     t.pages.my.passport.shareText.headline(
       year,
@@ -129,259 +123,199 @@ export async function Landing() {
 
   return (
     <div className="pt-8">
-      <div className="grid gap-8 sm:grid-cols-[2fr_1fr] sm:gap-10">
-        <div className="flex flex-col gap-6">
-          {lead && (
-            <Link
-              href={lead.href}
-              className="landing-rise group -mx-4 block sm:mx-0"
-              style={{ "--i": 1 } as React.CSSProperties}
-            >
+      <section className="grid items-center gap-8 sm:min-h-[calc(100svh-15rem)] sm:grid-cols-[3fr_2fr] sm:gap-12">
+        <div
+          className="landing-rise flex flex-col items-center gap-4 text-center sm:items-start sm:gap-6 sm:text-left"
+          style={{ "--i": 1 } as React.CSSProperties}
+        >
+          <h2 className="text-headline text-4xl sm:text-[3.5rem]">
+            {t.landing.hero}
+          </h2>
+          <p className="text-muted max-w-md text-lg leading-snug">
+            {t.landing.pitch}
+          </p>
+          <Actions t={t} />
+        </div>
+
+        {hero && (
+          <div
+            className="landing-rise relative mx-auto w-full max-w-sm sm:max-w-md"
+            style={{ "--i": 2 } as React.CSSProperties}
+          >
+            <Link href={hero.href} className="group block">
               <ImageFallback
-                sources={lead.imageSources}
-                alt={lead.imageAlt}
-                title={lead.title.text}
+                sources={hero.imageSources}
+                alt={hero.imageAlt}
+                title={hero.title.text}
                 aspectRatio="3 / 2"
                 priority
               />
-              <p className="mt-3 flex flex-col gap-1 px-4 sm:px-0">
-                <span className="text-kicker text-signal">
-                  {t.landing.coverStory}
+              <p className="mt-3 flex flex-col gap-1 pr-24">
+                <span className="text-kicker text-signal truncate">
+                  {t.pages.home.forYou} · {hero.whyLabel}
                 </span>
                 <span
-                  lang={lead.title.lang}
-                  className="text-headline text-xl group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4 sm:text-4xl"
+                  lang={hero.title.lang}
+                  className="text-headline text-2xl group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4"
                 >
-                  {lead.title.text}
+                  {hero.title.text}
                 </span>
-                <span className="text-muted text-sm italic sm:text-base">
-                  {lead.museum.text}
-                  {lead.city && `, ${lead.city}`}
+                <span className="text-muted text-sm italic">
+                  {hero.museum.text}
+                  {hero.city && `, ${hero.city}`}
                 </span>
               </p>
             </Link>
-          )}
-          <div
-            className="landing-rise flex flex-col gap-4"
-            style={{ "--i": 2 } as React.CSSProperties}
-          >
-            <p className="text-headline max-w-xl text-xl sm:text-2xl">
-              {t.landing.pitch}
-            </p>
-            <Actions t={t} />
-          </div>
-        </div>
-
-        <aside
-          className="landing-rise flex flex-col gap-8"
-          style={{ "--i": 3 } as React.CSSProperties}
-        >
-          <CoverLine title={t.landing.endingSoon} href="/exhibitions?ending=14">
-            {closing.map(({ view, days }) => (
-              <li key={view.href}>
-                <Link href={view.href} className="group flex flex-col gap-0.5">
-                  <DaysNumeral days={days} caption={dayCaption(days, i18n)} />
-                  <span
-                    lang={view.title.lang}
-                    className="text-headline text-xl group-hover:underline"
-                  >
-                    {view.title.text}
-                  </span>
-                  <span className="text-muted text-sm italic">
-                    {view.museum.text}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </CoverLine>
-          <CoverLine title={t.landing.fresh} href="/feed">
-            {fresh.map((view) => (
-              <li key={view.href}>
-                <Link href={view.href} className="group flex flex-col gap-0.5">
-                  <span
-                    lang={view.title.lang}
-                    className="text-headline text-xl group-hover:underline"
-                  >
-                    {view.title.text}
-                  </span>
-                  <span className="text-muted text-sm italic">
-                    {view.museum.text}
-                    {view.city && `, ${view.city}`}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </CoverLine>
-        </aside>
-      </div>
-
-      <section
-        aria-labelledby="landing-personal"
-        className="border-rule mt-12 border-t pt-6"
-      >
-        <p className="text-kicker text-signal">{t.landing.personal.kicker}</p>
-        <h2
-          id="landing-personal"
-          className="text-headline mt-2 text-4xl sm:text-6xl"
-        >
-          {t.landing.personal.title}
-        </h2>
-
-        <Chapter index={1} copy={t.landing.forYou}>
-          <div className="flex flex-col gap-8">
-            {picks.length > 0 && (
-              <ul className="grid grid-cols-2 gap-3 sm:gap-6">
-                {picks.map((pick) => (
-                  <li key={pick.href} className="flex">
-                    <ExhibitionCard item={pick} />
-                  </li>
-                ))}
-              </ul>
-            )}
-            {interestNames.length > 0 && (
-              <ForYouDemo categories={interestNames} />
+            {heroStamp && (
+              <div
+                className="absolute right-2 bottom-4 w-20 sm:-right-4 sm:w-24"
+                style={{ rotate: `${heroStamp.rotation + 6}deg` }}
+              >
+                <Stamp {...heroStamp} />
+              </div>
             )}
           </div>
-        </Chapter>
+        )}
+      </section>
 
-        <Chapter index={2} copy={t.landing.reminders} flip>
-          {reminder && (
-            <div className="flex flex-col gap-4 font-sans">
-              <div className="bg-surface flex gap-3 p-4 transition-transform duration-150 hover:-translate-y-0.5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/icon-192.png"
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 shrink-0"
-                />
-                <div className="flex min-w-0 flex-col gap-0.5">
-                  <p className="text-muted flex justify-between gap-2 text-xs">
-                    <span className="font-semibold">{t.app.name}</span>
-                    <span>{t.landing.reminders.now}</span>
-                  </p>
-                  <p className="text-sm font-semibold">
-                    {t.notifications.endsInWeek}: {reminder.title.text},{" "}
-                    {reminder.museum.text}
-                  </p>
-                  <p className="text-muted text-sm">
-                    {t.notifications.singleBody}
-                  </p>
-                </div>
-              </div>
-              <div className="border-rule-soft flex items-baseline gap-4 border-y py-3 text-sm">
-                <span className="text-kicker text-muted shrink-0">
-                  {t.landing.reminders.calendar}
-                </span>
-                <span className="text-signal shrink-0 font-semibold tabular-nums">
-                  {reminder.timeBar.endLabel}
-                </span>
-                <span className="min-w-0">
-                  {t.notifications.calendarEnds(reminder.title.text)}
-                </span>
-              </div>
-            </div>
-          )}
-        </Chapter>
-
-        <Chapter index={3} copy={t.landing.passport}>
-          <div className="flex flex-col gap-6">
-            <ul className="flex justify-center pt-2">
-              {stamps.map(({ rotation, ...stamp }) => (
-                <li
-                  key={stamp.id}
-                  className="-mx-1.5 w-20 transition-transform duration-150 hover:-translate-y-1 sm:-mx-1 sm:w-28"
-                  style={{ rotate: `${rotation}deg` }}
-                >
-                  <Stamp {...stamp} />
+      <Feature index={1} copy={t.landing.forYou}>
+        <div className="flex flex-col gap-8">
+          {picks.length > 0 && (
+            <ul className="grid grid-cols-2 gap-4 sm:gap-6">
+              {picks.map((pick) => (
+                <li key={pick.href} className="flex">
+                  <ExhibitionCard item={pick} />
                 </li>
               ))}
             </ul>
-            <figure className="flex flex-col gap-2">
-              <figcaption className="text-kicker text-muted">
-                {t.landing.passport.share}
-              </figcaption>
-              <p className="bg-surface p-4 font-sans text-sm whitespace-pre-line">
-                {shareText}
-              </p>
-            </figure>
-          </div>
-        </Chapter>
+          )}
+          {interestNames.length > 0 && (
+            <ForYouDemo categories={interestNames} />
+          )}
+        </div>
+      </Feature>
 
-        <Reveal className="border-rule-soft mt-10 border-t pt-6">
-          <h3 className="text-kicker">{t.landing.more.title}</h3>
-          <ul className="mt-4 grid gap-4 sm:grid-cols-3 sm:gap-6">
-            {(
-              [
-                ["/trip", t.landing.more.trip],
-                ["/trip/day", t.landing.more.day],
-                ["/nearby", t.landing.more.nearby],
-              ] as const
-            ).map(([href, text]) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className="hover:text-signal font-serif text-lg leading-snug transition-colors duration-150"
-                >
-                  {text}
-                </Link>
+      <Feature index={2} copy={t.landing.reminders}>
+        {reminder && (
+          <div className="flex flex-col gap-4 font-sans">
+            <div className="bg-surface flex gap-3 p-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/icon-192.png"
+                alt=""
+                width={40}
+                height={40}
+                className="h-10 w-10 shrink-0"
+              />
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <p className="text-muted flex justify-between gap-2 text-xs">
+                  <span className="font-semibold">{t.app.name}</span>
+                  <span>{t.landing.reminders.now}</span>
+                </p>
+                <p className="text-sm font-semibold">
+                  {t.notifications.endsInWeek}: {reminder.title.text},{" "}
+                  {reminder.museum.text}
+                </p>
+                <p className="text-muted text-sm">
+                  {t.notifications.singleBody}
+                </p>
+              </div>
+            </div>
+            <div className="border-rule-soft flex items-center gap-4 border p-4">
+              <div className="border-rule-soft flex shrink-0 flex-col items-center border-r pr-4">
+                <span className="text-kicker text-muted">
+                  {t.landing.reminders.calendar}
+                </span>
+                <span className="text-signal font-serif text-3xl tabular-nums">
+                  {reminder.timeBar.endLabel.split(".")[0]}
+                </span>
+              </div>
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <span className="text-sm font-semibold">
+                  {t.notifications.calendarEnds(reminder.title.text)}
+                </span>
+                <span className="text-muted text-sm">
+                  {reminder.museum.text} · {reminder.timeBar.endLabel}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </Feature>
+
+      <Feature index={3} copy={t.landing.passport}>
+        <div className="flex flex-col gap-8">
+          <ul className="bg-surface grid grid-cols-5 gap-2 p-4 sm:gap-4 sm:p-6">
+            {stamps.map(({ rotation, ...stamp }) => (
+              <li
+                key={stamp.id}
+                className="transition-transform duration-150 hover:-translate-y-1"
+                style={{ rotate: `${rotation}deg` }}
+              >
+                <Stamp {...stamp} />
               </li>
             ))}
           </ul>
-        </Reveal>
-      </section>
+          <figure className="flex flex-col items-center gap-2">
+            <figcaption className="text-kicker text-muted">
+              {t.landing.passport.share}
+            </figcaption>
+            <p className="border-rule-soft border px-4 py-3 font-sans text-sm whitespace-pre-line">
+              {shareText}
+            </p>
+          </figure>
+        </div>
+      </Feature>
 
-      <Reveal className="border-rule mt-12 flex flex-col gap-6 border-t pt-8">
-        <p className="text-headline text-3xl sm:text-4xl">{t.landing.end}</p>
+      <Reveal className="border-rule-soft mt-12 border-t pt-12">
+        <h2 className="text-kicker text-center">{t.landing.more.title}</h2>
+        <ul className="mt-6 grid gap-6 text-center sm:grid-cols-3">
+          {(
+            [
+              ["/trip", t.landing.more.trip],
+              ["/trip/day", t.landing.more.day],
+              ["/nearby", t.landing.more.nearby],
+            ] as const
+          ).map(([href, { title, body }]) => (
+            <li key={href}>
+              <Link href={href} className="group flex flex-col gap-1">
+                <span className="text-headline text-2xl group-hover:underline">
+                  {title}
+                </span>
+                <span className="text-muted">{body}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Reveal>
+
+      <Reveal className="border-rule mt-12 flex flex-col items-center gap-6 border-t pt-12 text-center">
+        <p className="text-headline text-3xl sm:text-5xl">{t.landing.end}</p>
         <Actions t={t} />
       </Reveal>
     </div>
   );
 }
 
-function CoverLine({
-  title,
-  href,
-  children,
-}: {
-  title: string;
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="border-rule border-t pt-3">
-      <h2 className="text-kicker mb-3">
-        <Link href={href} className="hover:text-signal">
-          {title}
-        </Link>
-      </h2>
-      <ul className="flex flex-col gap-4">{children}</ul>
-    </section>
-  );
-}
-
-function Chapter({
+function Feature({
   index,
   copy,
-  flip = false,
   children,
 }: {
   index: number;
   copy: { kicker: string; title: string; body: string };
-  flip?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <Reveal className="border-rule-soft mt-10 grid gap-6 border-t pt-6 sm:grid-cols-2 sm:items-center sm:gap-12">
-      <div className={`flex flex-col gap-3 ${flip ? "sm:order-2" : ""}`}>
+    <Reveal className="border-rule-soft mt-12 border-t pt-12">
+      <div className="mx-auto flex max-w-xl flex-col items-center gap-3 text-center">
         <p className="text-kicker text-signal">
           {String(index).padStart(2, "0")} · {copy.kicker}
         </p>
-        <h3 className="text-headline text-3xl sm:text-5xl">{copy.title}</h3>
-        <p className="text-muted max-w-md text-lg leading-snug">{copy.body}</p>
+        <h2 className="text-headline text-4xl sm:text-5xl">{copy.title}</h2>
+        <p className="text-muted text-lg leading-snug">{copy.body}</p>
       </div>
-      <div>{children}</div>
+      <div className="mx-auto mt-8 max-w-lg">{children}</div>
     </Reveal>
   );
 }

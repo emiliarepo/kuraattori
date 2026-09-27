@@ -1,4 +1,5 @@
 # 23 Page-load performance and back navigation
+
 Status: done · Model: Sonnet 5 · Blocked by: 24
 
 Two related problems: moving between pages feels slow, and going back doesn't return the user to where they were.
@@ -9,12 +10,12 @@ Measured locally (`command pnpm opennextjs-cloudflare preview`, anonymous reques
 
 TTFB / total, cold vs warm (KV cache empty vs populated):
 
-| Page | Cold TTFB / total | Warm TTFB / total |
-|---|---|---|
-| `/` | 181 / 184 ms | 23 / 25 ms |
-| `/exhibitions` | 30 / 32 ms | 21 / 24 ms |
-| `/exhibitions/[slug]` | 63 / 64 ms | 24 / 25 ms |
-| `/museums/[slug]` | 17 / 18 ms | 16 / 17 ms |
+| Page                  | Cold TTFB / total | Warm TTFB / total |
+| --------------------- | ----------------- | ----------------- |
+| `/`                   | 181 / 184 ms      | 23 / 25 ms        |
+| `/exhibitions`        | 30 / 32 ms        | 21 / 24 ms        |
+| `/exhibitions/[slug]` | 63 / 64 ms        | 24 / 25 ms        |
+| `/museums/[slug]`     | 17 / 18 ms        | 16 / 17 ms        |
 
 `/my/interested` needs a session; the production preview build only offers Google sign-in (the dev credentials form is `NODE_ENV === "development"`-gated), so it wasn't measured here — see the D1 rows table below instead, measured under `pnpm dev` with a real signed-in session.
 
@@ -26,13 +27,13 @@ On 27.9.2026 the site went down for a day: the similar-exhibitions query read ~8
 
 Rows read per page, from the dev-only `meta.rows_read` logger (`src/server/db/read-budget.ts`), same signed-in dev user and data on both sides:
 
-| Page | Before (rows / statements) | After, cache cold (rows / statements) | After, cache warm (rows / statements) |
-|---|---|---|---|
-| `/` | 2127 / 28 | 2628 / 31 | **105** / 20 |
-| `/exhibitions` | 375 / 11 | 328 / 9 | **79** / 8 |
-| `/exhibitions/[slug]` (grouped exhibition) | 896 / 17 | 2550 / 21 (first pool population) | **51** / 11 |
-| `/museums/[slug]` (7 exhibitions) | 75 / **34** | — | **46** / **8** |
-| `/my/interested` (3 items) | 45 / **16** | — | **16** / **5** |
+| Page                                       | Before (rows / statements) | After, cache cold (rows / statements) | After, cache warm (rows / statements) |
+| ------------------------------------------ | -------------------------- | ------------------------------------- | ------------------------------------- |
+| `/`                                        | 2127 / 28                  | 2628 / 31                             | **105** / 20                          |
+| `/exhibitions`                             | 375 / 11                   | 328 / 9                               | **79** / 8                            |
+| `/exhibitions/[slug]` (grouped exhibition) | 896 / 17                   | 2550 / 21 (first pool population)     | **51** / 11                           |
+| `/museums/[slug]` (7 exhibitions)          | 75 / **34**                | —                                     | **46** / **8**                        |
+| `/my/interested` (3 items)                 | 45 / **16**                | —                                     | **16** / **5**                        |
 
 Every page was already under the 5000-row budget before this ticket, since the dataset is small — the original incident was a correlated-subquery blowup (already fixed in a prior commit), not a steady-state overage. The real problem this ticket targets is aggregate daily D1 volume (the header's region query alone ran 1132×/day) and N+1 round trips, both fixed:
 

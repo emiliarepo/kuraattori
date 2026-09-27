@@ -1,10 +1,11 @@
 # 36 Matkalla: trip planning tab with a museum day planner
+
 Status: done · Model: Opus 5.5 (low effort) · Blocked by: 30
 
 Turn travel mode into a proper planning feature with its own navigation tab, and add a museum day planner inside it.
 
 - **New tab "Matkalla"** in the mobile bottom bar and the desktop tabs, between Selaa and Omat (5 tabs; check they fit at 375 px with 44 px targets). Remove the small "Matkalla?" link from the home page; the tab replaces it.
-- **`/trip` becomes the planning hub:** (1) *Matka*: the existing travel mode (place + date range, what's open, "Päättyy matkasi aikana" / "Avautuu …" labels) and (2) *Museopäivä*: the day planner below. Use sub-tabs in the MyTabs style (`/trip` and `/trip/day`), each a real route, state in the URL so plans are shareable and survive back navigation.
+- **`/trip` becomes the planning hub:** (1) _Matka_: the existing travel mode (place + date range, what's open, "Päättyy matkasi aikana" / "Avautuu …" labels) and (2) _Museopäivä_: the day planner below. Use sub-tabs in the MyTabs style (`/trip` and `/trip/day`), each a real route, state in the URL so plans are shareable and survive back navigation.
 - A trip's place and dates carry over to the day planner (pick a day within the trip → plan it).
 - Signed-in users can **save a trip** ("Tallenna matka": place, dates, chosen exhibitions and the day plans) and see saved trips at the top of the tab; include saved trips in the data export and account deletion, and mention them in /privacy. (New table; migration.)
 
