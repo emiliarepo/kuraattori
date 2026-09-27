@@ -124,3 +124,48 @@ test("Jaa passi shares the image with the link inside the text", async ({
       },
     ]);
 });
+
+test("the postmark text runs around the ring on the page and in the share image", async ({
+  page,
+}) => {
+  await markIntervallumVisited(page, uniqueEmail("passport-ring"));
+  await page.goto("/my/passport");
+
+  const rings = await page.evaluate(() =>
+    [...document.querySelectorAll("svg textPath")].map((textPath) => {
+      const href = textPath.getAttribute("href") ?? "";
+      const path = textPath.closest("svg")?.querySelector(href);
+      return {
+        text: textPath.textContent,
+        arc:
+          path?.tagName === "path" &&
+          /\bA\b/.test(path.getAttribute("d") ?? ""),
+      };
+    }),
+  );
+  expect(rings).toEqual([{ text: "KURAATTORI", arc: true }]);
+
+  const ringInk = await page.evaluate(async () => {
+    const response = await fetch("/my/passport/share.png");
+    const bitmap = await createImageBitmap(await response.blob());
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const context = canvas.getContext("2d")!;
+    context.drawImage(bitmap, 0, 0);
+    const { data } = context.getImageData(0, 0, bitmap.width, bitmap.height);
+    // One stamp: 240 px wide (u = 2.4) centred in the grid, postmark centre
+    // at (588, 746). The upper annulus between the two postmark circles holds
+    // only the ring text.
+    const [cx, cy, u] = [588, 746, 2.4];
+    let ink = 0;
+    for (let y = Math.round(cy - 19 * u); y < cy - 3 * u; y++) {
+      for (let x = Math.round(cx - 19 * u); x < cx + 19 * u; x++) {
+        const r = Math.hypot(x - cx, y - cy) / u;
+        if (r < 14.5 || r > 18.8) continue;
+        const i = (y * bitmap.width + x) * 4;
+        if (data[i]! + data[i + 1]! + data[i + 2]! < 600) ink++;
+      }
+    }
+    return ink;
+  });
+  expect(ringInk).toBeGreaterThan(150);
+});
