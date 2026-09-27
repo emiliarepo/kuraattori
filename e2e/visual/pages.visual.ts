@@ -19,6 +19,7 @@ const PAGES: Record<string, string> = {
   "my-year": `/my/year/${FROZEN_TODAY.slice(0, 4)}`,
   trip: `/trip?place=Helsinki&from=${FROZEN_TODAY}&to=${FROZEN_TODAY}`,
   "settings-interests": "/settings/interests",
+  nearby: "/nearby?city=Helsinki",
 };
 
 for (const [name, path] of Object.entries(PAGES)) {
