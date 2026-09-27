@@ -100,10 +100,10 @@ export async function HomeFeed() {
     activeRegions.map(editionSlugForRegion).find(Boolean) ?? "paakaupunkiseutu";
 
   return (
-    <div className="pt-6 [&>h1+section]:mt-0">
+    <div className="pt-2 [&>h1+section]:mt-0">
       <h1 className="sr-only">{t.app.name}</h1>
 
-      <div className="mb-4 grid gap-x-8 sm:grid-cols-2">
+      <div className="mb-2 grid gap-x-8 sm:grid-cols-2">
         <NearbyBanner />
         <FeedShortcut
           href={`/edition/${editionSlug}`}

@@ -35,16 +35,16 @@ describe("imageSources", () => {
     ).toEqual([source]);
   });
 
-  it("uses only the archived copy once the exhibition has ended", () => {
+  it("puts the archived copy first once the exhibition has ended", () => {
     const ended = { startDate: "2026-01-01", endDate: "2026-09-26" };
     expect(
       imageSources({ ...ended, imageUrl: source, imageArchiveKey: key }, today),
-    ).toEqual([`/img/${key}`]);
+    ).toEqual([`/img/${key}`, source]);
     expect(
       imageSources(
         { ...ended, imageUrl: source, imageArchiveKey: null },
         today,
       ),
-    ).toEqual([]);
+    ).toEqual([source]);
   });
 });

@@ -21,7 +21,11 @@ export function imageSources(
   const archived = exhibition.imageArchiveKey
     ? archivedImagePath(exhibition.imageArchiveKey)
     : null;
-  if (getPhase(exhibition, today) === "ended")
-    return archived ? [archived] : [];
-  return [exhibition.imageUrl, archived].filter((url) => url !== null);
+  // Once an exhibition has ended, museot.fi may drop its image any day, so the
+  // archived copy leads and the original is only the fallback.
+  const order =
+    getPhase(exhibition, today) === "ended"
+      ? [archived, exhibition.imageUrl]
+      : [exhibition.imageUrl, archived];
+  return order.filter((url) => url !== null);
 }

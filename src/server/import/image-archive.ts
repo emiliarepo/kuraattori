@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import { and, asc, eq, isNotNull } from "drizzle-orm";
+import { and, asc, eq, isNotNull, sql } from "drizzle-orm";
 
 import { type Db } from "~/server/db";
 import { exhibitions } from "~/server/db/schema";
@@ -159,7 +159,11 @@ export async function archiveImages(
         eq(exhibitions.imageArchiveRemoved, false),
       ),
     )
-    .orderBy(asc(exhibitions.id));
+    // Soonest-ending first: those images are the likeliest to disappear.
+    .orderBy(
+      asc(sql`coalesce(${exhibitions.endDate}, '9999-12-31')`),
+      asc(exhibitions.id),
+    );
 
   const todo = rows
     .map((row) => ({ ...row, key: archiveKey(row.id, row.imageUrl!) }))
