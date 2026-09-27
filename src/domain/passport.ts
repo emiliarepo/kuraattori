@@ -49,39 +49,190 @@ const GENERIC_WORDS = new Set([
   "keskus",
 ]);
 const GENERIC_SUFFIX = /(museo|museum|keskus|galleria)$/i;
-const LINE_MAX = 15;
+const CONJUNCTIONS = new Set(["ja", "och", "&"]);
+
+/** Labels the rules below get wrong, by museum name as museot.fi spells it. */
+export const LABEL_OVERRIDES: Record<string, string> = {
+  "Ahvenanmaan kulttuurihistoriallinen museo": "Ahvenanmaan museo",
+  "Apteekkimuseo ja Qwenselin talo": "Qwenselin talo",
+  "Kurikan museo ja Kotiseututalo": "Kurikan museo",
+  "Rakennuskulttuuritalo Toivo ja Korsmanin talo":
+    "Rakennuskulttuuritalo Toivo",
+  "Sallan sota- ja jälleenrakennusajan museo": "Sallan museo",
+  "Sodan ja Rauhan keskus Muisti & Päämajamuseo": "Muisti",
+  "Taivalkosken sota-ajan perinnehuone": "Taivalkosken perinnehuone",
+  "Turun yliopiston kasvitieteellinen puutarha":
+    "Turun kasvitieteellinen puutarha",
+  "UPM Verlan tehdasmuseo": "Verla",
+  "Teresia ja Rafael Lönnströmin kotimuseo": "Lönnströmin kotimuseo",
+  "Kuntsin modernin taiteen museo": "Kuntsi",
+  "Suomen valokuvataiteen museo": "Valokuvataiteen museo",
+  "Söderlångviks museum (Söderlångvikin museo)": "Söderlångvik",
+  "Karkkilan ruukkimuseo Senkka: Suomen Valimomuseo": "Senkka",
+  "Degerby Igor -museo": "Degerby Igor",
+};
+
+const GLYPHS =
+  " &'(),-.0123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÄÅÖäåéö–";
+/** Advance widths (1/1000 em) of public/fonts/newsreader-italic-500.ttf. */
+const ADVANCES = [
+  228, 698, 197, 282, 282, 238, 347, 232, 588, 588, 588, 588, 588, 588, 588,
+  654, 588, 588, 262, 698, 644, 688, 750, 636, 586, 742, 786, 346, 438, 715,
+  586, 960, 745, 760, 608, 758, 654, 553, 648, 744, 678, 948, 696, 670, 622,
+  518, 488, 396, 520, 416, 326, 442, 521, 301, 274, 504, 278, 798, 563, 470,
+  532, 488, 422, 363, 337, 540, 491, 700, 503, 492, 434, 698, 698, 760, 518,
+  518, 416, 470, 494,
+];
+
+function textWidth(text: string): number {
+  let width = 0;
+  for (const char of text) width += ADVANCES[GLYPHS.indexOf(char)] ?? 600;
+  return width / 1000;
+}
+
+/** Font sizes in stamp units (the stamp is 100 wide): one line, or two to three. */
+export const LABEL_SIZES = { large: 13, small: 10.5 } as const;
+const LABEL_WIDTH = 76;
+const MAX_LINES = 3;
+const COMPOUND_TAILS = [
+  "taidemuseo",
+  "museo",
+  "keskus",
+  "talo",
+  "halli",
+  "koti",
+  "kartano",
+  "puutarha",
+  "museum",
+];
+
+const fits = (line: string, size: number) =>
+  textWidth(line) * size <= LABEL_WIDTH;
+
+export function labelSize(lines: readonly string[]): number {
+  return lines.length === 1 && fits(lines[0]!, LABEL_SIZES.large)
+    ? LABEL_SIZES.large
+    : LABEL_SIZES.small;
+}
+
+interface Token {
+  text: string;
+  /** Joins the previous token without a space, dropping its added hyphen. */
+  glued: boolean;
+  hyphenAdded: boolean;
+}
+
+function breakWord(word: string): Token[] | null {
+  const dash = word.indexOf("-", 1);
+  const suffix = COMPOUND_TAILS.find(
+    (tail) =>
+      word.toLowerCase().endsWith(tail) && word.length > tail.length + 2,
+  );
+  const tail =
+    dash > 0 && dash < word.length - 1
+      ? word.slice(dash + 1)
+      : suffix && word.slice(-suffix.length);
+  if (!tail) return null;
+  const head = word.slice(0, -tail.length);
+  const hyphenAdded = !head.endsWith("-");
+  const parts = [
+    { text: hyphenAdded ? `${head}-` : head, glued: false, hyphenAdded },
+    { text: tail, glued: true, hyphenAdded: false },
+  ];
+  return parts.every((part) => fits(part.text, LABEL_SIZES.small))
+    ? parts
+    : null;
+}
+
+/** Breaks a word too wide for a line at its hyphen or before its last compound part. */
+function tokens(words: string[]): Token[] | null {
+  const result: Token[] = [];
+  for (const word of words) {
+    const parts = fits(word, LABEL_SIZES.small)
+      ? [{ text: word, glued: false, hyphenAdded: false }]
+      : breakWord(word);
+    if (!parts) return null;
+    result.push(...parts);
+  }
+  return result;
+}
+
+function joinLine(line: Token[]): string {
+  return line.reduce((text, token, index) => {
+    if (index === 0) return token.text;
+    if (!token.glued) return `${text} ${token.text}`;
+    return (
+      (line[index - 1]!.hyphenAdded ? text.slice(0, -1) : text) + token.text
+    );
+  }, "");
+}
+
+function partitions(items: Token[], parts: number): Token[][][] {
+  if (parts === 1) return [[items]];
+  const result: Token[][][] = [];
+  for (let split = 1; split <= items.length - parts + 1; split++)
+    for (const rest of partitions(items.slice(split), parts - 1))
+      result.push([items.slice(0, split), ...rest]);
+  return result;
+}
+
+/**
+ * One line at the large size, else the fewest (at least two, when there are
+ * several words) and most even lines at the small size; null if nothing fits.
+ */
+function layout(words: string[]): string[] | null {
+  if (!words.length) return null;
+  const whole = words.join(" ");
+  if (fits(whole, LABEL_SIZES.large)) return [whole];
+  const items = tokens(words);
+  if (!items) return null;
+  const fewest = items.length > 1 ? 2 : 1;
+  for (
+    let count = fewest;
+    count <= Math.min(MAX_LINES, items.length);
+    count++
+  ) {
+    let best: string[] | null = null;
+    let bestWidth = Infinity;
+    for (const partition of partitions(items, count)) {
+      const lines = partition.map(joinLine);
+      const widest = Math.max(...lines.map(textWidth));
+      if (widest * LABEL_SIZES.small <= LABEL_WIDTH && widest < bestWidth) {
+        best = lines;
+        bestWidth = widest;
+      }
+    }
+    if (best) return best;
+  }
+  return null;
+}
 
 function isGeneric(word: string) {
   return GENERIC_WORDS.has(word.toLowerCase()) || word.startsWith("-");
 }
 
-function wrap(words: string[], max = LINE_MAX): string[] | null {
-  const text = words.join(" ");
-  if (!words.length) return null;
-  if (text.length <= 10 || words.length === 1) return [text];
-  let best: string[] | null = null;
-  for (let split = 1; split < words.length; split++) {
-    const lines = [
-      words.slice(0, split).join(" "),
-      words.slice(split).join(" "),
-    ];
-    const longest = Math.max(...lines.map((line) => line.length));
-    if (
-      longest <= max &&
-      (!best || longest < Math.max(...best.map((line) => line.length)))
-    )
-      best = lines;
-  }
-  return best;
+const isAcronym = (word: string) => /^\p{Lu}{2,}$/u.test(word);
+
+function readable(words: string[]): boolean {
+  const first = words[0] ?? "";
+  const last = words.at(-1) ?? "";
+  return (
+    words.length > 0 &&
+    !CONJUNCTIONS.has(first.toLowerCase()) &&
+    !CONJUNCTIONS.has(last.toLowerCase()) &&
+    (words.join("").length >= 3 || isAcronym(first))
+  );
 }
 
 /**
- * One or two lines for the stamp face. Prefers the proper name after a
+ * One to three lines for the stamp face. Prefers the proper name after a
  * generic word ("Nykytaiteen museo Kiasma" → "Kiasma"), then an acronym,
- * then the name without generic words wrapped onto two lines. A generic
- * word after a genitive stays ("Kuurojen museo"), or the name reads cut off.
+ * then the name without generic words. A generic word after a genitive
+ * stays ("Kuurojen museo"), or the name reads cut off.
  */
 export function stampLabel(name: string): string[] {
+  const override = LABEL_OVERRIDES[name];
+  if (override) return layout(override.split(/\s+/)) ?? [override];
   const head = name.split(/,|:|\s\(|\s[–-]\s/)[0]!.trim();
   const words = head
     .split(/\s+/)
@@ -101,15 +252,17 @@ export function stampLabel(name: string): string[] {
   const withoutSuffixed = kept.filter((word) => !GENERIC_SUFFIX.test(word));
   const candidates = [
     lastGeneric >= 0 && /^\p{Lu}/u.test(tail[0] ?? "") ? tail : [],
-    kept.filter((word) => /^\p{Lu}{2,}$/u.test(word)).slice(0, 1),
+    kept.filter(isAcronym).slice(0, 1),
     kept,
     endsInGenitive(withoutSuffixed) ? [] : withoutSuffixed,
+    words,
   ];
   for (const candidate of candidates) {
-    const lines = wrap(candidate);
+    if (!readable(candidate)) continue;
+    const lines = layout(candidate);
     if (lines) return lines;
   }
-  return wrap(kept, Infinity) ?? [words[0]!];
+  return [head];
 }
 
 const ROMAN_MONTHS = [

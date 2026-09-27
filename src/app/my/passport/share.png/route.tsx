@@ -1,13 +1,10 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { ImageResponse } from "next/og";
 
-import {
-  LABEL_CENTER_Y,
-  labelSize,
-  POSTMARK_CENTER,
-} from "~/app/_components/Stamp";
+import { LABEL_CENTER_Y, POSTMARK_CENTER } from "~/app/_components/Stamp";
 import {
   buildPassport,
+  labelSize,
   postmarkDate,
   STAMP_INKS,
   STAMP_PAPER,

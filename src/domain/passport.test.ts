@@ -4,6 +4,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildPassport,
+  LABEL_OVERRIDES,
+  LABEL_SIZES,
+  labelSize,
   passportShareText,
   postmarkDate,
   progressBar,
@@ -73,14 +76,19 @@ describe("stampLabel", () => {
     ["Kiasma", ["Kiasma"]],
     ["Museokeskus Vapriikki", ["Vapriikki"]],
     ["Ett Hem -museo", ["Ett Hem"]],
-    ["Malmin talo, Pietarsaaren museo", ["Malmin", "talo"]],
+    ["Malmin talo, Pietarsaaren museo", ["Malmin talo"]],
     ["Lusto - Suomen Metsämuseo", ["Lusto"]],
     ["Urheilun ja liikunnan kulttuurikeskus TAHTO", ["TAHTO"]],
     ["Sinebrychoffin taidemuseo", ["Sinebrychoffin", "taidemuseo"]],
     ["Sotamuseo Maneesi", ["Maneesi"]],
     ["Kuurojen museo", ["Kuurojen", "museo"]],
     ["Herttoniemen kartanon museo", ["Herttoniemen", "kartanon museo"]],
-    ["Kuntsin modernin taiteen museo", ["Kuntsin modernin", "taiteen museo"]],
+    ["Kuntsin modernin taiteen museo", ["Kuntsi"]],
+    ["Galleria K", ["Galleria K"]],
+    ["Apteekkimuseo ja Qwenselin talo", ["Qwenselin", "talo"]],
+    ["Lastentarhamuseo", ["Lastentarha-", "museo"]],
+    ["Nurmijärvi-Taiteen Museo", ["Nurmijärvi-", "Taiteen Museo"]],
+    ["Helsingin kaupunginmuseo", ["Helsingin", "kaupunginmuseo"]],
     ["Nykytaiteen museo Kiasma", ["Kiasma"]],
     ["LUOMUS Luonnontieteellinen museo", ["LUOMUS"]],
     ["Särestöniemi-museo", ["Särestöniemi"]],
@@ -88,6 +96,15 @@ describe("stampLabel", () => {
     ["Näyttelykeskus WeeGee", ["WeeGee"]],
   ])("%s", (name, expected) => {
     expect(stampLabel(name)).toEqual(expected);
+  });
+
+  it.each(Object.keys(LABEL_OVERRIDES))("override for %s fits", (name) => {
+    expect(stampLabel(name).join(" ")).toBe(LABEL_OVERRIDES[name]);
+  });
+
+  it("uses one of two sizes", () => {
+    expect(labelSize(["Kiasma"])).toBe(LABEL_SIZES.large);
+    expect(labelSize(["Kuurojen", "museo"])).toBe(LABEL_SIZES.small);
   });
 });
 

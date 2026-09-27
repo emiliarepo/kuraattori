@@ -95,7 +95,7 @@ export default async function MyPassportPage() {
               <summary className="text-kicker flex min-h-11 cursor-pointer items-center">
                 {copy.unstamped(region.unstamped.length)}
               </summary>
-              <ul className="grid grid-cols-4 gap-3 pb-2 sm:grid-cols-6 lg:grid-cols-10">
+              <ul className="grid grid-cols-3 gap-x-4 gap-y-4 pb-2 sm:grid-cols-4 sm:gap-x-6 lg:grid-cols-6">
                 {region.unstamped.map((museum) => (
                   <li key={museum.id}>
                     <Link
