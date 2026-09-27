@@ -8,10 +8,14 @@ const MUSEUM_POINTS = 15;
 const NEW_POINTS = 10;
 const NEW_WITHIN_DAYS = 14;
 
+/** `1` = Kiinnostaa, `2` = Erityisesti. `-1` ("Ei kiinnosta") never scores; see `excludedCategoryIds`. */
+export type InterestWeight = 1 | 2;
+
 export type RelevanceReason =
   | {
       readonly type: "category";
       readonly categoryId: number;
+      readonly weight: InterestWeight;
       readonly points: number;
     }
   | { readonly type: "region"; readonly points: number }
@@ -21,6 +25,8 @@ export type RelevanceReason =
 export interface RelevanceResult {
   readonly score: number;
   readonly reasons: readonly RelevanceReason[];
+  /** The exhibition has a category the user marked "Ei kiinnosta". */
+  readonly hasExcludedMatch: boolean;
 }
 
 export interface RelevanceExhibition {
@@ -32,7 +38,8 @@ export interface RelevanceExhibition {
 }
 
 export interface UserPreferences {
-  readonly interestCategoryIds: ReadonlySet<number>;
+  readonly interestWeights: ReadonlyMap<number, InterestWeight>;
+  readonly excludedCategoryIds: ReadonlySet<number>;
   readonly preferredRegions: ReadonlySet<string>;
   readonly followedMuseumIds: ReadonlySet<number>;
 }
@@ -44,17 +51,28 @@ export function getRelevance(
 ): RelevanceResult {
   const reasons: RelevanceReason[] = [];
 
-  let categoryTotal = 0;
-  exhibition.categoryIds
-    .filter((categoryId) => preferences.interestCategoryIds.has(categoryId))
-    .forEach((categoryId, index) => {
-      const nominal =
-        index === 0 ? FIRST_CATEGORY_POINTS : ADDITIONAL_CATEGORY_POINTS;
-      const capped = Math.min(CATEGORY_CAP, categoryTotal + nominal);
-      const points = capped - categoryTotal;
-      categoryTotal = capped;
-      if (points > 0) reasons.push({ type: "category", categoryId, points });
-    });
+  const matches = exhibition.categoryIds
+    .map((categoryId) => ({
+      categoryId,
+      weight: preferences.interestWeights.get(categoryId),
+    }))
+    .filter(
+      (match): match is { categoryId: number; weight: InterestWeight } =>
+        match.weight !== undefined,
+    )
+    .sort((a, b) => b.weight - a.weight);
+
+  let equivalentTotal = 0;
+  matches.forEach(({ categoryId, weight }, index) => {
+    const nominal =
+      index === 0 ? FIRST_CATEGORY_POINTS : ADDITIONAL_CATEGORY_POINTS;
+    const cappedEquivalent = Math.min(CATEGORY_CAP, equivalentTotal + nominal);
+    const equivalentPoints = cappedEquivalent - equivalentTotal;
+    equivalentTotal = cappedEquivalent;
+    const points = equivalentPoints * weight;
+    if (points > 0)
+      reasons.push({ type: "category", categoryId, weight, points });
+  });
 
   if (
     exhibition.region !== null &&
@@ -77,5 +95,8 @@ export function getRelevance(
   return {
     score: reasons.reduce((sum, reason) => sum + reason.points, 0),
     reasons,
+    hasExcludedMatch: exhibition.categoryIds.some((categoryId) =>
+      preferences.excludedCategoryIds.has(categoryId),
+    ),
   };
 }

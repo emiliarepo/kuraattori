@@ -29,8 +29,11 @@ function reasonLabel(
   },
 ): string | null {
   switch (reason.type) {
-    case "category":
-      return context.categoryNameById.get(reason.categoryId) ?? null;
+    case "category": {
+      const name = context.categoryNameById.get(reason.categoryId);
+      if (name === undefined) return null;
+      return reason.weight === 2 ? `${name} ★` : name;
+    }
     case "region":
       return context.region;
     case "museum":
@@ -52,7 +55,10 @@ export const recommendationRouter = createTRPCRouter({
       const [interests, regions, followed, states, rows, importRunCount] =
         await Promise.all([
           ctx.db
-            .select({ id: userInterests.categoryId })
+            .select({
+              categoryId: userInterests.categoryId,
+              weight: userInterests.weight,
+            })
             .from(userInterests)
             .where(eq(userInterests.userId, userId)),
           ctx.db
@@ -116,8 +122,16 @@ export const recommendationRouter = createTRPCRouter({
           categoryNameById.set(row.categoryId, row.name);
         }
       }
+      const interestWeights = new Map<number, 1 | 2>();
+      const excludedCategoryIds = new Set<number>();
+      for (const interest of interests) {
+        if (interest.weight === -1)
+          excludedCategoryIds.add(interest.categoryId);
+        else interestWeights.set(interest.categoryId, interest.weight as 1 | 2);
+      }
       const preferences = {
-        interestCategoryIds: new Set(interests.map((x) => x.id)),
+        interestWeights,
+        excludedCategoryIds,
         preferredRegions: new Set(regions.map((x) => x.region)),
         followedMuseumIds: new Set(followed.map((x) => x.id)),
       };
@@ -146,7 +160,7 @@ export const recommendationRouter = createTRPCRouter({
             !isSinulleEligible({
               relevance,
               status,
-              hasInterests: interests.length > 0,
+              hasInterests: interestWeights.size > 0,
             })
           )
             return [];
