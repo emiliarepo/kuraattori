@@ -302,3 +302,16 @@ export const userExhibitions = createTable(
     index("user_exhibition_status_idx").on(t.userId, t.status),
   ],
 );
+
+export const calendarFeeds = createTable("calendar_feed", (d) => ({
+  userId: d
+    .text({ length: 255 })
+    .notNull()
+    .primaryKey()
+    .references(() => users.id),
+  token: d.text().notNull().unique(),
+  createdAt: d
+    .integer({ mode: "timestamp" })
+    .default(sql`(unixepoch())`)
+    .notNull(),
+}));

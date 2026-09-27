@@ -64,6 +64,15 @@ export const t = {
     title: "Profiili",
     interestsHeading: "Kiinnostuksen kohteet",
     regionsHeading: "Alueet",
+    calendarHeading: "Kalenteri",
+    calendarDescription:
+      "Kiinnostavien näyttelyiden päättymispäivät omassa kalenterissasi.",
+    calendarCopy: "Kopioi osoite",
+    calendarCopied: "Osoite kopioitu",
+    calendarAdd: "Lisää kalenteriin",
+    calendarRotate: "Luo uusi osoite",
+    calendarRotateConfirm:
+      "Vanha kalenteriosoite lakkaa toimimasta. Luodaanko uusi?",
   },
   pages: {
     signIn: {
