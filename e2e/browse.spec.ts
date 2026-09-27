@@ -19,8 +19,10 @@ test("browse: a category filter narrows results without a reload", async ({
   await page.getByRole("button", { name: t.pages.browse.applyFilters }).click();
 
   await expect(page).toHaveURL(/category=/);
-  await expect.poll(() => rows.count()).toBeLessThan(baselineCount);
-  await expect.poll(() => rows.count()).toBeGreaterThan(0);
+  const exhibitionRows = page.getByRole("main").locator("ul > li");
+  await expect(exhibitionRows.first()).toBeVisible();
+  for (const row of await exhibitionRows.all())
+    await expect(row).toContainText("Nykytaide");
 
   const markerSurvived = await page.evaluate(
     () => (window as unknown as { __e2eMarker?: boolean }).__e2eMarker === true,
@@ -52,4 +54,22 @@ test.describe("mobile filter sheet", () => {
     await page.goBack();
     await expect(page).toHaveURL(/\/exhibitions$/);
   });
+});
+
+test("load more keeps the scroll position and focus", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 400 });
+  await page.goto("/exhibitions");
+  const loadMore = page.getByRole("button", { name: t.pages.browse.loadMore });
+  await loadMore.scrollIntoViewIfNeeded();
+  const rows = page.getByRole("main").locator("ul > li");
+  const before = await rows.count();
+  const scrollY = await page.evaluate(() => window.scrollY);
+  expect(scrollY).toBeGreaterThan(0);
+
+  await loadMore.click();
+
+  await expect(rows).not.toHaveCount(before);
+  await expect(page).toHaveURL(/page=2/);
+  expect(await page.evaluate(() => window.scrollY)).toBe(scrollY);
+  await expect(loadMore).toBeFocused();
 });

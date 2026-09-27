@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import Link from "next/link";
 
 import { ExhibitionListClient } from "~/app/_components/ExhibitionListClient";
@@ -22,6 +23,15 @@ export const metadata: Metadata = {
 };
 
 const PAGE_SIZE = 20;
+
+/** The Playwright server sets `E2E_BROWSE_PAGE_SIZE` so its small fixture set still pages. */
+async function browsePageSize(): Promise<number> {
+  const { env } = await getCloudflareContext({ async: true });
+  const override = Number(
+    (env as { E2E_BROWSE_PAGE_SIZE?: string }).E2E_BROWSE_PAGE_SIZE,
+  );
+  return override > 0 ? override : PAGE_SIZE;
+}
 
 export default async function ExhibitionsPage({
   searchParams,
@@ -53,7 +63,7 @@ export default async function ExhibitionsPage({
 
   const listInputBase = {
     ...browseFiltersToListInput(filters),
-    limit: PAGE_SIZE,
+    limit: await browsePageSize(),
   };
   const { items, nextCursor } = await listAcrossRegionsPages(
     activeRegions,

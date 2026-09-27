@@ -57,7 +57,7 @@ export default defineConfig({
   webServer: [
     {
       name: "app",
-      command: `tsx scripts/e2e-server.ts ${APP_LOG_PATH} -- --port ${APP_PORT} --persist-to ${APP_PERSIST_DIR} --var E2E_TEST_AUTH:1 --var NEXTJS_ENV:development --var AUTH_SECRET:${TEST_AUTH_SECRET}`,
+      command: `tsx scripts/e2e-server.ts ${APP_LOG_PATH} -- --port ${APP_PORT} --persist-to ${APP_PERSIST_DIR} --var E2E_TEST_AUTH:1 --var E2E_BROWSE_PAGE_SIZE:5 --var NEXTJS_ENV:development --var AUTH_SECRET:${TEST_AUTH_SECRET}`,
       url: `${APP_BASE_URL}/api/auth/providers`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
