@@ -14,6 +14,7 @@ export const t = {
     indefinite: "Toistaiseksi",
   },
   ui: {
+    updating: "Päivitetään…",
     rail: {
       previous: (title: string) => `Edelliset: ${title}`,
       next: (title: string) => `Seuraavat: ${title}`,
