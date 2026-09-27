@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { HoverPrefetchLink } from "~/app/_components/HoverPrefetchLink";
 
 export type Category = { label: string; lang?: "fi"; href?: string };
 
@@ -17,12 +17,12 @@ export function CategoryList({
         <span key={category.label} lang={category.lang}>
           {index > 0 && " · "}
           {category.href ? (
-            <Link
+            <HoverPrefetchLink
               href={category.href}
               className="hover:text-fg underline-offset-2 hover:underline"
             >
               {category.label}
-            </Link>
+            </HoverPrefetchLink>
           ) : (
             category.label
           )}

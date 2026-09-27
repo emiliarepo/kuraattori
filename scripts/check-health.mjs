@@ -50,3 +50,4 @@ for (const url of [
 const summary = ["## Site health", "", "| URL | Status | Time |", "| --- | ---: | ---: |", ...rows, ""].join("\n");
 console.log(summary);
 if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, summary);
+if (failed) process.exitCode = 1;

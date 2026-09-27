@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { HoverPrefetchLink } from "~/app/_components/HoverPrefetchLink";
 
 import { CategoryList, type Category } from "~/app/_components/CategoryList";
 import { ImageFallback } from "~/app/_components/ImageFallback";
@@ -63,7 +63,7 @@ export function ExhibitionRow({
   return (
     <li className="border-rule-soft border-t first:border-t-0">
       <div className="relative">
-        <Link
+        <HoverPrefetchLink
           href={href}
           className={`group flex gap-4 sm:gap-6 ${showRating ? "pt-5 pb-2" : "py-5"}`}
         >
@@ -104,7 +104,7 @@ export function ExhibitionRow({
               )
             )}
           </div>
-        </Link>
+        </HoverPrefetchLink>
         {signedIn && (
           <StatusHeart
             exhibitionId={exhibitionId}

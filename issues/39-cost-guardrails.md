@@ -30,7 +30,7 @@ No real 14-day baseline exists: the Worker's first production deploy was today a
 | Worker CPU (median × requests, ms) | ~199,000 | 1,000,000 (`BUDGET_WORKER_CPU_MS`) |
 | D1 rows read | 34,179,591 | 100,000,000 (`BUDGET_D1_ROWS_READ`; the measured day was the incident) |
 | D1 rows written | 47,785 | 240,000 (`BUDGET_D1_ROWS_WRITTEN`) |
-| KV reads | 637 | 3,200 (`BUDGET_KV_READS`) |
+| KV reads | 637 | 100,000 (`BUDGET_KV_READS`; 27.9: 8,101 reads over 12,045 requests after ticket 41 moved more reads to KV) |
 | KV writes | 11 | 200 (`BUDGET_KV_WRITES`, floor) |
 | R2 Class A ops | 5 | 500 (`BUDGET_R2_CLASS_A`, floor) |
 | R2 Class B ops | 0 | 5,000 (`BUDGET_R2_CLASS_B`, floor) |

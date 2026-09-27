@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { HoverPrefetchLink } from "~/app/_components/HoverPrefetchLink";
 
 import { CategoryList } from "~/app/_components/CategoryList";
 import { ImageFallback } from "~/app/_components/ImageFallback";
@@ -23,7 +23,7 @@ export function ExhibitionCard({
 }) {
   return (
     <div className="relative h-full w-full">
-      <Link
+      <HoverPrefetchLink
         href={item.href}
         className="group flex h-full w-full flex-col gap-1.5"
       >
@@ -65,7 +65,7 @@ export function ExhibitionCard({
             <TimeBar {...item.timeBar} stacked />
           </div>
         )}
-      </Link>
+      </HoverPrefetchLink>
       {signedIn && (
         <StatusHeart
           exhibitionId={item.exhibitionId}

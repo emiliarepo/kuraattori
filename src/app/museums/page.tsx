@@ -1,5 +1,5 @@
 import { type Metadata } from "next";
-import Link from "next/link";
+import { HoverPrefetchLink } from "~/app/_components/HoverPrefetchLink";
 
 import { FollowToggle } from "~/app/_components/FollowToggle";
 import { localized } from "~/domain/localized";
@@ -38,7 +38,7 @@ export default async function MuseumsPage() {
             key={museum.id}
             className="border-rule-soft flex items-baseline justify-between gap-4 border-t py-3 first:border-t-0"
           >
-            <Link
+            <HoverPrefetchLink
               href={`/museums/${museum.slug}`}
               className="group flex flex-1 items-baseline justify-between gap-4"
             >
@@ -53,7 +53,7 @@ export default async function MuseumsPage() {
                   {museum.city}
                 </span>
               )}
-            </Link>
+            </HoverPrefetchLink>
             {signedIn && (
               <FollowToggle
                 museumId={museum.id}
