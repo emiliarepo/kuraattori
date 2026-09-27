@@ -290,6 +290,7 @@ export const userExhibitions = createTable(
       .references(() => exhibitions.id),
     status: d.text({ enum: ["interested", "visited", "hidden"] }).notNull(),
     visitedAt: d.integer({ mode: "timestamp" }),
+    note: d.text(),
     createdAt: d
       .integer({ mode: "timestamp" })
       .default(sql`(unixepoch())`)

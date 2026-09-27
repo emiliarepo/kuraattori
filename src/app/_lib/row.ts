@@ -25,6 +25,8 @@ export interface ExhibitionRowView {
   timeBar: TimeBarProps;
   status: ExhibitionStatus | null;
   whyLabel: string | null;
+  visitedAt: Date | null;
+  visitNote: string | null;
 }
 
 /** No hrefs: ExhibitionRow's whole row is already a link, and links can't nest. */
@@ -49,6 +51,8 @@ export function toRowView(
     timeBar: timeBarProps(item, today),
     status: item.status,
     whyLabel: null,
+    visitedAt: item.visitedAt,
+    visitNote: item.visitNote,
   };
 }
 
@@ -68,5 +72,7 @@ export function forYouToRowView(
     timeBar: timeBarProps(item.exhibition, today),
     status: null,
     whyLabel: item.reasons.length > 0 ? item.reasons.join(" · ") : null,
+    visitedAt: null,
+    visitNote: null,
   };
 }

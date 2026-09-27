@@ -92,6 +92,8 @@ async function withDetails(
         .select({
           exhibitionId: userExhibitions.exhibitionId,
           status: userExhibitions.status,
+          visitedAt: userExhibitions.visitedAt,
+          note: userExhibitions.note,
         })
         .from(userExhibitions)
         .where(
@@ -114,6 +116,12 @@ async function withDetails(
       .map(({ id, name, slug }) => ({ id, name, slug })),
     status:
       states.find((state) => groupIds.includes(state.exhibitionId))?.status ??
+      null,
+    visitedAt:
+      states.find((state) => groupIds.includes(state.exhibitionId))
+        ?.visitedAt ?? null,
+    visitNote:
+      states.find((state) => groupIds.includes(state.exhibitionId))?.note ??
       null,
   }));
 }

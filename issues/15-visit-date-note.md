@@ -1,5 +1,6 @@
 # 15 Visit date and note
-Status: todo · Model: GPT-6 Luna · Blocked by: 12
+Status: done · Implemented visit date and private note tracking.
+Model: GPT-6 Luna · Blocked by: 12
 
 When marking Käyty, record when and optionally a short private note.
 

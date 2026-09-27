@@ -77,4 +77,115 @@ describe("my.list", () => {
     const hidden = await createCaller(ctx).my.list({ status: "hidden" });
     expect(hidden.map((item) => item.slug)).toEqual(["hidden-one"]);
   });
+
+  it("orders visits by date and returns their private notes", async () => {
+    await db.insert(schema.museums).values({
+      id: 1,
+      source: "test",
+      sourceId: "m1",
+      name: "Ateneum",
+      slug: "ateneum",
+      city: "Helsinki",
+    });
+    await db.insert(schema.exhibitions).values([
+      {
+        id: 1,
+        source: "test",
+        sourceId: "e1",
+        museumId: 1,
+        slug: "older",
+        titleFi: "Vanhempi",
+        startDate: "2026-01-01",
+        sourcePayloadHash: "a",
+      },
+      {
+        id: 2,
+        source: "test",
+        sourceId: "e2",
+        museumId: 1,
+        slug: "newer",
+        titleFi: "Uudempi",
+        startDate: "2026-01-01",
+        sourcePayloadHash: "b",
+      },
+    ]);
+    await db.insert(schema.userExhibitions).values([
+      {
+        userId,
+        exhibitionId: 1,
+        status: "visited",
+        visitedAt: new Date("2026-05-01T12:00:00Z"),
+        note: "Vanha muisto",
+      },
+      {
+        userId,
+        exhibitionId: 2,
+        status: "visited",
+        visitedAt: new Date("2026-08-01T12:00:00Z"),
+        note: "Uusi muisto",
+      },
+    ]);
+
+    const visits = await createCaller(ctx).my.list({ status: "visited" });
+    expect(visits.map(({ slug }) => slug)).toEqual(["newer", "older"]);
+    expect(visits.map(({ visitNote }) => visitNote)).toEqual([
+      "Uusi muisto",
+      "Vanha muisto",
+    ]);
+  });
+});
+
+describe("userExhibition.updateVisit", () => {
+  it("validates exhibition date bounds and clears date and note when status changes", async () => {
+    await db.insert(schema.museums).values({
+      id: 1,
+      source: "test",
+      sourceId: "m1",
+      name: "Ateneum",
+      slug: "ateneum",
+    });
+    await db.insert(schema.exhibitions).values({
+      id: 1,
+      source: "test",
+      sourceId: "e1",
+      museumId: 1,
+      slug: "boundaries",
+      titleFi: "Rajat",
+      startDate: "2026-01-01",
+      sourcePayloadHash: "a",
+    });
+    await db.insert(schema.userExhibitions).values({
+      userId,
+      exhibitionId: 1,
+      status: "visited",
+      visitedAt: new Date("2026-02-01T12:00:00Z"),
+      note: "Muistiinpano",
+    });
+    const caller = createCaller(ctx);
+    await expect(
+      caller.userExhibition.updateVisit({
+        exhibitionId: 1,
+        visitedOn: "2025-12-31",
+        note: "",
+      }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      caller.userExhibition.updateVisit({
+        exhibitionId: 1,
+        visitedOn: "2099-01-01",
+        note: "",
+      }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+    await caller.userExhibition.setStatus({
+      exhibitionId: 1,
+      status: "hidden",
+    });
+    const [updated] = await db.select().from(schema.userExhibitions);
+    expect(updated).toMatchObject({
+      status: "hidden",
+      visitedAt: null,
+      note: null,
+    });
+  });
 });

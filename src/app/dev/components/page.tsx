@@ -233,6 +233,8 @@ function toView(
     timeBar: timeBarProps(exhibition.start, exhibition.end),
     status: index === 0 ? "interested" : index === 3 ? "visited" : null,
     whyLabel: index === 2 ? "Luonto ja eläimet · Pääkaupunkiseutu" : null,
+    visitedAt: index === 3 ? new Date("2026-09-27T12:00:00.000Z") : null,
+    visitNote: null,
   };
 }
 

@@ -179,6 +179,9 @@ export default async function ExhibitionDetailPage({
             <ExhibitionStatusControl
               exhibitionId={exhibition.id}
               initialStatus={exhibition.status}
+              startDate={exhibition.startDate}
+              initialVisitedAt={exhibition.visitedAt}
+              initialNote={exhibition.visitNote}
             />
           ) : (
             <SignInPrompt message={t.pages.signIn.status} />
