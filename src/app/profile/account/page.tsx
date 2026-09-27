@@ -10,9 +10,12 @@ import { getDb } from "~/server/db";
 export default async function ProfileAccountPage({
   searchParams,
 }: {
-  searchParams: Promise<{ poista?: string }>;
+  searchParams: Promise<{ delete?: string }>;
 }) {
-  const [session, { poista }] = await Promise.all([auth(), searchParams]);
+  const [session, { delete: confirmDelete }] = await Promise.all([
+    auth(),
+    searchParams,
+  ]);
   if (!session?.user) redirect("/sign-in?callbackUrl=/profile");
   const user = session.user;
 
@@ -54,7 +57,7 @@ export default async function ProfileAccountPage({
       </div>
 
       <div className="border-rule-soft flex flex-col gap-3 border-t pt-6 font-sans text-sm">
-        {poista === "1" ? (
+        {confirmDelete === "1" ? (
           <form
             action={async () => {
               "use server";
@@ -81,7 +84,7 @@ export default async function ProfileAccountPage({
           </form>
         ) : (
           <Link
-            href="/profile/account?poista=1"
+            href="/profile/account?delete=1"
             className="text-muted self-start underline"
           >
             {t.profile.deleteAccount}

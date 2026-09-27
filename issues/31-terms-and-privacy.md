@@ -33,4 +33,4 @@ This is not legal advice. Read both texts before publishing.
 - Google is described as handling sign-in under its own privacy policy, not as a processor. For Google account data, Google acts as a separate controller, and no Google DPA applies to a consumer OAuth client. Cloudflare is the processor and its DPA is linked.
 - The cookie list comes from the code: Auth.js `authjs.session-token`, `authjs.csrf-token`, `authjs.callback-url` and `authjs.pkce.code_verifier` (with `__Secure-`/`__Host-` prefixes over HTTPS), plus `kuraattori_regions` and `kuraattori_onboarded`. The page also mentions the `sessionStorage` rail scroll position.
 - Deletion also clears `user_followed_museum`, which has no UI yet, and `verification_token` rows matching the user's email. The test finds user-linked tables through the schema's foreign keys to `user`, so a future user table (e.g. from ticket 20) fails the test until `deleteUserData` and the privacy text cover it.
-- Deletion is one `db.batch` (atomic in D1). The confirm step is `/profile/account?poista=1`.
+- Deletion is one `db.batch` (atomic in D1). The confirm step is `/profile/account?delete=1`.
