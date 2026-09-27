@@ -1,5 +1,6 @@
 import { EmptyState } from "~/app/_components/EmptyState";
 import { ExhibitionCard } from "~/app/_components/ExhibitionCard";
+import { RailScrollContainer } from "~/app/_components/RailScrollContainer";
 import { Section } from "~/app/_components/Section";
 import { type ExhibitionRowView } from "~/app/_lib/row";
 
@@ -23,8 +24,8 @@ export function Rail({
       {items.length === 0 ? (
         <EmptyState message={emptyMessage} />
       ) : (
-        <ul
-          aria-label={title}
+        <RailScrollContainer
+          title={title}
           className="rail -mx-4 scroll-px-4 gap-3 px-4 pt-1 pb-3 sm:-mx-6 sm:scroll-px-6 sm:gap-5 sm:px-6"
         >
           {items.map(({ view, lead }) => (
@@ -32,7 +33,7 @@ export function Rail({
               <ExhibitionCard item={view} lead={lead} signedIn={signedIn} />
             </li>
           ))}
-        </ul>
+        </RailScrollContainer>
       )}
     </Section>
   );

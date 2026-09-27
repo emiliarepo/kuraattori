@@ -1,5 +1,6 @@
 import { type Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
 import { Section } from "~/app/_components/Section";
@@ -10,13 +11,16 @@ import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { siteUrl } from "~/app/_lib/site-url";
 
+/** Shared with the page body: `generateMetadata` and the component both run per request, so this dedupes the query. */
+const getMuseum = cache((slug: string) => api.museum.bySlug({ slug }));
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const museum = await api.museum.bySlug({ slug });
+  const museum = await getMuseum(slug);
   if (!museum) return {};
   return {
     title: `${museum.name} — ${t.app.name}`,
@@ -42,7 +46,7 @@ export default async function MuseumDetailPage({
 }) {
   const { slug } = await params;
   const [museum, exhibitions, session] = await Promise.all([
-    api.museum.bySlug({ slug }),
+    getMuseum(slug),
     api.museum.exhibitions({ slug }),
     auth(),
   ]);
@@ -50,13 +54,10 @@ export default async function MuseumDetailPage({
 
   const today = todayInHelsinki();
   const signedIn = Boolean(session?.user);
-  const present = exhibitions.filter(
-    (item): item is NonNullable<typeof item> => item !== null,
-  );
   const byPhase = {
-    current: present.filter((item) => item.phase === "current"),
-    upcoming: present.filter((item) => item.phase === "upcoming"),
-    ended: present.filter((item) => item.phase === "ended"),
+    current: exhibitions.filter((item) => item.phase === "current"),
+    upcoming: exhibitions.filter((item) => item.phase === "upcoming"),
+    ended: exhibitions.filter((item) => item.phase === "ended"),
   };
 
   return (

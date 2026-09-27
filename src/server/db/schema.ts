@@ -142,7 +142,11 @@ export const museums = createTable(
       .default(sql`(unixepoch())`)
       .notNull(),
   }),
-  (t) => [unique("museum_source_idx").on(t.source, t.sourceId)],
+  (t) => [
+    unique("museum_source_idx").on(t.source, t.sourceId),
+    index("museum_region_idx").on(t.region),
+    index("museum_city_idx").on(t.city),
+  ],
 );
 
 export const exhibitions = createTable(

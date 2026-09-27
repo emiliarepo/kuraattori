@@ -34,6 +34,36 @@ export async function listAcrossRegions(
   return { items, nextCursor: null };
 }
 
+/**
+ * `listAcrossRegions`, chained `pageCount` times so the browse page can load
+ * "page N" (the URL's loaded-pages count) server-side in one request — back
+ * navigation and a reload both land on the same set of loaded rows. With
+ * more than one active region there's no stable cursor to chain (see above),
+ * so only the first page loads.
+ */
+export async function listAcrossRegionsPages(
+  activeRegions: readonly string[],
+  input: ListInput,
+  pageCount: number,
+): Promise<{ items: ExhibitionWithDetails[]; nextCursor: string | null }> {
+  if (activeRegions.length > 1 || pageCount <= 1) {
+    return listAcrossRegions(activeRegions, input);
+  }
+
+  const region = activeRegions[0];
+  const items: ExhibitionWithDetails[] = [];
+  let cursor: string | undefined;
+  let nextCursor: string | null = null;
+  for (let page = 0; page < pageCount; page++) {
+    const result = await api.exhibition.list({ ...input, region, cursor });
+    items.push(...result.items);
+    nextCursor = result.nextCursor;
+    if (!nextCursor) break;
+    cursor = nextCursor;
+  }
+  return { items, nextCursor };
+}
+
 interface NewInput {
   limit?: number;
 }

@@ -1,4 +1,4 @@
-import { and, asc, count, eq, inArray, or, sql } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { todayInHelsinki } from "~/domain/dates";
@@ -7,13 +7,11 @@ import { getSinulleScore, isSinulleEligible } from "~/domain/ranking";
 import { getUrgency } from "~/domain/urgency";
 import { t } from "~/i18n/fi";
 import { groupExhibitionRows } from "~/server/api/grouping";
+import { categoryRouter } from "~/server/api/routers/category";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { getActiveExhibitionPool } from "~/server/cache/active-pool";
 import {
-  categories,
-  exhibitionCategories,
-  exhibitions,
   importRuns,
-  museums,
   userExhibitions,
   userFollowedMuseums,
   userInterests,
@@ -52,76 +50,54 @@ export const recommendationRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const [interests, regions, followed, states, rows, importRunCount] =
-        await Promise.all([
-          ctx.db
-            .select({
-              categoryId: userInterests.categoryId,
-              weight: userInterests.weight,
-            })
-            .from(userInterests)
-            .where(eq(userInterests.userId, userId)),
-          ctx.db
-            .select({ region: userRegions.region })
-            .from(userRegions)
-            .where(eq(userRegions.userId, userId)),
-          ctx.db
-            .select({ id: userFollowedMuseums.museumId })
-            .from(userFollowedMuseums)
-            .where(eq(userFollowedMuseums.userId, userId)),
-          ctx.db
-            .select({
-              id: userExhibitions.exhibitionId,
-              status: userExhibitions.status,
-            })
-            .from(userExhibitions)
-            .where(eq(userExhibitions.userId, userId)),
-          ctx.db
-            .select({ exhibition: exhibitions, museum: museums })
-            .from(exhibitions)
-            .innerJoin(museums, eq(exhibitions.museumId, museums.id))
-            .where(
-              and(
-                eq(exhibitions.kind, "exhibition"),
-                or(
-                  sql`${exhibitions.endDate} is null`,
-                  sql`${exhibitions.endDate} >= ${todayInHelsinki()}`,
-                ),
-              ),
-            )
-            .orderBy(asc(exhibitions.startDate))
-            .limit(500),
-          ctx.db
-            .select({ count: count() })
-            .from(importRuns)
-            .where(eq(importRuns.status, "succeeded")),
-        ]);
-      const categoryRows: { exhibitionId: number; categoryId: number }[] = [];
-      const categoryNameById = new Map<number, string>();
-      for (let offset = 0; offset < rows.length; offset += 90) {
-        const batch = rows.slice(offset, offset + 90);
-        const batchRows = await ctx.db
+      const [
+        interests,
+        regions,
+        followed,
+        states,
+        importRunCount,
+        pool,
+        allCategories,
+      ] = await Promise.all([
+        ctx.db
           .select({
-            exhibitionId: exhibitionCategories.exhibitionId,
-            categoryId: exhibitionCategories.categoryId,
-            name: categories.name,
+            categoryId: userInterests.categoryId,
+            weight: userInterests.weight,
           })
-          .from(exhibitionCategories)
-          .innerJoin(
-            categories,
-            eq(categories.id, exhibitionCategories.categoryId),
-          )
-          .where(
-            inArray(
-              exhibitionCategories.exhibitionId,
-              batch.map((row) => row.exhibition.id),
-            ),
-          );
-        for (const row of batchRows) {
-          categoryRows.push(row);
-          categoryNameById.set(row.categoryId, row.name);
-        }
-      }
+          .from(userInterests)
+          .where(eq(userInterests.userId, userId)),
+        ctx.db
+          .select({ region: userRegions.region })
+          .from(userRegions)
+          .where(eq(userRegions.userId, userId)),
+        ctx.db
+          .select({ id: userFollowedMuseums.museumId })
+          .from(userFollowedMuseums)
+          .where(eq(userFollowedMuseums.userId, userId)),
+        ctx.db
+          .select({
+            id: userExhibitions.exhibitionId,
+            status: userExhibitions.status,
+          })
+          .from(userExhibitions)
+          .where(eq(userExhibitions.userId, userId)),
+        ctx.db
+          .select({ count: count() })
+          .from(importRuns)
+          .where(eq(importRuns.status, "succeeded")),
+        getActiveExhibitionPool(ctx.db),
+        categoryRouter.createCaller(ctx).list(),
+      ]);
+      const rows = pool.map(({ exhibition, museum }) => ({
+        exhibition,
+        museum,
+      }));
+      const categoryIdsByExhibition = new Map(
+        pool.map((entry) => [entry.exhibition.id, entry.categoryIds]),
+      );
+      const categoryNameById = new Map(
+        allCategories.map((category) => [category.id, category.name]),
+      );
       const interestWeights = new Map<number, 1 | 2>();
       const excludedCategoryIds = new Set<number>();
       for (const interest of interests) {
@@ -142,9 +118,7 @@ export const recommendationRouter = createTRPCRouter({
         .flatMap(({ exhibition, museum, venues, memberIds }) => {
           const relevance = getRelevance(
             {
-              categoryIds: categoryRows
-                .filter((x) => x.exhibitionId === exhibition.id)
-                .map((x) => x.categoryId),
+              categoryIds: categoryIdsByExhibition.get(exhibition.id) ?? [],
               region: museum.region,
               museumId: museum.id,
               firstSeenAt: hasMultipleImports

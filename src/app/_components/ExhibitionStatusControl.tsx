@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { refreshStatusData } from "~/app/_components/refresh-status-action";
 import {
   StatusActions,
   type ExhibitionStatus,
@@ -55,7 +56,10 @@ export function ExhibitionStatusControl({
     setStatus(next);
     mutation.mutate(
       { exhibitionId, status: requested },
-      { onError: () => setStatus(previous) },
+      {
+        onSuccess: () => void refreshStatusData(),
+        onError: () => setStatus(previous),
+      },
     );
   }
 

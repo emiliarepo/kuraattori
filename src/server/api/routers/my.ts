@@ -2,46 +2,40 @@ import { and, count, eq, gte, lte } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { exhibitionRouter } from "~/server/api/routers/exhibition";
+import { withDetails } from "~/server/api/routers/exhibition";
 import { userExhibitionRouter } from "~/server/api/routers/user-exhibition";
 import { todayInHelsinki } from "~/domain/dates";
 import { exhibitions, userExhibitions } from "~/server/db/schema";
 
 const ENDING_SOON_WITHIN_DAYS = 7;
 
-/**
- * `userExhibition.listByStatus` returns bare exhibition rows (no museum join
- * or categories); composes it with `exhibition.bySlug` for the museum,
- * categories and phase/urgency the My pages need, the same
- * call-a-sibling-router pattern `museum.exhibitions` already uses.
- */
 export const myRouter = createTRPCRouter({
   list: protectedProcedure
     .input(z.object({ status: z.enum(["interested", "visited", "hidden"]) }))
     .query(async ({ ctx, input }) => {
-      const rows = await userExhibitionRouter
+      const userId = ctx.session.user.id;
+      const statusRows = await userExhibitionRouter
         .createCaller(ctx)
         .listByStatus(input);
-      const items = await Promise.all(
-        rows.map(async (row) => {
-          const item = await exhibitionRouter
-            .createCaller(ctx)
-            .bySlug({ slug: row.exhibition.slug });
-          return item
-            ? { ...item, visitedAt: row.visitedAt, visitNote: row.note }
-            : null;
-        }),
+      if (!statusRows.length) return [];
+      const items = await withDetails(
+        ctx.db,
+        statusRows.map(({ exhibition, museum }) => ({ exhibition, museum })),
+        userId,
       );
-      const found = items.filter(
-        (item): item is NonNullable<typeof item> => item !== null,
+      const itemByMemberId = new Map(
+        items.flatMap((item) =>
+          item.memberIds.map((id) => [id, item] as const),
+        ),
       );
-      // Two group members can each carry the user's status; bySlug then
-      // resolves both to the same canonical exhibition.
-      const seenSlugs = new Set<string>();
-      return found.filter((item) => {
-        if (seenSlugs.has(item.slug)) return false;
-        seenSlugs.add(item.slug);
-        return true;
+      // Two group members can each carry the user's status; keep the first
+      // (by `listByStatus`'s ordering) and resolve both to the canonical one.
+      const seen = new Set<number>();
+      return statusRows.flatMap((row) => {
+        const item = itemByMemberId.get(row.exhibitionId);
+        if (!item || seen.has(item.id)) return [];
+        seen.add(item.id);
+        return [{ ...item, visitedAt: row.visitedAt, visitNote: row.note }];
       });
     }),
   /** Drives the Omat tab dot: interested exhibitions ending within a week. */

@@ -1,47 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
 import { toRowView, type ExhibitionWithDetails } from "~/app/_lib/row";
 import { t } from "~/i18n/fi";
-import { api, type RouterInputs } from "~/trpc/react";
 
-type ListInput = Omit<RouterInputs["exhibition"]["list"], "cursor">;
-
+/**
+ * The loaded-pages count lives in `loadMoreHref`'s `page` param (see
+ * exhibitions/page.tsx), not client state: "Näytä lisää" replaces the URL
+ * with the next page number so back navigation and a reload both land on
+ * the same set of loaded rows, instead of resetting to page 1.
+ */
 export function ExhibitionListClient({
-  initialItems,
-  initialNextCursor,
-  input,
+  items,
+  loadMoreHref,
   today,
   emptyMessage,
   signedIn = false,
 }: {
-  initialItems: readonly ExhibitionWithDetails[];
-  initialNextCursor: string | null;
-  input: ListInput;
+  items: readonly ExhibitionWithDetails[];
+  loadMoreHref: string | null;
   today: string;
   emptyMessage: string;
   signedIn?: boolean;
 }) {
-  const utils = api.useUtils();
-  const [items, setItems] = useState(initialItems);
-  const [cursor, setCursor] = useState(initialNextCursor);
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const [loading, startTransition] = useTransition();
 
-  async function loadMore() {
-    if (!cursor || loading) return;
-    setLoading(true);
-    try {
-      const page = await utils.client.exhibition.list.query({
-        ...input,
-        cursor,
-      });
-      setItems((prev) => [...prev, ...page.items]);
-      setCursor(page.nextCursor);
-    } finally {
-      setLoading(false);
-    }
+  function loadMore() {
+    if (!loadMoreHref) return;
+    // Keep scroll in place and reuse the same history entry: repeated
+    // "Näytä lisää" clicks shouldn't stack up back-button stops.
+    startTransition(() => router.replace(loadMoreHref, { scroll: false }));
   }
 
   return (
@@ -51,7 +43,7 @@ export function ExhibitionListClient({
         emptyMessage={emptyMessage}
         signedIn={signedIn}
       />
-      {cursor && (
+      {loadMoreHref && (
         <button
           type="button"
           onClick={loadMore}

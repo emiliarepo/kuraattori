@@ -9,6 +9,7 @@ import {
   parseBrowseFilters,
   type BrowseFilters,
 } from "~/app/_lib/browse-filters";
+import { useBackToClose } from "~/app/_lib/use-back-to-close";
 import { t } from "~/i18n/fi";
 
 export type FilterOption = { id: number; label: string };
@@ -194,6 +195,8 @@ export function FilterSheet(props: {
   const router = useRouter();
   const pathname = usePathname();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  useBackToClose(sheetOpen, () => dialogRef.current?.close());
 
   function apply(next: BrowseFilters) {
     const query = browseFiltersToParams(next).toString();
@@ -250,7 +253,10 @@ export function FilterSheet(props: {
       <div className="sm:hidden">
         <button
           type="button"
-          onClick={() => dialogRef.current?.showModal()}
+          onClick={() => {
+            dialogRef.current?.showModal();
+            setSheetOpen(true);
+          }}
           className="border-rule w-full border py-2.5 font-sans text-sm font-semibold"
         >
           {t.pages.browse.openFilters}
@@ -258,6 +264,7 @@ export function FilterSheet(props: {
         <dialog
           ref={dialogRef}
           aria-label={t.pages.browse.filters}
+          onClose={() => setSheetOpen(false)}
           className="border-rule bg-bg text-fg fixed inset-x-0 bottom-0 m-0 max-h-[85vh] w-full max-w-none overflow-y-auto border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop:bg-black/40"
         >
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">

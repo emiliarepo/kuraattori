@@ -1,6 +1,7 @@
 import { type Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { CategoryList } from "~/app/_components/CategoryList";
 import { ExhibitionDescription } from "~/app/_components/ExhibitionDescription";
@@ -30,13 +31,16 @@ const dateTimeFormat = new Intl.DateTimeFormat("fi-FI", {
   year: "numeric",
 });
 
+/** Shared with the page body: `generateMetadata` and the component both run per request, so this dedupes the query. */
+const getExhibition = cache((slug: string) => api.exhibition.bySlug({ slug }));
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const exhibition = await api.exhibition.bySlug({ slug });
+  const exhibition = await getExhibition(slug);
   if (!exhibition) return {};
   return {
     title: `${exhibition.titleFi} — ${exhibition.museum.name} — ${t.app.name}`,
@@ -63,7 +67,7 @@ export default async function ExhibitionDetailPage({
 }) {
   const { slug } = await params;
   const [exhibition, session] = await Promise.all([
-    api.exhibition.bySlug({ slug }),
+    getExhibition(slug),
     auth(),
   ]);
   if (!exhibition) notFound();
