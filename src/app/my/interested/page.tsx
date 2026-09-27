@@ -4,7 +4,11 @@ import { t } from "~/i18n/fi";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
-export default async function MyInterestedPage() {
+export default async function MyInterestedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string | string[] }>;
+}) {
   const session = await auth();
   const feed = session?.user
     ? await api.profile.getExistingCalendarFeed()
@@ -16,6 +20,7 @@ export default async function MyInterestedPage() {
       <MyStatusPage
         status="interested"
         emptyMessage={t.pages.my.emptyInterested}
+        searchParams={searchParams}
       />
     </>
   );
