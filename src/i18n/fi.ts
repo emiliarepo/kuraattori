@@ -39,6 +39,14 @@ export const t = {
       announceCleared: "Merkintä poistettu",
       heartLabel: (title: string) => `Kiinnostaa: ${title}`,
     },
+    follow: {
+      follow: "Seuraa",
+      following: "Seurataan",
+      followLabel: (museum: string) => `Seuraa: ${museum}`,
+      unfollowLabel: (museum: string) => `Lopeta seuraaminen: ${museum}`,
+      announceFollowed: (museum: string) => `Seurataan: ${museum}`,
+      announceUnfollowed: (museum: string) => `Seuranta lopetettu: ${museum}`,
+    },
     interest: {
       none: "–",
       interested: "Kiinnostaa",
@@ -109,6 +117,10 @@ export const t = {
       "Vanha kalenteriosoite lakkaa toimimasta. Luodaanko uusi?",
     accountName: "Nimi",
     accountEmail: "Sähköposti",
+    museums: {
+      heading: "Museot",
+      empty: "Et seuraa vielä yhtään museota.",
+    },
     exportData: "Lataa tietosi",
     deleteAccount: "Poista tili",
     deleteConfirm:
@@ -129,8 +141,10 @@ export const t = {
       new: "Uudet näyttelyt",
       upcoming: "Tulossa",
       whyNew: "Uusi",
+      whyFollowed: (museum: string) => `Seuraat: ${museum}`,
       seeAll: "Kaikki",
       chooseInterests: "Valitse kiinnostuksen kohteet",
+      followedMuseums: "Seuraamasi museot",
     },
     browse: {
       title: "Selaa",

@@ -30,7 +30,9 @@ export default function PrivacyPage() {
           Googlen kirjautumisen yhteydessä antamat tunnisteet.
         </li>
         <li>Kirjautumisistunto ja sen voimassaoloaika.</li>
-        <li>Valitsemasi alueet ja aiheiden kiinnostuspainot.</li>
+        <li>
+          Valitsemasi alueet, aiheiden kiinnostuspainot ja seuraamasi museot.
+        </li>
         <li>
           Näyttelymerkintäsi (kiinnostaa, käyty, piilotettu), käyntipäivät ja
           muistiinpanot.

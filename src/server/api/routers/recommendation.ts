@@ -35,7 +35,7 @@ function reasonLabel(
     case "region":
       return context.region;
     case "museum":
-      return context.museumName;
+      return t.pages.home.whyFollowed(context.museumName);
     case "new":
       return t.pages.home.whyNew;
   }

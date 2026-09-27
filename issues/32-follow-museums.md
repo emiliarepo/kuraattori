@@ -1,5 +1,5 @@
 # 32 Follow museums
-Status: todo · Model: Sonnet 5 · Blocked by: 20
+Status: done · Model: Sonnet 5 · Blocked by: 20
 
 The `user_followed_museum` table exists and relevance already awards +15 for a followed museum (`src/domain/relevance.ts`, used by `recommendation.forYou` and `trip`), but nothing writes to it.
 

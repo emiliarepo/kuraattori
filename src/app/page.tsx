@@ -43,33 +43,48 @@ export default async function HomePage() {
   // The underlying failure is already logged by the tRPC error-logging
   // middleware.
   const emptyList = { items: [], nextCursor: null };
-  const [endingSoon, upcoming, freshest, forYou, lastImportAt, interests] =
-    await Promise.all([
-      listAcrossRegions(activeRegions, {
-        state: "current",
-        endingWithinDays: 14,
-        limit: SECTION_LIMIT,
-      }).catch(() => emptyList),
-      listAcrossRegions(activeRegions, {
-        state: "upcoming",
-        limit: SECTION_LIMIT,
-      }).catch(() => emptyList),
-      listNewAcrossRegions(activeRegions, { limit: SECTION_LIMIT }).catch(
-        () => [],
-      ),
-      signedIn
-        ? api.recommendation
-            .forYou({ limit: SECTION_LIMIT + 1 })
-            .catch(() => [])
-        : Promise.resolve([]),
-      api.meta.lastImportAt().catch(() => null),
-      signedIn
-        ? api.profile
-            .get()
-            .then((profile) => profile.interests)
-            .catch(() => [])
-        : [],
-    ]);
+  const [
+    endingSoon,
+    upcoming,
+    freshest,
+    forYou,
+    lastImportAt,
+    interests,
+    followedMuseumCount,
+    followedExhibitions,
+  ] = await Promise.all([
+    listAcrossRegions(activeRegions, {
+      state: "current",
+      endingWithinDays: 14,
+      limit: SECTION_LIMIT,
+    }).catch(() => emptyList),
+    listAcrossRegions(activeRegions, {
+      state: "upcoming",
+      limit: SECTION_LIMIT,
+    }).catch(() => emptyList),
+    listNewAcrossRegions(activeRegions, { limit: SECTION_LIMIT }).catch(
+      () => [],
+    ),
+    signedIn
+      ? api.recommendation.forYou({ limit: SECTION_LIMIT + 1 }).catch(() => [])
+      : Promise.resolve([]),
+    api.meta.lastImportAt().catch(() => null),
+    signedIn
+      ? api.profile
+          .get()
+          .then((profile) => profile.interests)
+          .catch(() => [])
+      : [],
+    signedIn
+      ? api.museum
+          .followed()
+          .then((rows) => rows.length)
+          .catch(() => 0)
+      : 0,
+    signedIn
+      ? api.museum.followedExhibitions({ limit: SECTION_LIMIT }).catch(() => [])
+      : Promise.resolve([]),
+  ]);
   const hasInterests = interests.some((interest) => interest.weight !== -1);
 
   const endingSoonSorted = [...endingSoon.items].sort(
@@ -149,6 +164,17 @@ export default async function HomePage() {
             </p>
           </Section>
         ))}
+
+      {signedIn && followedMuseumCount > 0 && (
+        <Rail
+          title={t.pages.home.followedMuseums}
+          emptyMessage={t.pages.browse.empty}
+          signedIn={signedIn}
+          items={followedExhibitions.map((item) => ({
+            view: toRowView(item, today),
+          }))}
+        />
+      )}
 
       <Rail
         title={t.pages.home.new}

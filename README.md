@@ -101,3 +101,7 @@ discarding the imported data.
   deploy, and see `docs/design.md` for why the importer isn't a Workers cron.
 - Google OAuth isn't configured (`AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` are
   empty in `.env.example`); sign-in wiring is a later ticket.
+
+## License
+
+Code: [MIT](LICENSE). The terms of use text in `src/app/terms` is adapted from Automattic's [Legalmattic](https://github.com/Automattic/legalmattic) under CC BY-SA 4.0. Exhibition data belongs to museot.fi and the museums.
