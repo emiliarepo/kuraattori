@@ -1,1 +1,6 @@
 NEXTJS_ENV=development
+
+# Enables the dev-only credentials sign-in against a built Worker (CI sets
+# this only for the Playwright test server). Uncomment to test the sign-in
+# flow locally without Google OAuth.
+# E2E_TEST_AUTH=1

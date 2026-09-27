@@ -36,6 +36,10 @@ check. Both read from the same local D1 database under `.wrangler/state`.
 ## Other scripts
 
 - `pnpm test` — Vitest.
+- `pnpm test:e2e` — Playwright, against the real built Worker (`opennextjs-cloudflare build`,
+  then `wrangler dev`) with a local D1 seeded from `fixtures/museot/` through the real
+  importer code (`scripts/e2e-seed.ts`, no network). Requires `pnpm exec playwright install
+  chromium` once. See `playwright.config.ts` and `e2e/`.
 - `pnpm typecheck`, `pnpm lint`, `pnpm format:check` / `format:write`.
 - `pnpm cf-typegen` — regenerate `cloudflare-env.d.ts` from `wrangler.jsonc`
   (runs automatically on `pnpm install` via `postinstall`).
@@ -45,7 +49,8 @@ check. Both read from the same local D1 database under `.wrangler/state`.
 ## Deployment
 
 Pushes to `main` run `.github/workflows/deploy.yml`: install, typecheck, lint,
-test, apply `drizzle/` migrations to the remote D1 database
+test, a Playwright end-to-end suite against the built Worker (`pnpm test:e2e`),
+apply `drizzle/` migrations to the remote D1 database
 (`wrangler d1 migrations apply DB --remote`), then `pnpm run deploy`. Any
 failed step stops the run before the migration or deploy. It shares a
 `d1-remote` concurrency group with the nightly importer
