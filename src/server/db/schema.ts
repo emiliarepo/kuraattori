@@ -171,6 +171,8 @@ export const exhibitions = createTable(
     sourceUrl: d.text(),
     imageUrl: d.text(),
     museumCardEligible: d.integer({ mode: "boolean" }).notNull().default(false),
+    admissionText: d.text(),
+    admissionAdultCents: d.integer(),
     sourcePayloadHash: d.text().notNull(),
     /**
      * Same-exhibition-at-several-venues key (normalized title + start + end +

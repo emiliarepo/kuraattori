@@ -48,12 +48,13 @@ export function MyTabs() {
             value={sort}
             onChange={(event) => {
               const next = event.target.value;
-              router.push(
-                next === MY_SORTS[status][0]
-                  ? pathname
-                  : `${pathname}?sort=${next}`,
-                { scroll: false },
-              );
+              const params = new URLSearchParams(searchParams);
+              if (next === MY_SORTS[status][0]) params.delete("sort");
+              else params.set("sort", next);
+              const query = params.toString();
+              router.push(query ? `${pathname}?${query}` : pathname, {
+                scroll: false,
+              });
             }}
             className="border-rule-soft bg-bg text-fg focus:border-fg border px-2 py-1.5 text-sm font-normal tracking-normal normal-case"
           >

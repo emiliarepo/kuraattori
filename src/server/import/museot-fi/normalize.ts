@@ -1,3 +1,4 @@
+import { parseAdultAdmissionCents } from "~/domain/admission";
 import { resolveRegion } from "~/domain/regions";
 
 import { classify } from "../grouping";
@@ -52,6 +53,8 @@ export function normalizeExhibition(
     sourceUrl: `${SOURCE_URL_BASE}${listing.sourceId}`,
     imageUrl: detail.imageUrl ?? listing.imageUrl,
     museumCardEligible: detail.museumCardEligible,
+    admissionText: detail.admissionText,
+    admissionAdultCents: parseAdultAdmissionCents(detail.admissionText),
     categorySourceIds,
     payloadHash: hashListingItem(listing),
     ...classify({

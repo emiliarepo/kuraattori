@@ -24,5 +24,6 @@ export const detailSchema = z.object({
   imageUrl: z.string().url().optional(),
   websiteUrl: z.string().url().optional(),
   museumCardEligible: z.boolean(),
+  admissionText: z.string().optional(),
   categorySourceIds: z.array(z.string()),
 });

@@ -7,14 +7,18 @@ import { t } from "~/i18n/fi";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
+type MyListItem = Awaited<ReturnType<typeof api.my.list>>[number];
+
 export async function MyStatusPage({
   status,
   emptyMessage,
   searchParams,
+  renderHeader,
 }: {
   status: MyStatus;
   emptyMessage: string;
   searchParams: Promise<{ sort?: string | string[] }>;
+  renderHeader?: (items: MyListItem[]) => React.ReactNode;
 }) {
   const session = await auth();
   if (!session?.user) return <SignInPrompt message={t.pages.signIn.my} />;
@@ -29,6 +33,7 @@ export async function MyStatusPage({
 
   return (
     <>
+      {renderHeader?.(items)}
       {endedAt !== 0 && (
         <ExhibitionList
           items={items

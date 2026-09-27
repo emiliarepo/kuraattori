@@ -22,6 +22,8 @@ export interface NormalizedExhibition {
   sourceUrl: string;
   imageUrl: string | undefined;
   museumCardEligible: boolean;
+  admissionText: string | undefined;
+  admissionAdultCents: number | undefined;
   categorySourceIds: string[];
   /** Hash of the listing payload, used to skip re-fetching an unchanged detail page. */
   payloadHash: string;
