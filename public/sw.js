@@ -62,6 +62,35 @@ worker.addEventListener("fetch", (event) => {
   }
 });
 
+worker.addEventListener("push", (event) => {
+  const { title, body, url } = event.data?.json() ?? {};
+  event.waitUntil(
+    worker.registration.showNotification(title ?? "Kuraattori", {
+      body,
+      icon: "/icon-192.png",
+      lang: "fi",
+      data: { url: url ?? "/" },
+    }),
+  );
+});
+
+worker.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL(
+    event.notification.data?.url ?? "/",
+    worker.location.origin,
+  ).href;
+  event.waitUntil(
+    worker.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((windows) => {
+        const open = windows.find((client) => client.url === url);
+        if (open) return open.focus();
+        return worker.clients.openWindow(url);
+      }),
+  );
+});
+
 /** @param {Request} request */
 async function networkFirstPage(request) {
   const cache = await caches.open(CACHE_NAME);

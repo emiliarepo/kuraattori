@@ -4,6 +4,8 @@ import { type Db } from "~/server/db";
 import {
   accounts,
   calendarFeeds,
+  pushSent,
+  pushSubscriptions,
   savedTrips,
   sessions,
   userExhibitions,
@@ -24,6 +26,8 @@ export async function exportUserData(db: Db, userId: string) {
     exhibitions,
     [calendarFeed],
     trips,
+    subscriptions,
+    notified,
   ] = await Promise.all([
     db
       .select({
@@ -86,6 +90,20 @@ export async function exportUserData(db: Db, userId: string) {
       })
       .from(savedTrips)
       .where(eq(savedTrips.userId, userId)),
+    db
+      .select({
+        endpoint: pushSubscriptions.endpoint,
+        createdAt: pushSubscriptions.createdAt,
+      })
+      .from(pushSubscriptions)
+      .where(eq(pushSubscriptions.userId, userId)),
+    db
+      .select({
+        exhibitionId: pushSent.exhibitionId,
+        sentOn: pushSent.sentOn,
+      })
+      .from(pushSent)
+      .where(eq(pushSent.userId, userId)),
   ]);
 
   return {
@@ -97,6 +115,8 @@ export async function exportUserData(db: Db, userId: string) {
     exhibitions,
     calendarFeed: calendarFeed ?? null,
     savedTrips: trips,
+    pushSubscriptions: subscriptions,
+    pushNotificationsSent: notified,
   };
 }
 
@@ -121,6 +141,8 @@ export async function deleteUserData(db: Db, userId: string) {
     db.delete(userExhibitions).where(eq(userExhibitions.userId, userId)),
     db.delete(calendarFeeds).where(eq(calendarFeeds.userId, userId)),
     db.delete(savedTrips).where(eq(savedTrips.userId, userId)),
+    db.delete(pushSubscriptions).where(eq(pushSubscriptions.userId, userId)),
+    db.delete(pushSent).where(eq(pushSent.userId, userId)),
     db.delete(users).where(eq(users.id, userId)),
   ]);
 }

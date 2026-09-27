@@ -118,6 +118,22 @@ export const t = {
     calendarRotate: "Luo uusi osoite",
     calendarRotateConfirm:
       "Vanha kalenteriosoite lakkaa toimimasta. Luodaanko uusi?",
+    push: {
+      heading: "Muistutukset",
+      description:
+        "Ilmoitus tälle laitteelle, kun kiinnostavalla näyttelyllä on viikko aikaa. Enintään yksi ilmoitus päivässä.",
+      enable: "Ota muistutukset käyttöön",
+      enabling: "Otetaan käyttöön…",
+      enabled: "Muistutukset ovat käytössä tällä laitteella.",
+      disable: "Poista käytöstä",
+      disabling: "Poistetaan…",
+      unsupported: "Tämä selain ei tue ilmoituksia.",
+      unsupportedIos:
+        "iPhonella ja iPadilla lisää Kuraattori ensin Koti-valikkoon ja avaa se sieltä.",
+      denied:
+        "Ilmoitukset on estetty. Salli ne selaimen sivustoasetuksista ja lataa sivu uudelleen.",
+      failed: "Muistutusten käyttöönotto ei onnistunut. Yritä uudelleen.",
+    },
     accountName: "Nimi",
     accountEmail: "Sähköposti",
     museums: {
@@ -127,7 +143,7 @@ export const t = {
     exportData: "Lataa tietosi",
     deleteAccount: "Poista tili",
     deleteConfirm:
-      "Tili ja kaikki tallentamasi tiedot poistetaan pysyvästi: kiinnostukset, alueet, näyttelymerkinnät, muistiinpanot, tallennetut matkat ja kalenteriosoite.",
+      "Tili ja kaikki tallentamasi tiedot poistetaan pysyvästi: kiinnostukset, alueet, näyttelymerkinnät, muistiinpanot, tallennetut matkat, kalenteriosoite ja muistutusten tilaukset.",
     deleteConfirmSubmit: "Poista tili pysyvästi",
     deleteCancel: "Peruuta",
   },

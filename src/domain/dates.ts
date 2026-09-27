@@ -17,6 +17,12 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((parseIsoDate(to) - parseIsoDate(from)) / 86_400_000);
 }
 
+export function addDays(isoDate: string, days: number): string {
+  return new Date(parseIsoDate(isoDate) + days * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+}
+
 /** Every date from `from` to `to` inclusive, at most `limit` of them. */
 export function datesInRange(
   from: string,

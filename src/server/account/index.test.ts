@@ -76,6 +76,15 @@ async function seedUser(id: string) {
       },
     ],
   });
+  await libsql.insert(schema.pushSubscriptions).values({
+    endpoint: `https://push.example/${id}`,
+    userId: id,
+    p256dh: "key",
+    auth: "secret",
+  });
+  await libsql
+    .insert(schema.pushSent)
+    .values({ userId: id, exhibitionId: 1, sentOn: "2026-09-27" });
 }
 
 await libsql.insert(schema.museums).values({

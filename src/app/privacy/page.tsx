@@ -9,7 +9,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title={t.legal.privacyTitle}
-      kicker="Versio 1 · Päivitetty 27.9.2026"
+      kicker="Versio 2 · Päivitetty 27.9.2026"
     >
       <p>
         Tämä seloste kertoo, mitä henkilötietoja Kuraattori käsittelee ja miksi
@@ -43,6 +43,11 @@ export default function PrivacyPage() {
         </li>
         <li>Henkilökohtaisen kalenteriosoitteesi tunniste.</li>
         <li>
+          Jos otat muistutukset käyttöön: laitteesi ilmoitustilauksen osoite ja
+          salausavaimet sekä tieto siitä, mistä näyttelyistä ja minä päivänä
+          sinua on muistutettu.
+        </li>
+        <li>
           Palvelimen tekniset lokit, joissa voi näkyä esimerkiksi IP-osoite ja
           pyydetty sivu.
         </li>
@@ -52,10 +57,10 @@ export default function PrivacyPage() {
       <h2>Käyttötarkoitus ja oikeusperuste</h2>
       <p>
         Tietoja käytetään vain pyytämäsi palvelun tarjoamiseen: kirjautumiseen,
-        suositusten ja omien näyttelyiden näyttämiseen sekä
-        kalenterisyötteeseen. Oikeusperuste on sopimus eli palvelun tarjoaminen
-        sinulle (6 artiklan 1 kohdan b alakohta). Palvelussa ei ole analytiikkaa
-        eikä mainoksia, eikä tietoja myydä tai luovuteta muille.
+        suositusten ja omien näyttelyiden näyttämiseen, kalenterisyötteeseen
+        sekä pyytämiisi muistutuksiin. Oikeusperuste on sopimus eli palvelun
+        tarjoaminen sinulle (6 artiklan 1 kohdan b alakohta). Palvelussa ei ole
+        analytiikkaa eikä mainoksia, eikä tietoja myydä tai luovuteta muille.
       </p>
 
       <h2>Käsittelijät ja siirrot EU:n ulkopuolelle</h2>
@@ -75,11 +80,16 @@ export default function PrivacyPage() {
           </a>{" "}
           mukaisesti.
         </li>
+        <li>
+          Muistutukset kulkevat selaimesi valmistajan ilmoituspalvelun kautta
+          (esimerkiksi Google, Apple tai Mozilla). Palvelu saa vain salatun
+          viestin ja laitteesi tilausosoitteen.
+        </li>
       </ul>
       <p>
-        Molemmat ovat yhdysvaltalaisia yrityksiä. Tietoja voidaan siirtää
-        Yhdysvaltoihin EU:n ja Yhdysvaltojen välisen tietosuojakehyksen (Data
-        Privacy Framework) tai EU:n vakiosopimuslausekkeiden perusteella.
+        Cloudflare ja Google ovat yhdysvaltalaisia yrityksiä. Tietoja voidaan
+        siirtää Yhdysvaltoihin EU:n ja Yhdysvaltojen välisen tietosuojakehyksen
+        (Data Privacy Framework) tai EU:n vakiosopimuslausekkeiden perusteella.
       </p>
 
       <h2>Karttatiedot</h2>
@@ -97,9 +107,10 @@ export default function PrivacyPage() {
 
       <h2>Säilytysaika</h2>
       <p>
-        Tilin tiedot säilytetään, kunnes poistat tilisi. Kirjautumisistunto
-        vanhenee 30 päivässä. Palvelimen lokit poistuvat Cloudflaren lokien
-        säilytysajan mukaan muutamassa päivässä.
+        Tilin tiedot säilytetään, kunnes poistat tilisi. Ilmoitustilaus poistuu,
+        kun poistat muistutukset käytöstä tai ilmoituspalvelu kertoo sen
+        vanhentuneen. Kirjautumisistunto vanhenee 30 päivässä. Palvelimen lokit
+        poistuvat Cloudflaren lokien säilytysajan mukaan muutamassa päivässä.
       </p>
 
       <h2>Evästeet</h2>

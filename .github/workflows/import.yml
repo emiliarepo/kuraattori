@@ -5,7 +5,12 @@ on:
     # 04:00 Europe/Helsinki. Helsinki is UTC+2 (EET) or UTC+3 (EEST); 01:00 UTC
     # covers EET and lands at 04:00 during EEST too.
     - cron: "0 1 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      push_test_email:
+        description: "Only send a test notification to this user's subscriptions (skips the import)"
+        required: false
+        default: ""
 
 concurrency:
   group: d1-remote
@@ -28,8 +33,19 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Import and check source counts against remote D1
+        if: inputs.push_test_email == ''
         run: pnpm import:museot
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+
+      - name: Send closing-soon notifications
+        if: ${{ !cancelled() }}
+        run: pnpm push:closing
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          PUSH_TEST_EMAIL: ${{ inputs.push_test_email }}
