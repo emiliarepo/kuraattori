@@ -21,6 +21,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: new URL("/", siteUrl).toString() },
     { url: new URL("/exhibitions", siteUrl).toString() },
     { url: new URL("/museums", siteUrl).toString() },
+    { url: new URL("/terms", siteUrl).toString() },
+    { url: new URL("/privacy", siteUrl).toString() },
     ...exhibitions.map(({ slug, updatedAt }) => ({
       url: new URL(`/exhibitions/${slug}`, siteUrl).toString(),
       lastModified: updatedAt ?? undefined,

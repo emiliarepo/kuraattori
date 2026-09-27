@@ -54,6 +54,10 @@ export const t = {
       devEmailLabel: "Sähköposti",
       devNameLabel: "Nimi",
       devSubmit: "Kirjaudu kehityskäyttäjänä",
+      consentPrefix: "Kirjautumalla hyväksyt ",
+      consentTerms: "käyttöehdot",
+      consentJoin: " ja ",
+      consentPrivacy: "tietosuojaselosteen",
     },
   },
   onboarding: {
@@ -84,6 +88,12 @@ export const t = {
       "Vanha kalenteriosoite lakkaa toimimasta. Luodaanko uusi?",
     accountName: "Nimi",
     accountEmail: "Sähköposti",
+    exportData: "Lataa tietosi",
+    deleteAccount: "Poista tili",
+    deleteConfirm:
+      "Tili ja kaikki tallentamasi tiedot poistetaan pysyvästi: kiinnostukset, alueet, näyttelymerkinnät, muistiinpanot ja kalenteriosoite.",
+    deleteConfirmSubmit: "Poista tili pysyvästi",
+    deleteCancel: "Peruuta",
   },
   pages: {
     signIn: {
@@ -220,5 +230,10 @@ export const t = {
       museums: "Museot ja niiden näyttelyt.",
       trip: "Suunnittele matka: näe mitkä näyttelyt ovat auki valitulla paikalla ja ajalla.",
     },
+  },
+  legal: {
+    terms: "Käyttöehdot",
+    privacy: "Tietosuoja",
+    privacyTitle: "Tietosuojaseloste",
   },
 } as const;
