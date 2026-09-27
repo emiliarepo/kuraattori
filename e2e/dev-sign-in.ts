@@ -31,5 +31,6 @@ export async function devSignIn(
   // outside this suite, worth its own investigation) — a real navigation to
   // the same URL always renders correctly, so land on one of those instead
   // of the flaky transition.
+  await page.waitForLoadState("networkidle");
   await page.goto(page.url());
 }
