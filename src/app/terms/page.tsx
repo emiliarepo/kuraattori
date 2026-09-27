@@ -58,8 +58,8 @@ export default function TermsPage() {
       <h2>Sovellettava laki ja yhteystiedot</h2>
       <p>
         Ehtoihin sovelletaan Suomen lakia. Kysymykset:{" "}
-        <a href="mailto:emilia@repo.codes">emilia@repo.codes</a>.
-        Henkilötietojen käsittelystä kerrotaan{" "}
+        <a href="mailto:hi@emialis.com">hi@emialis.com</a>. Henkilötietojen
+        käsittelystä kerrotaan{" "}
         <Link href="/privacy">tietosuojaselosteessa</Link>.
       </p>
 

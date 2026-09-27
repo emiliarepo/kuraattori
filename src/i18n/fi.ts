@@ -14,6 +14,10 @@ export const t = {
     indefinite: "Toistaiseksi",
   },
   ui: {
+    rail: {
+      previous: (title: string) => `Edelliset: ${title}`,
+      next: (title: string) => `Seuraavat: ${title}`,
+    },
     nav: {
       home: "Koti",
       browse: "Selaa",
@@ -83,7 +87,24 @@ export const t = {
       interests: "Kiinnostukset",
       regions: "Alueet",
       calendar: "Kalenteri",
+      year: "Vuosikatsaus",
       account: "Tili",
+    },
+    year: {
+      cta: (year: number) => `Vuotesi museoissa ${year} →`,
+      kicker: "Vuotesi museoissa",
+      title: (year: number) => `Vuotesi museoissa ${year}`,
+      years: "Vuosi",
+      visits: "Käyntejä",
+      museums: "Museoita",
+      cities: "Kaupunkeja",
+      categories: "Suosituimmat aiheet",
+      months: "Käynnit kuukausittain",
+      visit: "Käynti",
+      firstVisit: "Ensimmäinen käynti",
+      latestVisit: "Viimeisin käynti",
+      busiestMonth: (month: string, count: number) =>
+        `Vilkkain kuukausi oli ${month}: ${count === 1 ? "1 käynti" : `${count} käyntiä`}`,
     },
     calendarHeading: "Kalenteri",
     calendarDescription:
