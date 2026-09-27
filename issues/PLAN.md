@@ -12,7 +12,7 @@ Migrations are serialized (one migration-adding ticket in flight at a time): 14 
 3. Wave B: 15 visit date/note (Luna, migration), 18 travel mode (Sonnet).
 4. Wave C: 24 card status tweaks (Sonnet), 16 calendar (Luna, migration).
 4b. Wave C2: 23 performance + back navigation (Sonnet, broad; skeletons copy the final card layout from 24).
-4c. After 23: 26 health checks (Sol), 27 E2E tests (Sonnet), 28 error visibility (Sonnet) — reliability first, alongside wave D.
+4c. After 23: 26 health checks (Sol), 27 E2E tests (Sonnet), 28 error visibility (Sonnet), 29 profile tabs (Sonnet) — reliability first, alongside wave D.
 5. Wave D: 20 savings (Opus low, migration) + 25 Omat sorting (Sol, no migration), then 21 year in review (Sonnet).
 6. 22 en/sv locales (Opus low; lowest priority; adds a migration, so after 20).
 7. Design consistency review (Opus) across all screens, fixes, final deploy and browser check.
