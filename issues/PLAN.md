@@ -5,6 +5,7 @@ Authorized by the user: execute tickets 13–21 in any order, merge locally, pus
 Migrations are serialized (one migration-adding ticket in flight at a time): 14 → 15 → 16 → 20.
 
 1. Merge 11 (CI deploy) and 12 (serif redesign); verify live.
+1b. After 12 lands: reread tickets 13–21 against the new docs/design.md and components (rails, serif tokens, card names); update wording, file references and UI instructions before launching them.
 2. Wave A (parallel, no migrations): 13 weights (Sonnet), 17 PWA (Luna), 19 similar (Luna) + 14 dedupe (Sonnet, migration).
 3. Wave B: 15 visit date/note (Luna, migration), 18 travel mode (Sonnet).
 4. Wave C: 16 calendar (Luna, migration).
