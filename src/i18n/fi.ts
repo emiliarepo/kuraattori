@@ -192,6 +192,9 @@ export const t = {
       invalidRange: "Lähtöpäivän tulee olla saapumispäivän jälkeen.",
       empty: "Ei näyttelyitä valitulla paikalla ja ajalla.",
       endsDuringTrip: "Päättyy matkasi aikana",
+      endsAfterTrip: (date: string) => `Päättyy pian matkan jälkeen, ${date}`,
+      endingSoon: "Päättyy pian",
+      otherOpen: "Muut auki matkasi aikana",
       opensDuringTrip: (date: string) => `Avautuu ${date}`,
       planDay: "Suunnittele museopäivä",
       planDayCity: "Kaupunki",
@@ -226,6 +229,8 @@ export const t = {
       plan: "Järjestä reitti",
       itinerary: "Reitti",
       walk: (minutes: number) => `≈ ${minutes} min kävellen`,
+      walkRoute: "Kävelyreitti",
+      walkRouteTo: (museum: string) => `Kävelyreitti: ${museum}`,
       total: (minutes: number, km: string) =>
         `Kävelyä yhteensä ≈ ${minutes} min (${km} km)`,
       unknownLocation: "sijainti ei tiedossa",

@@ -2,12 +2,14 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 import { EmptyState } from "~/app/_components/EmptyState";
+import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
 import {
   dayPlanHref,
   DEFAULT_START,
   parseDayPlan,
   type DayPlanParams,
 } from "~/app/_lib/day-plan-params";
+import { urgencyLabelText } from "~/app/_lib/exhibition-format";
 import { SaveTripButton } from "~/app/trip/SaveTripButton";
 import { RouteLink } from "~/app/trip/day/RouteLink";
 import { todayInHelsinki } from "~/domain/dates";
@@ -18,6 +20,7 @@ import {
   orderStops,
   walkingMinutes,
 } from "~/domain/day-plan";
+import { partitionEndingSoon } from "~/domain/trip";
 import { t } from "~/i18n/fi";
 import { formatWeekdayDate } from "~/i18n/format";
 import { auth } from "~/server/auth";
@@ -48,9 +51,11 @@ function TripFields({ trip }: { trip: DayPlanParams["trip"] }) {
 function CandidateRow({
   candidate,
   checked,
+  urgency,
 }: {
   candidate: Candidate;
   checked: boolean;
+  urgency: string | null;
 }) {
   return (
     <li>
@@ -69,6 +74,11 @@ function CandidateRow({
           <span className="text-muted font-serif italic">
             {candidate.museumName}
           </span>
+          {urgency && (
+            <span className="mt-1.5">
+              <UrgencyLabel label={urgency} />
+            </span>
+          )}
         </span>
       </label>
     </li>
@@ -155,8 +165,32 @@ export default async function DayPage({
   );
   const chosen = plan.ids.flatMap((id) => byId.get(id) ?? []);
   const chosenIds = new Set(chosen.map((candidate) => candidate.id));
-  const interested = candidates.filter((candidate) => candidate.interested);
-  const others = candidates.filter((candidate) => !candidate.interested);
+  const inTrip =
+    plan.trip.from !== null &&
+    plan.trip.to !== null &&
+    plan.trip.from <= date &&
+    date <= plan.trip.to;
+  const soonUntil = inTrip ? plan.trip.to : date;
+  const endingSoonFirst = (list: Candidate[]) => {
+    const { endingSoon, rest } = partitionEndingSoon(
+      list,
+      date,
+      soonUntil,
+      date,
+    );
+    return [...endingSoon, ...rest].map((candidate) => ({
+      candidate,
+      urgency: endingSoon.includes(candidate)
+        ? urgencyLabelText(candidate, date)
+        : null,
+    }));
+  };
+  const interested = endingSoonFirst(
+    candidates.filter((candidate) => candidate.interested),
+  );
+  const others = endingSoonFirst(
+    candidates.filter((candidate) => !candidate.interested),
+  );
   const validCount =
     chosen.length >= MIN_DAY_STOPS && chosen.length <= MAX_DAY_STOPS;
 
@@ -177,11 +211,6 @@ export default async function DayPage({
     (sum, leg) => sum + (leg.legKm === null ? 0 : walkingMinutes(leg.legKm)),
     0,
   );
-  const inTrip =
-    plan.trip.from !== null &&
-    plan.trip.to !== null &&
-    plan.trip.from <= date &&
-    date <= plan.trip.to;
   const calendarParams = new URLSearchParams({
     city,
     date,
@@ -209,66 +238,91 @@ export default async function DayPage({
           >
             {t.pages.day.itinerary}
           </h3>
-          <ol className="divide-rule-soft divide-y">
+          <ol>
             {itinerary.map(({ stop, legKm }, index) => {
               const visitStart = addMinutes(plan.start, index * VISIT_MINUTES);
+              const next = itinerary[index + 1]?.stop;
               return (
-                <li key={stop.id} className="flex gap-4 py-5">
-                  <span
-                    aria-hidden="true"
-                    className="text-headline w-10 shrink-0 text-5xl tabular-nums"
-                  >
-                    {index + 1}
-                  </span>
-                  <div className="flex min-w-0 flex-col gap-1.5">
-                    <p className="text-kicker text-muted tabular-nums">
-                      {`${visitStart}–${addMinutes(visitStart, VISIT_MINUTES)}`}
-                    </p>
-                    <Link
-                      href={`/exhibitions/${stop.slug}`}
-                      className="hover:text-signal font-serif text-xl leading-snug"
+                <li
+                  key={stop.id}
+                  className="border-rule-soft border-t first:border-t-0"
+                >
+                  <div className="flex gap-4 py-5">
+                    <span
+                      aria-hidden="true"
+                      className="text-headline w-10 shrink-0 text-5xl tabular-nums"
                     >
-                      <span className="sr-only">{`${index + 1}. `}</span>
-                      {stop.title}
-                    </Link>
-                    <Link
-                      href={`/museums/${stop.museumSlug}`}
-                      className="text-muted hover:text-signal font-serif italic"
-                    >
-                      {stop.museumName}
-                    </Link>
-                    <p className="font-sans text-sm">
-                      {stop.address ?? ""}
-                      {stop.coordinates === null && (
-                        <span className="text-muted">
-                          {stop.address ? " · " : ""}
-                          {t.pages.day.unknownLocation}
-                        </span>
+                      {index + 1}
+                    </span>
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                      <p className="text-kicker text-muted tabular-nums">
+                        {`${visitStart}–${addMinutes(visitStart, VISIT_MINUTES)}`}
+                      </p>
+                      <Link
+                        href={`/exhibitions/${stop.slug}`}
+                        className="hover:text-signal font-serif text-xl leading-snug"
+                      >
+                        <span className="sr-only">{`${index + 1}. `}</span>
+                        {stop.title}
+                      </Link>
+                      <Link
+                        href={`/museums/${stop.museumSlug}`}
+                        className="text-muted hover:text-signal font-serif italic"
+                      >
+                        {stop.museumName}
+                      </Link>
+                      <p className="font-sans text-sm">
+                        {stop.address ?? ""}
+                        {stop.coordinates === null && (
+                          <span className="text-muted">
+                            {stop.address ? " · " : ""}
+                            {t.pages.day.unknownLocation}
+                          </span>
+                        )}
+                      </p>
+                      {index > 0 && stop.coordinates !== null && (
+                        <Link
+                          href={dayPlanHref({
+                            city,
+                            date,
+                            ids: [
+                              stop.id,
+                              ...orderedIds.filter((id) => id !== stop.id),
+                            ],
+                            start: plan.start,
+                            trip: plan.trip,
+                          })}
+                          className="hover:text-signal inline-flex min-h-11 items-center self-start font-sans text-sm underline underline-offset-4"
+                        >
+                          {t.pages.day.startHere}
+                        </Link>
                       )}
-                    </p>
-                    {legKm !== null && (
+                    </div>
+                  </div>
+                  {next && legKm !== null && (
+                    <div className="border-rule-soft flex items-center gap-4 border-t">
+                      <span
+                        aria-hidden="true"
+                        className="text-muted w-10 shrink-0 text-center font-sans"
+                      >
+                        ↓
+                      </span>
                       <p className="text-kicker">
                         {t.pages.day.walk(walkingMinutes(legKm))}
                       </p>
-                    )}
-                    {index > 0 && stop.coordinates !== null && (
-                      <Link
-                        href={dayPlanHref({
-                          city,
-                          date,
-                          ids: [
-                            stop.id,
-                            ...orderedIds.filter((id) => id !== stop.id),
-                          ],
-                          start: plan.start,
-                          trip: plan.trip,
-                        })}
-                        className="hover:text-signal inline-flex min-h-11 items-center self-start font-sans text-sm underline underline-offset-4"
-                      >
-                        {t.pages.day.startHere}
-                      </Link>
-                    )}
-                  </div>
+                      <RouteLink
+                        points={[stop, next].map((point) => ({
+                          name: point.museumName,
+                          address: point.address,
+                          latitude: point.latitude,
+                          longitude: point.longitude,
+                        }))}
+                        label={t.pages.day.walkRoute}
+                        ariaLabel={t.pages.day.walkRouteTo(next.museumName)}
+                        className="hover:text-signal inline-flex min-h-11 items-center font-sans text-sm underline underline-offset-4"
+                      />
+                    </div>
+                  )}
                 </li>
               );
             })}
@@ -360,10 +414,11 @@ export default async function DayPage({
             </legend>
             {interested.length > 0 ? (
               <ul className="divide-rule-soft divide-y">
-                {interested.map((candidate) => (
+                {interested.map(({ candidate, urgency }) => (
                   <CandidateRow
                     key={candidate.id}
                     candidate={candidate}
+                    urgency={urgency}
                     checked={chosenIds.has(candidate.id)}
                   />
                 ))}
@@ -378,7 +433,7 @@ export default async function DayPage({
             <details
               className="border-rule-soft mt-2 border-t"
               open={
-                others.some((candidate) => chosenIds.has(candidate.id)) ||
+                others.some(({ candidate }) => chosenIds.has(candidate.id)) ||
                 interested.length === 0
               }
             >
@@ -386,10 +441,11 @@ export default async function DayPage({
                 {t.pages.day.more(others.length)}
               </summary>
               <ul className="divide-rule-soft divide-y">
-                {others.map((candidate) => (
+                {others.map(({ candidate, urgency }) => (
                   <CandidateRow
                     key={candidate.id}
                     candidate={candidate}
+                    urgency={urgency}
                     checked={chosenIds.has(candidate.id)}
                   />
                 ))}

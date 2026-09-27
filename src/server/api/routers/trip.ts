@@ -191,6 +191,7 @@ export const tripRouter = createTRPCRouter({
           id: exhibition.id,
           slug: exhibition.slug,
           title: exhibition.titleFi,
+          startDate: exhibition.startDate,
           endDate: exhibition.endDate,
           museumName: museum.name,
           museumSlug: museum.slug,

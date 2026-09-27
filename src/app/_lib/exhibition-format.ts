@@ -4,6 +4,7 @@ import {
   getTimeBarProgress,
   type ExhibitionDates,
 } from "~/domain/dates";
+import { ENDING_SOON_DAYS } from "~/domain/urgency";
 import type { TimeBarProps } from "~/app/_components/TimeBar";
 import { t } from "~/i18n/fi";
 
@@ -55,7 +56,7 @@ function remainingDaysLabel(daysRemaining: number): {
   if (daysRemaining === 0) return { label: t.time.endsToday, urgent: true };
   if (daysRemaining === 1)
     return { label: t.time.daysRemainingOne, urgent: true };
-  if (daysRemaining <= 14)
+  if (daysRemaining <= ENDING_SOON_DAYS)
     return { label: t.time.daysRemaining(daysRemaining), urgent: true };
   return { label: t.pages.timeBar.daysCompact(daysRemaining), urgent: false };
 }
@@ -140,13 +141,12 @@ export function tripWhyLabel(
   exhibition: ExhibitionDates,
   from: string,
   to: string,
+  endingSoon = false,
 ): string | null {
-  if (
-    exhibition.endDate !== null &&
-    exhibition.endDate >= from &&
-    exhibition.endDate <= to
-  ) {
-    return t.pages.trip.endsDuringTrip;
+  if (exhibition.endDate !== null && exhibition.endDate >= from) {
+    if (exhibition.endDate <= to) return t.pages.trip.endsDuringTrip;
+    if (endingSoon)
+      return t.pages.trip.endsAfterTrip(formatShortDate(exhibition.endDate));
   }
   if (exhibition.startDate >= from && exhibition.startDate <= to) {
     return t.pages.trip.opensDuringTrip(formatShortDate(exhibition.startDate));

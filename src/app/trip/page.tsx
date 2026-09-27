@@ -2,10 +2,12 @@ import { type Metadata } from "next";
 
 import { EmptyState } from "~/app/_components/EmptyState";
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
+import { Section } from "~/app/_components/Section";
 import { tripToRowView } from "~/app/_lib/row";
 import { hasValidTripRange, parseTripFilters } from "~/app/_lib/trip-filters";
 import { datesInRange, todayInHelsinki } from "~/domain/dates";
 import { groupRegions } from "~/domain/regions";
+import { partitionEndingSoon } from "~/domain/trip";
 import { t } from "~/i18n/fi";
 import { formatWeekdayDate } from "~/i18n/format";
 import { SaveTripButton } from "~/app/trip/SaveTripButton";
@@ -59,6 +61,10 @@ export default async function TripPage({
     ),
   ].sort((a, b) => a.localeCompare(b, "fi"));
   const tripDays = range ? datesInRange(range.from, range.to, 31) : [];
+  const groups =
+    items && range
+      ? partitionEndingSoon(items, range.from, range.to, today)
+      : null;
 
   return (
     <>
@@ -200,13 +206,38 @@ export default async function TripPage({
               />
             )}
           </div>
-          <ExhibitionList
-            items={items.map((item) =>
-              tripToRowView(item, today, range.from, range.to),
-            )}
-            emptyMessage={t.pages.trip.empty}
-            signedIn={signedIn}
-          />
+          {groups && groups.endingSoon.length > 0 ? (
+            <>
+              <Section title={t.pages.trip.endingSoon}>
+                <ExhibitionList
+                  items={groups.endingSoon.map((item) =>
+                    tripToRowView(item, today, range.from, range.to, true),
+                  )}
+                  emptyMessage={t.pages.trip.empty}
+                  signedIn={signedIn}
+                />
+              </Section>
+              {groups.rest.length > 0 && (
+                <Section title={t.pages.trip.otherOpen}>
+                  <ExhibitionList
+                    items={groups.rest.map((item) =>
+                      tripToRowView(item, today, range.from, range.to, false),
+                    )}
+                    emptyMessage={t.pages.trip.empty}
+                    signedIn={signedIn}
+                  />
+                </Section>
+              )}
+            </>
+          ) : (
+            <ExhibitionList
+              items={items.map((item) =>
+                tripToRowView(item, today, range.from, range.to, false),
+              )}
+              emptyMessage={t.pages.trip.empty}
+              signedIn={signedIn}
+            />
+          )}
         </>
       )}
     </>
