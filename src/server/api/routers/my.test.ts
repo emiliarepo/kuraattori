@@ -28,6 +28,183 @@ afterEach(async () => {
 });
 
 describe("my.list", () => {
+  it("sorts interested exhibitions by closing, added, opening, and Finnish name", async () => {
+    await db.insert(schema.museums).values({
+      id: 1,
+      source: "test",
+      sourceId: "m1",
+      name: "Museo",
+      slug: "museo",
+    });
+    await db.insert(schema.exhibitions).values([
+      {
+        id: 1,
+        source: "test",
+        sourceId: "e1",
+        museumId: 1,
+        slug: "z",
+        titleFi: "Zeta",
+        startDate: "2026-01-01",
+        endDate: "2026-10-01",
+        sourcePayloadHash: "1",
+      },
+      {
+        id: 2,
+        source: "test",
+        sourceId: "e2",
+        museumId: 1,
+        slug: "a",
+        titleFi: "Åbo",
+        startDate: "2026-11-01",
+        endDate: "2026-12-01",
+        sourcePayloadHash: "2",
+      },
+      {
+        id: 3,
+        source: "test",
+        sourceId: "e3",
+        museumId: 1,
+        slug: "b",
+        titleFi: "Ääni",
+        startDate: "2026-10-01",
+        endDate: null,
+        sourcePayloadHash: "3",
+      },
+      {
+        id: 4,
+        source: "test",
+        sourceId: "e4",
+        museumId: 1,
+        slug: "c",
+        titleFi: "Öljy",
+        startDate: "2026-01-01",
+        endDate: "2026-09-01",
+        sourcePayloadHash: "4",
+      },
+      {
+        id: 5,
+        source: "test",
+        sourceId: "e5",
+        museumId: 1,
+        slug: "d",
+        titleFi: "Aalto",
+        startDate: "2026-10-01",
+        endDate: "2026-10-01",
+        sourcePayloadHash: "5",
+      },
+    ]);
+    await db.insert(schema.userExhibitions).values(
+      [1, 2, 3, 4, 5].map((exhibitionId) => ({
+        userId,
+        exhibitionId,
+        status: "interested" as const,
+        createdAt: new Date(`2026-08-0${exhibitionId}T12:00:00Z`),
+      })),
+    );
+    const list = (sort?: "ending" | "added" | "opening" | "name") =>
+      createCaller(ctx).my.list({ status: "interested", sort });
+    expect((await list()).map((item) => item.id)).toEqual([1, 5, 2, 3, 4]);
+    expect((await list("added")).map((item) => item.id)).toEqual([
+      5, 4, 3, 2, 1,
+    ]);
+    expect((await list("opening")).map((item) => item.id)).toEqual([
+      3, 5, 2, 1, 4,
+    ]);
+    expect((await list("name")).map((item) => item.id)).toEqual([
+      5, 1, 2, 3, 4,
+    ]);
+    await expect(
+      createCaller(ctx).my.list({
+        status: "interested",
+        sort: "visited-newest",
+      }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("sorts visits and hidden entries by status dates, with id ties", async () => {
+    await db.insert(schema.museums).values({
+      id: 1,
+      source: "test",
+      sourceId: "m1",
+      name: "Museo",
+      slug: "museo",
+    });
+    await db.insert(schema.exhibitions).values(
+      [1, 2, 3, 4, 5, 6].map((id) => ({
+        id,
+        source: "test",
+        sourceId: `e${id}`,
+        museumId: 1,
+        slug: `e${id}`,
+        titleFi:
+          id === 4 ? "Åbo" : id === 5 ? "Beta" : id === 6 ? "Aalto" : "Aalto",
+        startDate: "2026-01-01",
+        sourcePayloadHash: `${id}`,
+      })),
+    );
+    await db.insert(schema.userExhibitions).values([
+      {
+        userId,
+        exhibitionId: 1,
+        status: "visited",
+        visitedAt: new Date("2026-01-01T12:00:00Z"),
+      },
+      {
+        userId,
+        exhibitionId: 2,
+        status: "visited",
+        visitedAt: new Date("2026-02-01T12:00:00Z"),
+      },
+      {
+        userId,
+        exhibitionId: 3,
+        status: "visited",
+        visitedAt: new Date("2026-02-01T12:00:00Z"),
+      },
+      {
+        userId,
+        exhibitionId: 4,
+        status: "hidden",
+        createdAt: new Date("2026-03-01T12:00:00Z"),
+        updatedAt: new Date("2026-04-01T12:00:00Z"),
+      },
+      {
+        userId,
+        exhibitionId: 5,
+        status: "hidden",
+        createdAt: new Date("2026-05-01T12:00:00Z"),
+      },
+      {
+        userId,
+        exhibitionId: 6,
+        status: "hidden",
+        createdAt: new Date("2026-05-01T12:00:00Z"),
+      },
+    ]);
+    const caller = createCaller(ctx);
+    expect(
+      (await caller.my.list({ status: "visited" })).map((item) => item.id),
+    ).toEqual([2, 3, 1]);
+    expect(
+      (await caller.my.list({ status: "visited", sort: "visited-oldest" })).map(
+        (item) => item.id,
+      ),
+    ).toEqual([1, 2, 3]);
+    expect(
+      (await caller.my.list({ status: "visited", sort: "name" })).map(
+        (item) => item.id,
+      ),
+    ).toEqual([1, 2, 3]);
+    expect(
+      (await caller.my.list({ status: "hidden" })).map((item) => item.id),
+    ).toEqual([5, 6, 4]);
+    expect(
+      (await caller.my.list({ status: "hidden", sort: "name" })).map(
+        (item) => item.id,
+      ),
+    ).toEqual([6, 5, 4]);
+  });
+
   it("joins museum details onto the user's exhibitions for a status", async () => {
     await db.insert(schema.museums).values({
       id: 1,
