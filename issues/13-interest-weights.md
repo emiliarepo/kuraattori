@@ -1,5 +1,5 @@
 # 13 Interest weights
-Status: todo · Model: Sonnet 5 · Blocked by: 12
+Status: done · Model: Sonnet 5 · Blocked by: 12
 
 Three-level interests instead of on/off, stored in the existing `user_interests.weight` (no migration needed):
 

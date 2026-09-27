@@ -8,6 +8,7 @@ import {
   type InterestWeight,
 } from "~/app/_components/InterestControl";
 import { refreshHeaderData } from "~/app/_components/refresh-header-action";
+import { groupRegions } from "~/domain/regions";
 import { t } from "~/i18n/fi";
 import { api } from "~/trpc/react";
 
@@ -38,6 +39,7 @@ export function ProfileForm({
       ),
   );
   const [regions, setRegions] = useState<readonly string[]>(initialRegions);
+  const regionGroups = groupRegions(allRegions);
   const router = useRouter();
 
   const updateInterests = api.profile.updateInterests.useMutation();
@@ -104,21 +106,28 @@ export function ProfileForm({
         <h2 className="text-kicker border-rule border-t pt-3">
           {t.profile.regionsHeading}
         </h2>
-        <ul className="flex flex-col gap-2">
-          {allRegions.map((region) => (
-            <li key={region}>
-              <label className="flex items-center gap-2.5 text-lg">
-                <input
-                  type="checkbox"
-                  checked={regions.includes(region)}
-                  onChange={() => toggleRegion(region)}
-                  className="accent-signal h-4 w-4 flex-none"
-                />
-                {region}
-              </label>
-            </li>
+        {[regionGroups.cities, regionGroups.others]
+          .filter((group) => group.length > 0)
+          .map((group, index) => (
+            <ul
+              key={index}
+              className={`flex flex-col gap-2 ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
+            >
+              {group.map((region) => (
+                <li key={region}>
+                  <label className="flex items-center gap-2.5 text-lg">
+                    <input
+                      type="checkbox"
+                      checked={regions.includes(region)}
+                      onChange={() => toggleRegion(region)}
+                      className="accent-signal h-4 w-4 flex-none"
+                    />
+                    {region}
+                  </label>
+                </li>
+              ))}
+            </ul>
           ))}
-        </ul>
       </section>
 
       <form action={signOutAction}>
