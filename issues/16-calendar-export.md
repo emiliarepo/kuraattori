@@ -1,5 +1,5 @@
 # 16 Calendar export for interested exhibitions
-Status: todo · Model: GPT-6 Luna · Blocked by: 12
+Status: done
 
 Let users see end dates of their Kiinnostaa exhibitions in their own calendar.
 

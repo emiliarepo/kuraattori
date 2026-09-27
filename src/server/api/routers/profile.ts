@@ -2,9 +2,35 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { protectedProcedure, createTRPCRouter } from "~/server/api/trpc";
-import { userInterests, userRegions } from "~/server/db/schema";
+import { createCalendarToken } from "~/server/calendar";
+import { calendarFeeds, userInterests, userRegions } from "~/server/db/schema";
 
 export const profileRouter = createTRPCRouter({
+  getCalendarFeed: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    await ctx.db
+      .insert(calendarFeeds)
+      .values({ userId, token: createCalendarToken() })
+      .onConflictDoNothing();
+    const [feed] = await ctx.db
+      .select({ token: calendarFeeds.token })
+      .from(calendarFeeds)
+      .where(eq(calendarFeeds.userId, userId))
+      .limit(1);
+    return { token: feed!.token };
+  }),
+  rotateCalendarFeed: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const token = createCalendarToken();
+    await ctx.db
+      .insert(calendarFeeds)
+      .values({ userId, token })
+      .onConflictDoUpdate({
+        target: calendarFeeds.userId,
+        set: { token, createdAt: new Date() },
+      });
+    return { token };
+  }),
   get: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
     const [regions, interests] = await Promise.all([
