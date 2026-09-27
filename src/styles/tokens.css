@@ -8,6 +8,13 @@
   --signal: #9a3f14;
   --on-signal: #fdf9f2;
   --surface: #ece4d6;
+  --stamp-paper: #fbf7ee;
+  --stamp-postmark: #1f1a14;
+  --stamp-rust: #8f3a14;
+  --stamp-green: #2f5a45;
+  --stamp-blue: #2b4668;
+  --stamp-ochre: #7a5a12;
+  --stamp-plum: #653553;
 }
 
 @media (prefers-color-scheme: dark) {
