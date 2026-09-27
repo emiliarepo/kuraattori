@@ -1,5 +1,5 @@
 # 22 English and Swedish UI
-Status: todo · Model: Sonnet 5 · Blocked by: 13–21 (lowest priority, last)
+Status: todo · Model: Opus 5.5 (low effort) · Blocked by: 13–21 (lowest priority, last)
 
 Add `en` and `sv` alongside `fi`, with a language choice on `/profile`.
 

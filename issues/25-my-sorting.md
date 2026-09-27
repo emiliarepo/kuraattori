@@ -1,5 +1,5 @@
 # 25 Sorting on the Omat tabs
-Status: todo · Model: GPT-6 Luna · Blocked by: 23
+Status: todo · Model: GPT-6 Sol · Blocked by: 23
 
 Each Omat tab gets a small sort control (sans `text-kicker` label "Järjestys" + a native `<select>` in the Forms style, or a short row of text buttons; no pills). The choice lives in the URL (`?sort=…`) so it survives reload and back navigation (ticket 23), and the default needs no parameter.
 

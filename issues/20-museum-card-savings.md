@@ -1,5 +1,5 @@
 # 20 Museokortti savings tracker
-Status: todo · Model: Sonnet 5 · Blocked by: 14, 15
+Status: todo · Model: Opus 5.5 (low effort) · Blocked by: 14, 15
 
 Show how much the user has saved with the Museum Card: sum of adult admission prices of their visited exhibitions.
 
