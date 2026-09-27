@@ -318,7 +318,15 @@ export const t = {
         otherRegion: "Muu",
         share: "Jaa passi",
         shareTitle: "Museopassini",
-        shareFailed: "Kuvan luonti epäonnistui.",
+        shareFailed: "Jakaminen epäonnistui.",
+        shareCopied: "Kopioitu",
+        sharePreparing: "Valmistellaan…",
+        shareImageTotal: (total: number) => `/ ${total} museota`,
+        shareText: {
+          headline: (year: number, stamped: number, total: number) =>
+            `Museopassi ${year} 🏛️ ${stamped}/${total} museota`,
+          moreRegions: (count: number) => `+${count}`,
+        },
       },
       sortLabel: "Järjestys",
       sortOptions: {

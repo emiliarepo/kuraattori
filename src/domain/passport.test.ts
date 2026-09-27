@@ -4,13 +4,19 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildPassport,
+  LABEL_OVERRIDES,
+  LABEL_SIZES,
+  labelSize,
+  passportShareText,
   postmarkDate,
+  progressBar,
   STAMP_INKS,
   STAMP_PAPER,
   STAMP_POSTMARK,
   stampLabel,
   stampLook,
 } from "~/domain/passport";
+import { t } from "~/i18n/fi";
 
 function luminance(hex: string): number {
   const [r, g, b] = [1, 3, 5].map((index) => {
@@ -70,14 +76,19 @@ describe("stampLabel", () => {
     ["Kiasma", ["Kiasma"]],
     ["Museokeskus Vapriikki", ["Vapriikki"]],
     ["Ett Hem -museo", ["Ett Hem"]],
-    ["Malmin talo, Pietarsaaren museo", ["Malmin", "talo"]],
+    ["Malmin talo, Pietarsaaren museo", ["Malmin talo"]],
     ["Lusto - Suomen Metsämuseo", ["Lusto"]],
     ["Urheilun ja liikunnan kulttuurikeskus TAHTO", ["TAHTO"]],
     ["Sinebrychoffin taidemuseo", ["Sinebrychoffin", "taidemuseo"]],
     ["Sotamuseo Maneesi", ["Maneesi"]],
     ["Kuurojen museo", ["Kuurojen", "museo"]],
     ["Herttoniemen kartanon museo", ["Herttoniemen", "kartanon museo"]],
-    ["Kuntsin modernin taiteen museo", ["Kuntsin modernin", "taiteen museo"]],
+    ["Kuntsin modernin taiteen museo", ["Kuntsi"]],
+    ["Galleria K", ["Galleria K"]],
+    ["Apteekkimuseo ja Qwenselin talo", ["Qwenselin", "talo"]],
+    ["Lastentarhamuseo", ["Lastentarha-", "museo"]],
+    ["Nurmijärvi-Taiteen Museo", ["Nurmijärvi-", "Taiteen Museo"]],
+    ["Helsingin kaupunginmuseo", ["Helsingin", "kaupunginmuseo"]],
     ["Nykytaiteen museo Kiasma", ["Kiasma"]],
     ["LUOMUS Luonnontieteellinen museo", ["LUOMUS"]],
     ["Särestöniemi-museo", ["Särestöniemi"]],
@@ -85,6 +96,15 @@ describe("stampLabel", () => {
     ["Näyttelykeskus WeeGee", ["WeeGee"]],
   ])("%s", (name, expected) => {
     expect(stampLabel(name)).toEqual(expected);
+  });
+
+  it.each(Object.keys(LABEL_OVERRIDES))("override for %s fits", (name) => {
+    expect(stampLabel(name).join(" ")).toBe(LABEL_OVERRIDES[name]);
+  });
+
+  it("uses one of two sizes", () => {
+    expect(labelSize(["Kiasma"])).toBe(LABEL_SIZES.large);
+    expect(labelSize(["Kuurojen", "museo"])).toBe(LABEL_SIZES.small);
   });
 });
 
@@ -145,5 +165,56 @@ describe("buildPassport", () => {
     expect(passport.regions[1]!.unstamped.map((m) => m.name)).toEqual([
       "Vapriikki",
     ]);
+  });
+});
+
+describe("progressBar", () => {
+  it.each([
+    [0, 10, "▱▱▱▱▱"],
+    [1, 40, "▰▱▱▱▱"],
+    [5, 10, "▰▰▰▱▱"],
+    [10, 10, "▰▰▰▰▰"],
+  ])("%i of %i is %s", (stamped, total, bar) => {
+    expect(progressBar(stamped, total)).toBe(bar);
+  });
+});
+
+describe("passportShareText", () => {
+  const copy = t.pages.my.passport.shareText;
+  const museums = (region: string, count: number, from: number) =>
+    Array.from({ length: count }, (_, i) => ({
+      id: from + i,
+      name: `Museo ${from + i}`,
+      slug: `m${from + i}`,
+      city: null,
+      region,
+    }));
+  const visits = (ids: number[]) =>
+    new Map(ids.map((id) => [id, new Date("2026-06-01")]));
+  const all = [
+    ...museums("Pääkaupunkiseutu", 10, 1),
+    ...museums("Tampere", 5, 101),
+    ...museums("Turku", 5, 201),
+    ...museums("Lappi", 5, 301),
+    ...museums("Kainuu", 5, 401),
+  ];
+
+  it("leads with the count, then the regions with the most stamps", () => {
+    const passport = buildPassport(
+      all,
+      visits([1, 2, 101, 102, 103, 104, 105, 201, 301]),
+      "Muu",
+    );
+    expect(passportShareText(passport, 2026, copy)).toBe(
+      "Museopassi 2026 🏛️ 9/30 museota\n" +
+        "Tampere ▰▰▰▰▰ · Pääkaupunkiseutu ▰▱▱▱▱ · Turku ▰▱▱▱▱ · +1",
+    );
+  });
+
+  it("is only the headline for an empty passport", () => {
+    const passport = buildPassport(all, new Map(), "Muu");
+    expect(passportShareText(passport, 2026, copy)).toBe(
+      "Museopassi 2026 🏛️ 0/30 museota",
+    );
   });
 });

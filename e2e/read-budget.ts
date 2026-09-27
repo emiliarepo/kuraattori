@@ -8,7 +8,7 @@ const EXCEEDED_PATTERN = /\[d1-budget\] budget exceeded/;
  * server as `<epoch-ms> <line>` before appending it to `logPath`; this reads
  * only the lines written since `sinceMs`.
  */
-function linesSince(logPath: string, sinceMs: number): string[] {
+export function linesSince(logPath: string, sinceMs: number): string[] {
   let content: string;
   try {
     content = readFileSync(logPath, "utf-8");

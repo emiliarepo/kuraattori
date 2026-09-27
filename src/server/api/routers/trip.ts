@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, isNull, lte, or } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -10,7 +10,11 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { whereVisible, withDetails } from "~/server/api/routers/exhibition";
+import {
+  loadHiddenMatcher,
+  withDetails,
+} from "~/server/api/routers/exhibition";
+import { getActiveExhibitionPool } from "~/server/cache/active-pool";
 import {
   exhibitions,
   museums,
@@ -83,31 +87,35 @@ async function loadPreferences(
 }
 
 /**
- * Exhibitions open at some point during `[from, to]` at the given place
- * (a region or a city — resolved by matching either column). No relevance
- * filtering, unlike Sinulle: a trip should show everything that's open, only
- * ordered by relevance for a signed-in user, then by closing date.
+ * `list`: exhibitions open at some point during `[from, to]` at the given
+ * place (a region or a city — resolved by matching either column). No
+ * relevance filtering, unlike Sinulle: a trip should show everything that's
+ * open, only ordered by relevance for a signed-in user, then by closing date.
+ * Both `list` and `day` read the cached active pool, so exhibitions that
+ * ended before today are left out even when a range starts in the past.
  */
 export const tripRouter = createTRPCRouter({
   list: publicProcedure.input(listInput).query(async ({ ctx, input }) => {
     const userId = ctx.session?.user?.id ?? null;
-    const filters = [
-      eq(exhibitions.kind, "exhibition"),
-      whereVisible(userId),
-      lte(exhibitions.startDate, input.to),
-      or(isNull(exhibitions.endDate), gte(exhibitions.endDate, input.from)),
-    ];
-    if (input.place)
-      filters.push(
-        or(eq(museums.region, input.place), eq(museums.city, input.place)),
-      );
-
-    const rows = await ctx.db
-      .select({ exhibition: exhibitions, museum: museums })
-      .from(exhibitions)
-      .innerJoin(museums, eq(exhibitions.museumId, museums.id))
-      .where(and(...filters));
-    const items = await withDetails(ctx.db, rows, userId);
+    const [pool, isHidden] = await Promise.all([
+      getActiveExhibitionPool(ctx.db),
+      loadHiddenMatcher(ctx.db, userId),
+    ]);
+    const matches = pool.filter(
+      ({ exhibition, museum }) =>
+        !isHidden(exhibition) &&
+        exhibition.startDate <= input.to &&
+        (exhibition.endDate ?? "9999-12-31") >= input.from &&
+        (!input.place ||
+          museum.region === input.place ||
+          museum.city === input.place),
+    );
+    const items = await withDetails(
+      ctx.db,
+      matches,
+      userId,
+      new Map(matches.map((entry) => [entry.exhibition.id, entry.categoryIds])),
+    );
 
     const preferences = userId ? await loadPreferences(ctx.db, userId) : null;
     const today = todayInHelsinki();
@@ -146,22 +154,17 @@ export const tripRouter = createTRPCRouter({
     .input(z.object({ city: z.string().min(1), date: isoDate }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session?.user?.id ?? null;
-      const rows = await ctx.db
-        .select({ exhibition: exhibitions, museum: museums })
-        .from(exhibitions)
-        .innerJoin(museums, eq(exhibitions.museumId, museums.id))
-        .where(
-          and(
-            eq(exhibitions.kind, "exhibition"),
-            whereVisible(userId),
-            eq(museums.city, input.city),
-            lte(exhibitions.startDate, input.date),
-            or(
-              isNull(exhibitions.endDate),
-              gte(exhibitions.endDate, input.date),
-            ),
-          ),
-        );
+      const [pool, isHidden] = await Promise.all([
+        getActiveExhibitionPool(ctx.db),
+        loadHiddenMatcher(ctx.db, userId),
+      ]);
+      const rows = pool.filter(
+        ({ exhibition, museum }) =>
+          !isHidden(exhibition) &&
+          museum.city === input.city &&
+          exhibition.startDate <= input.date &&
+          (exhibition.endDate ?? "9999-12-31") >= input.date,
+      );
 
       const interested = userId
         ? await ctx.db

@@ -1,8 +1,9 @@
-import { and, eq, gte, inArray, isNull, or } from "drizzle-orm";
+import { and, eq, gte, inArray } from "drizzle-orm";
 
 import { todayInHelsinki } from "~/domain/dates";
 import { batchedByIds } from "~/server/api/batch";
 import { cached } from "~/server/cache/kv-cache";
+import { endDateOrFar } from "~/server/db/expressions";
 import { exhibitionCategories, exhibitions, museums } from "~/server/db/schema";
 import {
   deserializeExhibition,
@@ -26,12 +27,7 @@ async function loadActivePool(db: Db) {
     .select({ exhibition: exhibitions, museum: museums })
     .from(exhibitions)
     .innerJoin(museums, eq(exhibitions.museumId, museums.id))
-    .where(
-      and(
-        eq(exhibitions.kind, "exhibition"),
-        or(isNull(exhibitions.endDate), gte(exhibitions.endDate, today)),
-      ),
-    );
+    .where(and(eq(exhibitions.kind, "exhibition"), gte(endDateOrFar, today)));
   const categoryRows = await batchedByIds(
     rows.map((row) => row.exhibition.id),
     (batch) =>

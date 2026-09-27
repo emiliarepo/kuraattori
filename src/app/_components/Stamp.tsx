@@ -1,4 +1,4 @@
-import { type StampInk } from "~/domain/passport";
+import { labelSize, type StampInk } from "~/domain/passport";
 
 export const STAMP_WIDTH = 100;
 export const STAMP_HEIGHT = 125;
@@ -27,11 +27,6 @@ export interface StampProps {
 function holes(length: number) {
   const count = Math.round(length / HOLE_GAP);
   return Array.from({ length: count + 1 }, (_, i) => (i * length) / count);
-}
-
-export function labelSize(label: string[]) {
-  const longest = Math.max(...label.map((line) => line.length));
-  return Math.min(label.length > 1 ? 14 : 18, 138 / Math.max(longest, 1));
 }
 
 export function Stamp({ id, label, city, year, ink, postmark }: StampProps) {
@@ -179,7 +174,7 @@ export function Stamp({ id, label, city, year, ink, postmark }: StampProps) {
 }
 
 export function EmptyStamp({ label }: { label: string[] }) {
-  const size = labelSize(label) * 0.8;
+  const size = labelSize(label);
   return (
     <svg
       viewBox={`0 0 ${STAMP_WIDTH} ${STAMP_HEIGHT}`}
