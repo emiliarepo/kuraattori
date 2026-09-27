@@ -13,8 +13,7 @@ without touching D1 or the Worker.
   database (`wrangler d1 migrations apply DB --remote`), then
   `pnpm run deploy`. A `concurrency` group (`deploy`, no cancel-in-progress)
   serializes runs so a migration and a deploy never overlap with each other.
-- `.github/workflows/ci.yml`: on pull request, runs the same
-  install/typecheck/lint/test steps with no D1 or deploy step.
+- A pull-request-only `ci.yml` was added and later removed (27.9.2026): work is merged locally, so it never ran; `deploy.yml` runs the same checks.
 - `import.yml` gained the same `deploy` concurrency group so the nightly
   museot.fi import can't run while a migration is in flight (and vice versa).
 - `next lint` and the OpenNext `next build` step both eagerly validate
