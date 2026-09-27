@@ -7,6 +7,8 @@ import { ImageFallback } from "~/app/_components/ImageFallback";
 import { LeadStory } from "~/app/_components/LeadStory";
 import { Rail } from "~/app/_components/Rail";
 import { Section } from "~/app/_components/Section";
+import { EmptyStamp, Stamp } from "~/app/_components/Stamp";
+import { postmarkDate, stampLabel, stampLook } from "~/domain/passport";
 import { StatusActionsDemo } from "~/app/dev/components/StatusActionsDemo";
 import { type TimeBarProps } from "~/app/_components/TimeBar";
 import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
@@ -215,6 +217,21 @@ const EXHIBITIONS: {
   },
 ];
 
+const STAMP_MUSEUMS = [
+  { id: 11, name: "Kiasma", city: "Helsinki" },
+  { id: 12, name: "Museokeskus Vapriikki", city: "Tampere" },
+  { id: 13, name: "Ett Hem -museo", city: "Turku" },
+  { id: 14, name: "Lusto - Suomen Metsämuseo", city: "Savonlinna" },
+  { id: 15, name: "Sinebrychoffin taidemuseo", city: "Helsinki" },
+  {
+    id: 16,
+    name: "Urheilun ja liikunnan kulttuurikeskus TAHTO",
+    city: "Helsinki",
+  },
+  { id: 17, name: "Malmin talo, Pietarsaaren museo", city: "Pietarsaari" },
+  { id: 18, name: "Museo-Galleria Alariesto", city: "Sodankylä" },
+];
+
 const LEAD = EXHIBITIONS[2]!;
 const ENDING_SOON = [EXHIBITIONS[0]!, EXHIBITIONS[1]!];
 
@@ -291,6 +308,33 @@ export default function ComponentLibraryPage() {
           };
         })}
       />
+
+      <Section title="Stamp (Museopassi)">
+        <div className="bg-surface grid grid-cols-3 gap-x-4 gap-y-6 p-4 sm:grid-cols-4 lg:grid-cols-8">
+          {STAMP_MUSEUMS.map((museum) => {
+            const look = stampLook(museum.id);
+            return (
+              <div
+                key={museum.id}
+                style={{ transform: `rotate(${look.rotation}deg)` }}
+              >
+                <Stamp
+                  id={museum.id}
+                  label={stampLabel(museum.name)}
+                  city={museum.city}
+                  year={2026}
+                  ink={look.ink}
+                  postmark={{
+                    date: postmarkDate(TODAY),
+                    rotation: look.postmarkRotation,
+                  }}
+                />
+              </div>
+            );
+          })}
+          <EmptyStamp label={stampLabel("Museokeskus Vapriikki")} />
+        </div>
+      </Section>
 
       <Section title="UrgencyLabel">
         <div className="flex flex-wrap gap-2">
