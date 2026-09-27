@@ -274,6 +274,23 @@ export const t = {
       interested: "Kiinnostavat",
       visited: "Käydyt",
       hidden: "Piilotetut",
+      passport: {
+        tab: "Museopassi",
+        summary: (stamped: number, total: number) =>
+          `${stamped} / ${total} museota`,
+        regionCount: (stamped: number, total: number) =>
+          `${stamped} / ${total}`,
+        regions: "Alueittain",
+        empty:
+          "Passisi on vielä tyhjä. Merkitse näyttely käydyksi, niin museo saa leiman.",
+        unstamped: (count: number) => `Vielä leimaamatta (${count})`,
+        stampName: (museum: string, city: string | null, date: string) =>
+          `Museopassi-leima: ${museum}${city ? `, ${city}` : ""}, käyty ${date}`,
+        otherRegion: "Muu",
+        share: "Jaa passi",
+        shareTitle: "Museopassini",
+        shareFailed: "Kuvan luonti epäonnistui.",
+      },
       sortLabel: "Järjestys",
       sortOptions: {
         ending: "Päättyy ensin",

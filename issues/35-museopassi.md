@@ -1,5 +1,5 @@
 # 35 Museopassi (museum passport with postage-stamp design)
-Status: todo · Model: Opus 5.5 (low effort) · Blocked by: 30
+Status: done · Model: Opus 5.5 (low effort) · Blocked by: 30
 
 A collection view of the museums the user has visited, designed as a sheet of **postage stamps** in a passport. The stamp design is the point of this ticket: get it right.
 
@@ -17,3 +17,18 @@ A collection view of the museums the user has visited, designed as a sheet of **
 - Tests: stamp colour/rotation determinism, counts; visual check at 390/1280 px in light and dark with 0, 1, 12 and 60 stamps.
 
 **Design:** follow `docs/design.md`; add a "Stamp" entry describing the final stamp spec.
+
+## Stamp prototype: three variants, "line" chosen
+
+Prototyped on `/dev/components` with eight real museums, rendered at 1280 px on the album background:
+
+- **Engraved:** an ink panel filling the frame, with the label, year and city reversed out in paper colour.
+- **Line:** paper face with a double ink frame and an ink band for the city; the label and year are printed in ink.
+- **Initial:** like engraved, plus a large faint italic initial behind a bottom-left label.
+
+**Chosen: line.** On the two panel variants the postmark, in dark ink at partial opacity, sank into the ink panel and was barely visible at mobile size. That undoes the whole "franked stamp" idea. On line, the postmark sits on paper and reads the way a real cancellation does, and the white margin inside the perforation stays generous. The label is ink on paper, which clears AA with room to spare for all five inks. Initial also crowded its label into the postmark's corner, and on a 60-stamp sheet the watermark letters read as noise.
+
+Found during the build:
+
+- Initials make poor labels ("Nykytaiteen museo Kiasma" → "NK"). `stampLabel()` now prefers the proper name after a generic word ("Kiasma"), then an acronym ("HAM", "LUOMUS"), then the name wrapped onto two lines, then its first word. It was checked against all 249 local museums.
+- The postmark uses a fixed near-black ink (`--stamp-postmark`, the light-mode `--fg`) rather than `--fg`. In dark mode `--fg` is cream, which would vanish on the stamp paper, and the ticket asks for stamps that don't invert.

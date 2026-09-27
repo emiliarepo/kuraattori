@@ -1,4 +1,4 @@
-import { and, count, eq, gte, lte } from "drizzle-orm";
+import { and, count, eq, gte, lte, min, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -144,6 +144,31 @@ export const myRouter = createTRPCRouter({
       return order || a.id - b.id;
     });
     return sorted;
+  }),
+  /** First visit per museum: the Museopassi stamps. */
+  stamps: protectedProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db
+      .select({
+        museumId: exhibitions.museumId,
+        firstVisitedAt: min(
+          sql<number>`coalesce(${userExhibitions.visitedAt}, ${userExhibitions.updatedAt}, ${userExhibitions.createdAt})`,
+        ),
+      })
+      .from(userExhibitions)
+      .innerJoin(exhibitions, eq(exhibitions.id, userExhibitions.exhibitionId))
+      .where(
+        and(
+          eq(userExhibitions.userId, ctx.session.user.id),
+          eq(userExhibitions.status, "visited"),
+        ),
+      )
+      .groupBy(exhibitions.museumId);
+    return new Map(
+      rows.map((row) => [
+        row.museumId,
+        new Date(Number(row.firstVisitedAt) * 1000),
+      ]),
+    );
   }),
   /** Drives the Omat tab dot: interested exhibitions ending within a week. */
   endingSoonCount: protectedProcedure.query(async ({ ctx }) => {
