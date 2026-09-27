@@ -211,6 +211,12 @@ export const exhibitions = createTable(
     index("exhibition_museum_idx").on(t.museumId),
     index("exhibition_dates_idx").on(t.startDate, t.endDate),
     index("exhibition_group_idx").on(t.exhibitionGroup),
+    index("exhibition_kind_end_idx").on(
+      t.kind,
+      sql`coalesce(${t.endDate}, '9999-12-31')`,
+      t.id,
+    ),
+    index("exhibition_kind_start_idx").on(t.kind, t.startDate),
   ],
 );
 

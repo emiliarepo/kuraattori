@@ -86,4 +86,45 @@ describe("meta API", () => {
 
     expect(await createCaller(ctx).meta.hasIneligibleExhibitions()).toBe(true);
   });
+
+  it("lists one sitemap URL per exhibition group, leaving out long-ended ones", async () => {
+    await db.insert(schema.museums).values({
+      id: 1,
+      source: "test",
+      sourceId: "m1",
+      name: "Ateneum",
+      slug: "ateneum",
+    });
+    const exhibition = (
+      id: number,
+      slug: string,
+      extra: Partial<typeof schema.exhibitions.$inferInsert> = {},
+    ) => ({
+      id,
+      source: "test",
+      sourceId: slug,
+      museumId: 1,
+      slug,
+      titleFi: slug,
+      startDate: "2026-01-01",
+      sourcePayloadHash: slug,
+      ...extra,
+    });
+    await db
+      .insert(schema.exhibitions)
+      .values([
+        exhibition(3, "group-second", { exhibitionGroup: "g" }),
+        exhibition(2, "group-first", { exhibitionGroup: "g" }),
+        exhibition(4, "solo"),
+        exhibition(6, "long-ended", { endDate: "2020-01-31" }),
+        exhibition(5, "notice", { kind: "notice" }),
+      ]);
+
+    const entries = await createCaller(ctx).meta.sitemapEntries();
+    expect(entries.exhibitions.map((entry) => entry.slug)).toEqual([
+      "group-first",
+      "solo",
+    ]);
+    expect(entries.museums.map((entry) => entry.slug)).toEqual(["ateneum"]);
+  });
 });
