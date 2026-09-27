@@ -42,7 +42,7 @@ test("in English, a translated exhibition shows its English description", async 
   assertPageClean,
 }) => {
   await useLocaleCookie(context, "en");
-  await page.goto("/");
+  await page.goto("/feed");
   await page
     .getByRole("link", { name: /Oliver Beer/ })
     .first()

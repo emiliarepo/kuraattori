@@ -6,7 +6,7 @@ test("falls back to the archived copy when museot.fi images fail", async ({
   await page.route(/museot\.fi\/.*\.(jpe?g|png|webp|gif)/i, (route) =>
     route.abort(),
   );
-  await page.goto("/");
+  await page.goto("/feed");
   const archived = page.waitForResponse((response) =>
     new URL(response.url()).pathname.startsWith("/img/"),
   );

@@ -1,11 +1,11 @@
 import { expect, test } from "./fixtures";
 import { t } from "../src/i18n/fi";
 
-test("anonymous home links to the capital region's Sunday edition", async ({
+test("the anonymous feed links to the capital region's Sunday edition", async ({
   page,
   assertPageClean,
 }) => {
-  await page.goto("/");
+  await page.goto("/feed");
   await page.getByRole("link", { name: t.pages.home.thisWeeksEdition }).click();
 
   await expect(page).toHaveURL(

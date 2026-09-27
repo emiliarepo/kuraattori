@@ -1,8 +1,8 @@
 import { expect, test } from "./fixtures";
 import { t } from "../src/i18n/fi";
 
-test("anonymous home renders every rail", async ({ page, assertPageClean }) => {
-  await page.goto("/");
+test("anonymous feed renders every rail", async ({ page, assertPageClean }) => {
+  await page.goto("/feed");
 
   await expect(page.getByText(t.pages.signIn.home)).toBeVisible();
 

@@ -9,6 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: new URL("/", siteUrl).toString() },
+    { url: new URL("/feed", siteUrl).toString() },
     { url: new URL("/exhibitions", siteUrl).toString() },
     { url: new URL("/museums", siteUrl).toString() },
     { url: new URL("/terms", siteUrl).toString() },

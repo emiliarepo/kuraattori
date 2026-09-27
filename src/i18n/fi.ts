@@ -472,6 +472,49 @@ export const t = {
       day: "Suunnittele museopäivä: valitse näyttelyt ja saat kävelyreitin.",
     },
   },
+  landing: {
+    metaTitle: "Kuraattori · Suomen museoiden näyttelyt",
+    metaDescription:
+      "Suomen museoiden näyttelyt yhdessä paikassa: mitä on auki, milloin se päättyy ja mikä sopii juuri sinulle.",
+    pitch:
+      "Suomen museoiden näyttelyt yhdessä paikassa. Näet mitä on auki ja milloin se päättyy.",
+    browse: "Selaa näyttelyitä",
+    signIn: "Kirjaudu Googlella",
+    coverStory: "Kansijuttu",
+    endingSoon: "Päättyy pian",
+    fresh: "Uudet",
+    personal: {
+      kicker: "Kirjautuneena",
+      title: "Oma kuraattorisi",
+    },
+    forYou: {
+      kicker: "Sinulle",
+      title: "Poiminnat, joissa lukee miksi.",
+      body: "Painota aiheita, niin poiminnat kertovat syynsä. Käynnin jälkeinen 👍 tai 👎 tarkentaa seuraavia.",
+      weights: "Kiinnostukset",
+      rating: "Kävitkö? Kerro, osuiko.",
+    },
+    reminders: {
+      kicker: "Muistutukset",
+      title: "Ei enää viime päivän ryntäystä.",
+      body: "Tallenna näyttely, niin saat ilmoituksen viikkoa ennen kuin se päättyy. Päättymispäivät tulevat myös kalenteriisi.",
+      now: "nyt",
+      calendar: "Kalenteri",
+    },
+    passport: {
+      kicker: "Museopassi",
+      title: "Leima jokaisesta museosta.",
+      body: "Merkitse käynti, niin saat museon leiman. Kun passi täyttyy, jaa se.",
+      share: "Jaettava teksti",
+    },
+    more: {
+      title: "Lisäksi",
+      trip: "Matkalla: mitä on auki toisessa kaupungissa matkasi aikana.",
+      day: "Museopäivä: valitse näyttelyt ja saat kävelyreitin.",
+      nearby: "Avoinna nyt lähelläsi: museot kävelymatkan päässä.",
+    },
+    end: "Aloita selaamalla. Kirjautua voi myöhemmin.",
+  },
   notifications: {
     calendarEnds: (title: string) => `Päättyy: ${title}`,
     endsInWeek: "Päättyy viikon päästä",

@@ -15,5 +15,5 @@ test("user menu closes after following its profile link", async ({ page }) => {
   await expect(page.locator("header").getByRole("dialog")).toHaveCount(0);
 
   await page.getByRole("link", { name: t.ui.nav.home }).first().click();
-  await page.waitForURL((url) => url.pathname === "/");
+  await page.waitForURL((url) => url.pathname === "/feed");
 });

@@ -12,7 +12,8 @@ const VIEWPORTS = [
 /**
  * Reports text that the layout cuts off without an ellipsis, leaf text boxes
  * that overlap a sibling's, and page-level horizontal overflow. Deliberate
- * truncation (`text-overflow: ellipsis`, line clamps) is not a finding.
+ * truncation (`text-overflow: ellipsis`, line clamps) is not a finding, and
+ * neither is SVG text (the Stamp), which is placed explicitly, not laid out.
  */
 async function layoutFindings(page: Page): Promise<string[]> {
   return page.evaluate(() => {
@@ -30,6 +31,7 @@ async function layoutFindings(page: Page): Promise<string[]> {
       ...document.querySelectorAll<HTMLElement>("main *, footer *"),
     ].filter((element) => {
       if (element.getClientRects().length === 0) return false;
+      if (element.closest("svg")) return false;
       return [...element.childNodes].some(
         (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
       );
@@ -104,6 +106,7 @@ for (const viewport of VIEWPORTS) {
     const year = new Date().getFullYear();
     const paths = [
       "/",
+      "/feed",
       "/exhibitions",
       detailHref!,
       "/my/visited",
@@ -119,6 +122,15 @@ for (const viewport of VIEWPORTS) {
       await page.waitForLoadState("networkidle");
       findings.push(
         ...(await layoutFindings(page)).map((f) => `${path}: ${f}`),
+      );
+    }
+
+    await page.context().clearCookies();
+    for (const path of ["/", "/feed"]) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      findings.push(
+        ...(await layoutFindings(page)).map((f) => `anonymous ${path}: ${f}`),
       );
     }
     expect(findings).toEqual([]);

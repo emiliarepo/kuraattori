@@ -11,7 +11,7 @@ test("list links prefetch on intent, not on sight", async ({ page }) => {
       prefetched.push(url.pathname);
   });
 
-  await page.goto("/");
+  await page.goto("/feed");
   await page.waitForLoadState("networkidle");
   expect(prefetched).toEqual([]);
 

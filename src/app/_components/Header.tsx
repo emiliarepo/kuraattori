@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 
 import { DesktopNav } from "~/app/_components/DesktopNav";
+import { MastheadTitle } from "~/app/_components/MastheadTitle";
 import { RegionSelector } from "~/app/_components/RegionSelector";
 import { UserMenu } from "~/app/_components/UserMenu";
 import { formatWeekdayDate } from "~/app/_lib/exhibition-format";
@@ -30,12 +31,7 @@ export async function Header({
     <header className="mx-auto max-w-5xl px-4 sm:px-6">
       <div className="grid grid-cols-[1fr_auto_1fr] items-center pt-4 pb-2 sm:pt-7 sm:pb-3">
         <span />
-        <Link
-          href="/"
-          className="font-serif text-[2rem] leading-none tracking-tight italic sm:text-5xl"
-        >
-          {t.app.name}
-        </Link>
+        <MastheadTitle name={t.app.name} signedIn={!!session?.user} />
         <div className="justify-self-end font-sans text-[0.8125rem]">
           {session?.user ? (
             <div className="hidden sm:block">

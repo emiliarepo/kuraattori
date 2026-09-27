@@ -469,6 +469,49 @@ export const t = {
       day: "Plan a museum day: choose exhibitions and get a walking route.",
     },
   },
+  landing: {
+    metaTitle: "Kuraattori · Exhibitions in Finnish museums",
+    metaDescription:
+      "Exhibitions in Finnish museums in one place: what is on, when it closes and what suits you.",
+    pitch:
+      "Exhibitions in Finnish museums in one place. See what is on and when it closes.",
+    browse: "Browse exhibitions",
+    signIn: "Sign in with Google",
+    coverStory: "Cover story",
+    endingSoon: "Closing soon",
+    fresh: "New",
+    personal: {
+      kicker: "Signed in",
+      title: "Your own curator",
+    },
+    forYou: {
+      kicker: "For you",
+      title: "Picks that say why.",
+      body: "Weight the topics you like and every pick shows its reason. A 👍 or 👎 after a visit sharpens the next ones.",
+      weights: "Interests",
+      rating: "Been there? Say if it hit.",
+    },
+    reminders: {
+      kicker: "Reminders",
+      title: "No more last-day rush.",
+      body: "Save an exhibition and get a notification a week before it closes. Closing dates go to your calendar too.",
+      now: "now",
+      calendar: "Calendar",
+    },
+    passport: {
+      kicker: "Museum passport",
+      title: "A stamp from every museum.",
+      body: "Mark a visit and get the museum's stamp. Share the passport as it fills up.",
+      share: "Share text",
+    },
+    more: {
+      title: "Also",
+      trip: "Travelling: what is open in another city during your trip.",
+      day: "Museum day: pick exhibitions and get a walking route.",
+      nearby: "Open near you: museums within walking distance right now.",
+    },
+    end: "Start by browsing. You can sign in later.",
+  },
   notifications: {
     calendarEnds: (title: string) => `Closes: ${title}`,
     endsInWeek: "Closes in a week",

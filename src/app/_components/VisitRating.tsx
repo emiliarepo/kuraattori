@@ -59,30 +59,7 @@ export function VisitRating({
 
   return (
     <div className="flex items-center gap-3 font-sans text-sm">
-      <div
-        role="group"
-        aria-label={t.ui.rating.group}
-        className="border-rule flex border"
-      >
-        {options(t).map(({ value, glyph, label }, index) => {
-          const pressed = rating === value;
-          return (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={pressed}
-              aria-label={label}
-              title={label}
-              onClick={() => handleClick(value)}
-              className={`border-rule flex h-11 w-11 items-center justify-center text-lg transition-colors duration-150 ${
-                index > 0 ? "border-l" : ""
-              } ${pressed ? "bg-signal" : "hover:bg-surface"}`}
-            >
-              <span aria-hidden>{glyph}</span>
-            </button>
-          );
-        })}
-      </div>
+      <RatingButtons rating={rating} onChoose={handleClick} />
       {mutation.isPending ? (
         <span className="text-muted">{t.ui.updating}</span>
       ) : (
@@ -91,6 +68,42 @@ export function VisitRating({
       <p aria-live="polite" className="sr-only">
         {announcement}
       </p>
+    </div>
+  );
+}
+
+export function RatingButtons({
+  rating,
+  onChoose,
+}: {
+  rating: Rating | null;
+  onChoose: (value: Rating) => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <div
+      role="group"
+      aria-label={t.ui.rating.group}
+      className="border-rule flex border"
+    >
+      {options(t).map(({ value, glyph, label }, index) => {
+        const pressed = rating === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={pressed}
+            aria-label={label}
+            title={label}
+            onClick={() => onChoose(value)}
+            className={`border-rule flex h-11 w-11 items-center justify-center text-lg transition-colors duration-150 ${
+              index > 0 ? "border-l" : ""
+            } ${pressed ? "bg-signal" : "hover:bg-surface"}`}
+          >
+            <span aria-hidden>{glyph}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -470,6 +470,49 @@ export const t = {
       day: "Planera en museidag: välj utställningar och få en promenadrutt.",
     },
   },
+  landing: {
+    metaTitle: "Kuraattori · Utställningar i Finlands museer",
+    metaDescription:
+      "Utställningar i Finlands museer på ett ställe: vad som visas, när det slutar och vad som passar dig.",
+    pitch:
+      "Utställningar i Finlands museer på ett ställe. Se vad som visas och när det slutar.",
+    browse: "Bläddra bland utställningar",
+    signIn: "Logga in med Google",
+    coverStory: "Omslagsartikel",
+    endingSoon: "Slutar snart",
+    fresh: "Nya",
+    personal: {
+      kicker: "Inloggad",
+      title: "Din egen kurator",
+    },
+    forYou: {
+      kicker: "För dig",
+      title: "Tips som säger varför.",
+      body: "Vikta ämnen du gillar så visar varje tips sitt skäl. En 👍 eller 👎 efter besöket skärper nästa.",
+      weights: "Intressen",
+      rating: "Varit där? Säg om det träffade.",
+    },
+    reminders: {
+      kicker: "Påminnelser",
+      title: "Ingen rusning sista dagen.",
+      body: "Spara en utställning och få en avisering en vecka innan den slutar. Slutdatumen hamnar också i din kalender.",
+      now: "nu",
+      calendar: "Kalender",
+    },
+    passport: {
+      kicker: "Museipass",
+      title: "En stämpel från varje museum.",
+      body: "Markera ett besök och få museets stämpel. Dela passet när det fylls.",
+      share: "Delningstext",
+    },
+    more: {
+      title: "Dessutom",
+      trip: "På resa: vad som är öppet i en annan stad under resan.",
+      day: "Museidag: välj utställningar och få en promenadrutt.",
+      nearby: "Öppet nära dig: museer på gångavstånd just nu.",
+    },
+    end: "Börja med att bläddra. Du kan logga in senare.",
+  },
   notifications: {
     calendarEnds: (title: string) => `Slutar: ${title}`,
     endsInWeek: "Slutar om en vecka",

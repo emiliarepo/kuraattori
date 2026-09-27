@@ -21,6 +21,7 @@ const SCHEMES = ["light", "dark"] as const;
 
 const SIGNED_OUT = [
   "/",
+  "/feed",
   "/exhibitions",
   "/museums",
   "/edition/paakaupunkiseutu",
@@ -33,6 +34,7 @@ const SIGNED_OUT = [
 ];
 const SIGNED_IN = [
   "/",
+  "/feed",
   "/my/interested",
   "/my/visited",
   "/my/passport",

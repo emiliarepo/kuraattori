@@ -10,6 +10,7 @@ test.beforeEach(async ({ page }) => {
 
 const PAGES: Record<string, string> = {
   home: "/",
+  feed: "/feed",
   exhibitions: "/exhibitions",
   "exhibition-detail": "/exhibitions/oliver-beer-resonance-project-the-cave",
   museum: "/museums/nykytaiteen-museo-kiasma",
@@ -52,8 +53,13 @@ test("region selector open", async ({ page }) => {
 test.describe("signed out", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test("home", async ({ page }) => {
+  test("landing", async ({ page }) => {
     await open(page, "/");
+    await capture(page, "landing");
+  });
+
+  test("feed", async ({ page }) => {
+    await open(page, "/feed");
     await capture(page, "home-signed-out");
   });
 });

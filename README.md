@@ -6,9 +6,10 @@ Live at **https://kuraattori.emiliarepo.dev**.
 
 ## Features
 
-- **Home:** a daily lead pick, then rails for exhibitions closing soon, recommendations ("Sinulle"), new openings, upcoming ones and followed museums.
+- **Landing page:** anonymous visitors at `/` get a magazine-cover front page that shows the personal features (Sinulle, reminders, Museopassi) with the real components. Everyone can go straight to the feed at `/feed`.
+- **Home (`/feed`, and `/` when signed in):** a daily lead pick, then rails for exhibitions closing soon, recommendations ("Sinulle"), new openings, upcoming ones and followed museums.
 - **Browse:** filters by region, city, museum, category and dates, with results and paging kept in the URL.
-- **Personal state:** mark exhibitions *Kiinnostaa*, *Käyty* or *Piilota*, add a visit date, a private note and a 👍/👎 rating, and sort the Omat lists.
+- **Personal state:** mark exhibitions _Kiinnostaa_, _Käyty_ or _Piilota_, add a visit date, a private note and a 👍/👎 rating, and sort the Omat lists.
 - **Museopassi:** a stamp for every museum you have visited, grouped by region, shareable as an image with a short text.
 - **Explainable recommendations:** a deterministic score from weighted interests (Kiinnostaa, Erityisesti, Ei kiinnosta), preferred regions and followed museums. Closing dates only break ties; they never push an unrelated exhibition to the top. Every recommendation shows its reasons.
 - **Matkalla:** what is open in a given place over a date range, a museum day planner that orders the chosen exhibitions into a walking route (map link and `.ics`), and saved trips.
@@ -77,16 +78,16 @@ In development, `/sign-in` offers a "Kirjaudu kehityskäyttäjänä" form, so yo
 
 ### Useful scripts
 
-| Command | What it does |
-|---|---|
-| `pnpm test` | Vitest unit and integration tests (routers run against the real migrations) |
-| `pnpm test:e2e` | builds the Worker, seeds a local D1 from `fixtures/` without network access, runs Playwright; run `pnpm exec playwright install chromium` once first |
-| `pnpm test:visual` | screenshot comparison of the key pages at 390 and 1280 px, light and dark, inside the pinned Playwright Docker image (see below) |
-| `pnpm test:visual:update` | the same run with `--update-snapshots`, rewriting the baselines |
-| `pnpm typecheck` / `pnpm lint` / `pnpm format:check` | static checks |
-| `pnpm db:generate` | generate a migration from `src/server/db/schema.ts` |
-| `pnpm cf-typegen` | regenerate `cloudflare-env.d.ts` from `wrangler.jsonc` (runs on install) |
-| `pnpm preview` / `pnpm deploy` | build and run, or deploy, the Worker |
+| Command                                              | What it does                                                                                                                                         |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm test`                                          | Vitest unit and integration tests (routers run against the real migrations)                                                                          |
+| `pnpm test:e2e`                                      | builds the Worker, seeds a local D1 from `fixtures/` without network access, runs Playwright; run `pnpm exec playwright install chromium` once first |
+| `pnpm test:visual`                                   | screenshot comparison of the key pages at 390 and 1280 px, light and dark, inside the pinned Playwright Docker image (see below)                     |
+| `pnpm test:visual:update`                            | the same run with `--update-snapshots`, rewriting the baselines                                                                                      |
+| `pnpm typecheck` / `pnpm lint` / `pnpm format:check` | static checks                                                                                                                                        |
+| `pnpm db:generate`                                   | generate a migration from `src/server/db/schema.ts`                                                                                                  |
+| `pnpm cf-typegen`                                    | regenerate `cloudflare-env.d.ts` from `wrangler.jsonc` (runs on install)                                                                             |
+| `pnpm preview` / `pnpm deploy`                       | build and run, or deploy, the Worker                                                                                                                 |
 
 ### Visual regression
 
@@ -123,16 +124,16 @@ Server errors are logged with context (route, tRPC procedure, D1 error code) to 
 
 Cloudflare has no hard spending cap on the Workers paid plan, so `health.yml` also bounds the worst case: every 30 minutes, [`scripts/check-usage-budgets.mjs`](scripts/check-usage-budgets.mjs) reads today's usage (since 00:00 UTC) from the Cloudflare GraphQL Analytics API and compares it against a daily budget per metric, each a repository variable so it can be changed without a deploy:
 
-| Repository variable | Metric |
-|---|---|
-| `BUDGET_WORKER_REQUESTS` | Worker requests |
-| `BUDGET_WORKER_CPU_MS` | Worker CPU time (ms; requests × median CPU time per request — the Analytics API has no daily-total field) |
-| `BUDGET_D1_ROWS_READ` | D1 rows read |
-| `BUDGET_D1_ROWS_WRITTEN` | D1 rows written |
-| `BUDGET_KV_READS` | KV read operations |
-| `BUDGET_KV_WRITES` | KV write operations |
-| `BUDGET_R2_CLASS_A` | R2 Class A (write-like) operations |
-| `BUDGET_R2_CLASS_B` | R2 Class B (read-like) operations |
+| Repository variable      | Metric                                                                                                    |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `BUDGET_WORKER_REQUESTS` | Worker requests                                                                                           |
+| `BUDGET_WORKER_CPU_MS`   | Worker CPU time (ms; requests × median CPU time per request — the Analytics API has no daily-total field) |
+| `BUDGET_D1_ROWS_READ`    | D1 rows read                                                                                              |
+| `BUDGET_D1_ROWS_WRITTEN` | D1 rows written                                                                                           |
+| `BUDGET_KV_READS`        | KV read operations                                                                                        |
+| `BUDGET_KV_WRITES`       | KV write operations                                                                                       |
+| `BUDGET_R2_CLASS_A`      | R2 Class A (write-like) operations                                                                        |
+| `BUDGET_R2_CLASS_B`      | R2 Class B (read-like) operations                                                                         |
 
 The job summary shows usage vs. budget for every metric on every run. If any metric is over budget, the script writes a `maintenance` key to the `CACHE` KV namespace (reason plus an expiry at the next 00:00 UTC) and fails the run, which makes GitHub email the repository owner. [`src/middleware.ts`](src/middleware.ts) checks that key on every request — one KV read, cached in the isolate for 60 seconds so the check itself can't become the cost problem it's guarding against — and while it's set, every route (including `/api/auth/*` and the calendar feed) returns the Finnish maintenance page with HTTP 503 and `Retry-After`, without touching D1, R2 or any other binding. Static assets are served by Cloudflare directly and are unaffected. The flag expires on its own at the recorded time; for manual control (e.g. planned maintenance), run `pnpm exec tsx scripts/maintenance.ts on "<reason>"` or `... off` with `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` set.
 

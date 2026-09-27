@@ -7,7 +7,7 @@ test("exhibition detail page shows a TimeBar and similar exhibitions", async ({
   page,
   assertPageClean,
 }) => {
-  await page.goto("/");
+  await page.goto("/feed");
   await page
     .getByRole("link", { name: /Oliver Beer/ })
     .first()

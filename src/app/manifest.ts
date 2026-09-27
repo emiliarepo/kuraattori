@@ -5,6 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Kuraattori",
     short_name: "Kuraattori",
     lang: "fi",
+    start_url: "/feed",
     display: "standalone",
     background_color: "#f6f1e7",
     theme_color: "#f6f1e7",

@@ -37,7 +37,7 @@ function helsinkiInstant(date: string, minutes: number): Date {
 }
 
 async function openFromHome(page: Page) {
-  await page.goto("/");
+  await page.goto("/feed");
   await page
     .getByRole("link", { name: new RegExp(t.pages.nearby.banner) })
     .click();
