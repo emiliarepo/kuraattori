@@ -1,5 +1,5 @@
 # 35 Museopassi (museum passport with postage-stamp design)
-Status: todo · Model: Opus 5.5 (low effort) · Blocked by: 30
+Status: done · Model: Opus 5.5 (low effort) · Blocked by: 30
 
 A collection view of the museums the user has visited, designed as a sheet of **postage stamps** in a passport. The stamp design is the point of this ticket: get it right.
 
