@@ -6,3 +6,8 @@ A second full pass of ticket 30 after all remaining features land: repeat ticket
 **Carried over from ticket 30 (fix these, don't just note them):**
 - Browse with two or more masthead regions only ever shows the first page: no cursor across regions (`list-across-regions.ts`). "Näytä lisää" must work for any number of regions.
 - Interest weight controls fill the neutral "–" option with rust, so /profile and /welcome read as a wall of rust. The neutral state should look neutral (`--fg`/`--rule`), with rust only for the chosen non-neutral levels.
+
+## Carried over (27.9.2026)
+
+- Intermittent React #418 hydration mismatch on first load under parallel E2E load (see issues/41 notes): find the cause.
+- The dev sign-in form only appears with `E2E_TEST_AUTH`, but README and AGENTS.md say it appears in development: align the code or the docs.
