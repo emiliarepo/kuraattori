@@ -172,6 +172,15 @@ export const exhibitions = createTable(
     endDate: d.text(),
     sourceUrl: d.text(),
     imageUrl: d.text(),
+    /** R2 key of the archived copy of `imageUrl`; see src/server/import/image-archive.ts. */
+    imageArchiveKey: d.text(),
+    imageWidth: d.integer(),
+    imageHeight: d.integer(),
+    /** Set when a rights holder asked for removal; the importer never re-archives it. */
+    imageArchiveRemoved: d
+      .integer({ mode: "boolean" })
+      .notNull()
+      .default(false),
     museumCardEligible: d.integer({ mode: "boolean" }).notNull().default(false),
     admissionText: d.text(),
     admissionAdultCents: d.integer(),

@@ -30,6 +30,11 @@ export default function TermsPage() {
         olla virheellisiä tai vanhentuneita. Tarkista aukioloajat ja näyttelyn
         tiedot museolta ennen käyntiä.
       </p>
+      <p>
+        Näyttelykuvat kuuluvat museoille ja kuvaajille. Niitä näytetään
+        näyttelyiden esittelemiseksi, ja ne poistetaan pyynnöstä:{" "}
+        <a href="mailto:hi@emialis.com">hi@emialis.com</a>.
+      </p>
 
       <h2>Käyttäjän vastuut</h2>
       <ul>

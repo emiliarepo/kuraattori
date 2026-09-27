@@ -28,7 +28,7 @@ export function ExhibitionCard({
         className="group flex h-full w-full flex-col gap-1.5"
       >
         <ImageFallback
-          src={item.imageUrl}
+          sources={item.imageSources}
           alt={item.imageAlt}
           title={item.title}
           aspectRatio="4 / 5"

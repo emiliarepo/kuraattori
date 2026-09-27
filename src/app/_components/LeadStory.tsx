@@ -5,7 +5,7 @@ import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
 
 export function LeadStory({
   href,
-  imageUrl,
+  imageSources,
   imageAlt,
   kicker,
   title,
@@ -14,7 +14,7 @@ export function LeadStory({
   urgencyLabel,
 }: {
   href: string;
-  imageUrl?: string | null;
+  imageSources: readonly string[];
   imageAlt: string;
   kicker: string;
   title: string;
@@ -28,7 +28,7 @@ export function LeadStory({
       className="group grid gap-4 sm:grid-cols-[3fr_2fr] sm:items-end sm:gap-8"
     >
       <ImageFallback
-        src={imageUrl}
+        sources={imageSources}
         alt={imageAlt}
         title={title}
         aspectRatio="3 / 2"

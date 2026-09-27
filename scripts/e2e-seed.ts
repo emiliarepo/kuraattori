@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { drizzle } from "drizzle-orm/d1";
+import sharp from "sharp";
 import { getPlatformProxy } from "wrangler";
 
 import * as schema from "~/server/db/schema";
@@ -13,12 +14,15 @@ import {
 } from "~/server/import/museot-fi/parse-listing";
 import { normalizeExhibition } from "~/server/import/museot-fi/normalize";
 import { parseMuseumPage } from "~/server/import/museot-fi/parse-museum";
+import { archiveImages } from "~/server/import/image-archive";
 import { runImport } from "~/server/import/run-import";
 import type {
   ExhibitionSourceAdapter,
   NormalizedCategory,
   NormalizedExhibition,
 } from "~/server/import/types";
+
+import { createBindingArchiveStore, resizeImage } from "./image-archive-store";
 
 const FIXTURES_DIR = join(import.meta.dirname, "..", "fixtures", "museot");
 const PERSIST_PATH = join(import.meta.dirname, "..", ".wrangler", "state-e2e");
@@ -209,6 +213,22 @@ async function main() {
     const stats = await runImport(db, adapter);
     console.log(JSON.stringify(stats, null, 2));
     if (stats.status === "failed") throw new Error(stats.errorMessage);
+
+    const placeholder = await sharp({
+      create: { width: 1600, height: 1200, channels: 3, background: "#8a6d3b" },
+    })
+      .jpeg()
+      .toBuffer();
+    const imageArchive = await archiveImages(
+      db,
+      {
+        download: () => Promise.resolve(placeholder),
+        resize: resizeImage,
+        put: createBindingArchiveStore(proxy.env.IMAGES_ARCHIVE).put,
+      },
+      Infinity,
+    );
+    console.log(JSON.stringify({ imageArchive }, null, 2));
   } finally {
     await proxy.dispose();
   }

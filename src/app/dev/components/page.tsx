@@ -245,7 +245,7 @@ function toView(
     title: exhibition.title,
     museum: exhibition.museum,
     city: exhibition.city,
-    imageUrl: exhibition.imageUrl,
+    imageSources: exhibition.imageUrl ? [exhibition.imageUrl] : [],
     imageAlt: `${exhibition.title}, ${exhibition.museum}`,
     categories: exhibition.categories,
     timeBar: timeBarProps(exhibition.start, exhibition.end),
@@ -271,7 +271,7 @@ export default function ComponentLibraryPage() {
       <Section title="LeadStory">
         <LeadStory
           href={`/exhibitions/${LEAD.slug}`}
-          imageUrl={LEAD.imageUrl}
+          imageSources={LEAD.imageUrl ? [LEAD.imageUrl] : []}
           imageAlt={`${LEAD.title}, ${LEAD.museum}`}
           kicker="Sinulle · Luonto ja eläimet · Pääkaupunkiseutu"
           title={LEAD.title}
@@ -365,7 +365,7 @@ export default function ComponentLibraryPage() {
         <div className="flex gap-4">
           <div className="w-32">
             <ImageFallback
-              src={EXHIBITIONS[0]!.imageUrl}
+              sources={[EXHIBITIONS[0]!.imageUrl!]}
               alt={EXHIBITIONS[0]!.title}
               title={EXHIBITIONS[0]!.title}
               aspectRatio="4 / 3"
@@ -373,7 +373,7 @@ export default function ComponentLibraryPage() {
           </div>
           <div className="w-32">
             <ImageFallback
-              src={null}
+              sources={[]}
               alt={EXHIBITIONS[7]!.title}
               title={EXHIBITIONS[7]!.title}
               aspectRatio="4 / 3"
@@ -381,7 +381,9 @@ export default function ComponentLibraryPage() {
           </div>
           <div className="w-32">
             <ImageFallback
-              src="https://museot.fi/uploadkuvat/thumb/does-not-exist.jpg"
+              sources={[
+                "https://museot.fi/uploadkuvat/thumb/does-not-exist.jpg",
+              ]}
               alt={EXHIBITIONS[8]!.title}
               title={EXHIBITIONS[8]!.title}
               aspectRatio="4 / 3"

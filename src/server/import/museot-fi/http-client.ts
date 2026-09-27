@@ -6,6 +6,14 @@ export class MuseotFiHttpClient {
   private nextRequestAt = 0;
 
   async getText(path: string): Promise<string> {
+    return (await this.get(path)).text();
+  }
+
+  async getBytes(url: string): Promise<Uint8Array> {
+    return new Uint8Array(await (await this.get(url)).arrayBuffer());
+  }
+
+  private async get(path: string): Promise<Response> {
     const requestAt = Math.max(this.nextRequestAt, Date.now());
     this.nextRequestAt = requestAt + MIN_INTERVAL_MS;
     const wait = requestAt - Date.now();
@@ -20,6 +28,6 @@ export class MuseotFiHttpClient {
         `museot.fi request failed: ${response.status} ${url.toString()}`,
       );
     }
-    return response.text();
+    return response;
   }
 }

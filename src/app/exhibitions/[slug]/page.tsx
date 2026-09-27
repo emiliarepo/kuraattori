@@ -21,6 +21,7 @@ import {
 } from "~/app/_lib/exhibition-format";
 import { toRowView } from "~/app/_lib/row";
 import { todayInHelsinki } from "~/domain/dates";
+import { archivedImagePath, imageSources } from "~/domain/images";
 import { t } from "~/i18n/fi";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
@@ -56,7 +57,11 @@ export async function generateMetadata({
         ? excerpt(exhibition.descriptionFi, 200)
         : undefined,
       url: new URL(`/exhibitions/${exhibition.slug}`, siteUrl),
-      images: [exhibition.imageUrl ?? "/logo-512.png"],
+      images: [
+        exhibition.imageArchiveKey
+          ? archivedImagePath(exhibition.imageArchiveKey)
+          : (exhibition.imageUrl ?? "/logo-512.png"),
+      ],
     },
   };
 }
@@ -132,7 +137,7 @@ export default async function ExhibitionDetailPage({
       <div className="mt-6 grid gap-8 sm:grid-cols-[1.6fr_1fr] sm:gap-10">
         <div className="sm:col-start-1">
           <ImageFallback
-            src={exhibition.imageUrl}
+            sources={imageSources(exhibition, today)}
             alt={imageAlt(exhibition.titleFi, exhibition.museum.name)}
             title={exhibition.titleFi}
             aspectRatio="3 / 2"

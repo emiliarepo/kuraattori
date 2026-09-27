@@ -18,6 +18,7 @@ import {
 import { forYouToRowView, toRowView } from "~/app/_lib/row";
 import { getDaysRemaining, todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
+import { imageSources } from "~/domain/images";
 import { auth } from "~/server/auth";
 import { getActiveRegions } from "~/server/regions-preference";
 import { api } from "~/trpc/server";
@@ -97,7 +98,7 @@ export default async function HomePage() {
       {lead ? (
         <LeadStory
           href={`/exhibitions/${lead.exhibition.slug}`}
-          imageUrl={lead.exhibition.imageUrl}
+          imageSources={imageSources(lead.exhibition, today)}
           imageAlt={imageAlt(lead.exhibition.titleFi, lead.museum.name)}
           kicker={[t.pages.home.forYou, ...lead.reasons].join(" · ")}
           title={lead.exhibition.titleFi}
