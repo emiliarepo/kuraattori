@@ -22,7 +22,7 @@ export function Rail({
   return (
     <Section title={title} more={more}>
       {items.length === 0 ? (
-        <EmptyState message={emptyMessage} />
+        <EmptyState message={emptyMessage} className="" />
       ) : (
         <RailScrollContainer
           title={title}

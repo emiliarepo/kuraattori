@@ -9,7 +9,7 @@ import {
   regionsForBrowse,
   parseBrowseFilters,
 } from "~/app/_lib/browse-filters";
-import { listAcrossRegionsPages } from "~/app/_lib/list-across-regions";
+import { listPages } from "~/app/_lib/list-pages";
 import { todayInHelsinki } from "~/domain/dates";
 import { localized, type Translatable } from "~/domain/localized";
 import { INTL_LOCALE, type Locale } from "~/i18n/locales";
@@ -76,7 +76,7 @@ export default async function ExhibitionsPage({
     ...browseFiltersToListInput(filters),
     limit: await browsePageSize(),
   };
-  const { items, nextCursor } = await listAcrossRegionsPages(
+  const { items, nextCursor } = await listPages(
     regionsForBrowse(filters, activeRegions),
     listInputBase,
     filters.page,

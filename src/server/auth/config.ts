@@ -58,9 +58,9 @@ export async function buildAuthConfig(): Promise<NextAuthConfig> {
     providers: [
       GoogleProvider,
       /**
-       * Test-only: lets the full sign-in flow be verified without real
-       * Google credentials. Never registered outside the Playwright test
-       * server; see `isTestAuthEnabled`.
+       * Dev and test only: lets the full sign-in flow be verified without
+       * real Google credentials. Never registered in a deployed build; see
+       * `isTestAuthEnabled`.
        */
       ...(testAuthEnabled
         ? [

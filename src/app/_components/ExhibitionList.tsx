@@ -15,7 +15,8 @@ export function ExhibitionList({
   signedIn?: boolean;
   ratable?: boolean;
 }) {
-  if (items.length === 0) return <EmptyState message={emptyMessage} />;
+  if (items.length === 0)
+    return <EmptyState message={emptyMessage} className="py-5" />;
 
   return (
     <ul className={className}>

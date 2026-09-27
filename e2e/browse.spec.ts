@@ -95,3 +95,22 @@ test("a city filter overrides the masthead region", async ({ page }) => {
     city,
   );
 });
+
+test("load more pages across two masthead regions", async ({ page }) => {
+  await page.goto("/exhibitions");
+  await page.getByRole("button", { name: t.ui.region.allRegions }).click();
+  const dialog = page.getByRole("dialog", { name: t.ui.region.sheetTitle });
+  for (const region of ["Pääkaupunkiseutu", "Tampere"]) {
+    await dialog.getByRole("checkbox", { name: region }).check();
+  }
+  await expect(
+    page.getByRole("button", { name: t.ui.region.regionCount(2) }),
+  ).toBeVisible();
+
+  await page.goto("/exhibitions");
+  const rows = page.getByRole("main").locator("ul > li");
+  const before = await rows.count();
+  await page.getByRole("button", { name: t.pages.browse.loadMore }).click();
+  await expect(page).toHaveURL(/page=2/);
+  await expect(rows).not.toHaveCount(before);
+});

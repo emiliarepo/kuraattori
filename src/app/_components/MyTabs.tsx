@@ -6,6 +6,7 @@ import { useOptimistic } from "react";
 
 import { usePendingNavigation } from "~/app/_components/PendingNavigation";
 
+import { usePendingLink } from "~/app/_components/usePendingLink";
 import { MY_SORTS, sortForStatus, type MyStatus } from "~/domain/my-sort";
 import { useI18n } from "~/i18n/client";
 
@@ -26,6 +27,7 @@ export function MyTabs() {
       ? sortForStatus(status, searchParams.get("sort"))
       : null;
   const { pending, start } = usePendingNavigation();
+  const { target, onClick } = usePendingLink();
   const [shownSort, setShownSort] = useOptimistic(sort);
 
   return (
@@ -35,11 +37,12 @@ export function MyTabs() {
         className="flex justify-between sm:justify-start"
       >
         {TABS.map((tab) => {
-          const active = pathname.startsWith(tab.href);
+          const active = (target ?? pathname).startsWith(tab.href);
           return (
             <Link
               key={tab.href}
               href={tab.href}
+              onClick={onClick}
               aria-current={active ? "page" : undefined}
               className={`text-kicker -mb-px border-b-2 py-3.5 whitespace-nowrap transition-colors duration-150 focus-visible:-outline-offset-2 sm:px-4 sm:first:pl-0 ${
                 active ? "border-b-signal text-signal" : "border-b-transparent"

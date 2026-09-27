@@ -34,8 +34,9 @@ import type { Db } from "~/server/db";
 const NEW_WITHIN_DAYS = 30;
 
 const ids = z.array(z.number().int().positive()).max(40);
+const regions = z.array(z.string().min(1)).max(40);
 const listInput = z.object({
-  region: z.string().min(1).optional(),
+  regions: regions.optional(),
   city: z.string().min(1).optional(),
   museumIds: ids.optional(),
   categoryIds: ids.optional(),
@@ -221,7 +222,8 @@ async function listExhibitions(ctx: ApiContext, input: ListInput) {
     onlyExhibitions,
     whereVisible(ctx.session?.user?.id ?? null),
   ];
-  if (input.region) filters.push(eq(museums.region, input.region));
+  if (input.regions?.length)
+    filters.push(inArray(museums.region, input.regions));
   if (input.city) filters.push(eq(museums.city, input.city));
   if (input.museumIds?.length)
     filters.push(inArray(museums.id, input.museumIds));
@@ -453,7 +455,7 @@ export const exhibitionRouter = createTRPCRouter({
     .input(
       z
         .object({
-          region: z.string().min(1).optional(),
+          regions: regions.optional(),
           limit: z.number().int().min(1).max(50).default(20),
         })
         .optional(),
@@ -469,7 +471,8 @@ export const exhibitionRouter = createTRPCRouter({
         gte(exhibitions.startDate, openedSince.toISOString().slice(0, 10)),
         lte(exhibitions.startDate, today),
       ];
-      if (input?.region) filters.push(eq(museums.region, input.region));
+      if (input?.regions?.length)
+        filters.push(inArray(museums.region, input.regions));
       const rows = await ctx.db
         .select(selectExhibitions())
         .from(exhibitions)

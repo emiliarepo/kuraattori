@@ -1,6 +1,10 @@
 import { type Metadata } from "next";
 
 import { EmptyState } from "~/app/_components/EmptyState";
+import {
+  PendingGetForm,
+  PendingSubmit,
+} from "~/app/_components/PendingGetForm";
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
 import { Section } from "~/app/_components/Section";
 import { tripToRowView } from "~/app/_lib/row";
@@ -75,10 +79,7 @@ export default async function TripPage({
     <>
       <p className="text-muted mb-6 max-w-prose">{t.pages.trip.intro}</p>
 
-      <form
-        method="get"
-        className="border-rule-soft mb-8 flex flex-col gap-4 border-b pb-8 font-sans sm:flex-row sm:flex-wrap sm:items-end"
-      >
+      <PendingGetForm className="border-rule-soft mb-8 flex flex-col gap-4 border-b pb-8 font-sans sm:flex-row sm:flex-wrap sm:items-end">
         <label className="text-kicker flex flex-col gap-1.5 sm:min-w-[12rem] sm:flex-1">
           {t.pages.trip.place}
           <select
@@ -137,13 +138,14 @@ export default async function TripPage({
           />
         </label>
 
-        <button type="submit" className="btn btn-primary">
+        <PendingSubmit className="btn btn-primary">
           {t.pages.trip.submit}
-        </button>
-      </form>
+        </PendingSubmit>
+      </PendingGetForm>
 
       {items === null || range === null ? (
         <EmptyState
+          className="pb-6"
           message={
             filters.from || filters.to
               ? t.pages.trip.invalidRange
@@ -152,10 +154,15 @@ export default async function TripPage({
         />
       ) : (
         <>
-          <div className="border-rule-soft mb-8 flex flex-col gap-6 border-b pb-8">
+          <div
+            className={`flex flex-col gap-6 ${
+              groups && groups.endingSoon.length > 0
+                ? ""
+                : "border-rule-soft mb-8 border-b pb-8"
+            }`}
+          >
             {tripCities.length > 0 && (
-              <form
-                method="get"
+              <PendingGetForm
                 action="/trip/day"
                 className="flex flex-col gap-4 font-sans sm:flex-row sm:flex-wrap sm:items-end"
               >
@@ -196,10 +203,10 @@ export default async function TripPage({
                     ))}
                   </select>
                 </label>
-                <button type="submit" className="btn btn-secondary">
+                <PendingSubmit className="btn btn-secondary">
                   {t.pages.trip.planDaySubmit}
-                </button>
-              </form>
+                </PendingSubmit>
+              </PendingGetForm>
             )}
             {signedIn && (
               <SaveTripButton

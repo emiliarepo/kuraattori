@@ -1,3 +1,9 @@
-export function EmptyState({ message }: { message: string }) {
-  return <p className="text-muted py-6 italic">{message}</p>;
+export function EmptyState({
+  message,
+  className = "py-6",
+}: {
+  message: string;
+  className?: string;
+}) {
+  return <p className={`text-muted italic ${className}`.trim()}>{message}</p>;
 }

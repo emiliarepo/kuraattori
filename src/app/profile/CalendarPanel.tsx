@@ -34,10 +34,10 @@ export function CalendarPanel({
         value={calendarUrl}
         className="border-rule-soft bg-bg min-h-11 min-w-0 border px-2 py-2 font-sans text-sm"
       />
-      <div className="flex flex-wrap gap-x-5 gap-y-3 font-sans text-sm">
+      <div className="flex flex-wrap gap-x-5 font-sans text-sm">
         <button
           type="button"
-          className="hover:text-signal underline underline-offset-4"
+          className="hover:text-signal inline-flex min-h-11 items-center underline underline-offset-4"
           onClick={async () => {
             await navigator.clipboard.writeText(calendarUrl);
             setCopied(true);
@@ -47,20 +47,22 @@ export function CalendarPanel({
         </button>
         <a
           href={calendarUrl.replace(/^https?:/, "webcal:")}
-          className="hover:text-signal underline underline-offset-4"
+          className="hover:text-signal inline-flex min-h-11 items-center underline underline-offset-4"
         >
           {t.profile.calendarAdd}
         </a>
         <button
           type="button"
-          className="hover:text-signal underline underline-offset-4"
+          className="hover:text-signal inline-flex min-h-11 items-center underline underline-offset-4"
           disabled={rotateCalendarFeed.isPending}
           onClick={() => {
             if (window.confirm(t.profile.calendarRotateConfirm))
               rotateCalendarFeed.mutate();
           }}
         >
-          {t.profile.calendarRotate}
+          {rotateCalendarFeed.isPending
+            ? t.ui.updating
+            : t.profile.calendarRotate}
         </button>
       </div>
     </div>

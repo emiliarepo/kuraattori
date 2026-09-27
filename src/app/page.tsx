@@ -11,10 +11,6 @@ import {
   imageAlt,
   urgencyLabelText,
 } from "~/app/_lib/exhibition-format";
-import {
-  listAcrossRegions,
-  listNewAcrossRegions,
-} from "~/app/_lib/list-across-regions";
 import { forYouToRowView, toRowView } from "~/app/_lib/row";
 import { getDaysRemaining, todayInHelsinki } from "~/domain/dates";
 import { editionSlugForRegion } from "~/domain/edition";
@@ -59,18 +55,24 @@ export default async function HomePage() {
     followedMuseumCount,
     followedExhibitions,
   ] = await Promise.all([
-    listAcrossRegions(activeRegions, {
-      state: "current",
-      endingWithinDays: 14,
-      limit: SECTION_LIMIT,
-    }).catch(() => emptyList),
-    listAcrossRegions(activeRegions, {
-      state: "upcoming",
-      limit: SECTION_LIMIT,
-    }).catch(() => emptyList),
-    listNewAcrossRegions(activeRegions, { limit: SECTION_LIMIT }).catch(
-      () => [],
-    ),
+    api.exhibition
+      .list({
+        regions: [...activeRegions],
+        state: "current",
+        endingWithinDays: 14,
+        limit: SECTION_LIMIT,
+      })
+      .catch(() => emptyList),
+    api.exhibition
+      .list({
+        regions: [...activeRegions],
+        state: "upcoming",
+        limit: SECTION_LIMIT,
+      })
+      .catch(() => emptyList),
+    api.exhibition
+      .new({ regions: [...activeRegions], limit: SECTION_LIMIT })
+      .catch(() => []),
     signedIn
       ? api.recommendation
           .forYou({ limit: SECTION_LIMIT + 1, locale })
@@ -106,7 +108,7 @@ export default async function HomePage() {
     (signedIn ? undefined : "paakaupunkiseutu");
 
   return (
-    <div className="pt-8">
+    <div className="pt-8 [&>h1+section]:mt-0">
       <h1 className="sr-only">{t.app.name}</h1>
 
       {editionSlug && (
@@ -168,7 +170,7 @@ export default async function HomePage() {
           )
         ) : (
           <Section title={t.pages.home.forYou}>
-            <p className="text-muted py-6 italic">
+            <p className="text-muted italic">
               <Link
                 href="/profile"
                 className="text-fg hover:text-signal font-sans text-sm font-semibold not-italic underline underline-offset-4"

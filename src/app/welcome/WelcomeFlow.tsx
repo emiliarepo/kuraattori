@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { usePendingNavigation } from "~/app/_components/PendingNavigation";
 import { type InterestWeight } from "~/app/_components/InterestControl";
 import { InterestsList, type Category } from "~/app/_components/InterestsList";
 import { RegionsList } from "~/app/_components/RegionsList";
@@ -41,6 +42,8 @@ export function WelcomeFlow({
 
   const updateInterests = api.profile.updateInterests.useMutation();
   const updateRegions = api.profile.updateRegions.useMutation();
+  const { pending, start } = usePendingNavigation();
+  const [leaving, setLeaving] = useState<"skip" | "finish" | null>(null);
 
   function setInterest(categoryId: number, weight: InterestWeight | null) {
     setInterests((current) => {
@@ -59,9 +62,16 @@ export function WelcomeFlow({
     );
   }
 
+  function leave(kind: "skip" | "finish", work: () => Promise<void>) {
+    setLeaving(kind);
+    start(async () => {
+      await work();
+      router.push("/");
+    });
+  }
+
   async function skip() {
     await markOnboardingDone();
-    router.push("/");
   }
 
   async function finish() {
@@ -75,7 +85,6 @@ export function WelcomeFlow({
       updateRegions.mutateAsync({ regions: [...regions] }),
     ]);
     await markOnboardingDone();
-    router.push("/");
   }
 
   return (
@@ -88,10 +97,11 @@ export function WelcomeFlow({
         </h1>
         <button
           type="button"
-          onClick={() => void skip()}
-          className="text-muted hover:text-signal flex-none font-sans text-sm font-semibold"
+          onClick={() => leave("skip", skip)}
+          disabled={pending}
+          className="text-muted hover:text-signal inline-flex min-h-11 flex-none items-center font-sans text-sm font-semibold"
         >
-          {t.onboarding.skip}
+          {pending && leaving === "skip" ? t.ui.updating : t.onboarding.skip}
         </button>
       </div>
 
@@ -119,10 +129,13 @@ export function WelcomeFlow({
           />
           <button
             type="button"
-            onClick={() => void finish()}
+            onClick={() => leave("finish", finish)}
+            disabled={pending}
             className="btn btn-primary w-full"
           >
-            {t.onboarding.finish}
+            {pending && leaving === "finish"
+              ? t.ui.updating
+              : t.onboarding.finish}
           </button>
         </>
       )}

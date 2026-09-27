@@ -68,7 +68,7 @@ pnpm import:museot                 # fill it from museot.fi (about 6 minutes, po
 pnpm dev                           # http://localhost:3000
 ```
 
-In development, `/sign-in` offers a "Kirjaudu kehityskäyttäjänä" form, so you don't need Google credentials. It only exists when `NODE_ENV=development`, or when the test server sets `E2E_TEST_AUTH`. To sign in with Google locally, create an OAuth client with `http://localhost:3000/api/auth/callback/google` as a redirect URI and put its ID and secret in `.env`.
+In development, `/sign-in` offers a "Kirjaudu kehityskäyttäjänä" form, so you don't need Google credentials. It exists under `pnpm dev` and when a Worker runs with `E2E_TEST_AUTH=1` (the Playwright server, or `pnpm preview` with it uncommented in `.dev.vars`); a deployed build never has it. To sign in with Google locally, create an OAuth client with `http://localhost:3000/api/auth/callback/google` as a redirect URI and put its ID and secret in `.env`.
 
 `pnpm dev` runs the Next.js dev server with the Cloudflare bindings proxied in. `pnpm preview` builds the real Worker bundle and serves it through `wrangler dev`, which catches code that works in Node but not on Workers.
 

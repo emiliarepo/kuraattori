@@ -2,6 +2,11 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 import { EmptyState } from "~/app/_components/EmptyState";
+import {
+  PendingGetForm,
+  PendingLink,
+  PendingSubmit,
+} from "~/app/_components/PendingGetForm";
 import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
 import {
   dayPlanHref,
@@ -135,9 +140,9 @@ export default async function DayPage({
       : "");
 
   const picker = (
-    <form
+    <PendingGetForm
       key={`${plan.city}|${plan.date}`}
-      method="get"
+
       className="border-rule-soft mb-8 flex flex-col gap-4 border-b pb-8 font-sans sm:flex-row sm:flex-wrap sm:items-end"
     >
       <TripFields trip={plan.trip} />
@@ -171,10 +176,10 @@ export default async function DayPage({
           className={fieldClass}
         />
       </label>
-      <button type="submit" className="btn btn-secondary">
+      <PendingSubmit className="btn btn-secondary">
         {t.pages.day.show}
-      </button>
-    </form>
+      </PendingSubmit>
+    </PendingGetForm>
   );
 
   if (!city || !plan.date)
@@ -182,7 +187,7 @@ export default async function DayPage({
       <>
         <p className="text-muted mb-6 max-w-prose">{t.pages.day.intro}</p>
         {picker}
-        <EmptyState message={t.pages.day.missing} />
+        <EmptyState message={t.pages.day.missing} className="pb-6" />
       </>
     );
   const date = plan.date;
@@ -336,7 +341,7 @@ export default async function DayPage({
                         )}
                       </p>
                       {index > 0 && stop.coordinates !== null && (
-                        <Link
+                        <PendingLink
                           href={dayPlanHref({
                             city,
                             date,
@@ -350,7 +355,7 @@ export default async function DayPage({
                           className="hover:text-signal inline-flex min-h-11 items-center self-start font-sans text-sm underline underline-offset-4"
                         >
                           {t.pages.day.startHere}
-                        </Link>
+                        </PendingLink>
                       )}
                     </div>
                   </div>
@@ -409,7 +414,7 @@ export default async function DayPage({
                 longitude: stop.longitude,
               }))}
             />
-            <form method="get" className="flex items-end gap-2">
+            <PendingGetForm className="flex items-end gap-2">
               <TripFields trip={plan.trip} />
               <input type="hidden" name="city" value={city} />
               <input type="hidden" name="date" value={date} />
@@ -424,10 +429,10 @@ export default async function DayPage({
                   className={fieldClass}
                 />
               </label>
-              <button type="submit" className="btn btn-secondary">
+              <PendingSubmit className="btn btn-secondary">
                 {t.pages.day.update}
-              </button>
-            </form>
+              </PendingSubmit>
+            </PendingGetForm>
             <a
               href={`/api/trip/day?${calendarParams.toString()}`}
               className="btn btn-secondary"
@@ -458,7 +463,7 @@ export default async function DayPage({
       {candidates.length === 0 ? (
         <EmptyState message={t.pages.day.empty} />
       ) : (
-        <form key={plan.ids.join(",")} method="get" className="font-sans">
+        <PendingGetForm key={plan.ids.join(",")} className="font-sans">
           <TripFields trip={plan.trip} />
           <input type="hidden" name="city" value={city} />
           <input type="hidden" name="date" value={date} />
@@ -512,16 +517,18 @@ export default async function DayPage({
             </details>
           )}
           <div className="border-rule-soft mt-4 flex flex-wrap items-center gap-4 border-t pt-4">
-            <button type="submit" className="btn btn-primary">
+            <PendingSubmit
+              className={`btn ${itinerary.length > 0 ? "btn-secondary" : "btn-primary"}`}
+            >
               {t.pages.day.plan}
-            </button>
+            </PendingSubmit>
             <p
               className={`text-sm ${plan.ids.length > 0 && !validCount ? "text-signal font-semibold" : "text-muted"}`}
             >
               {t.pages.day.choose(MIN_DAY_STOPS, MAX_DAY_STOPS)}
             </p>
           </div>
-        </form>
+        </PendingGetForm>
       )}
     </>
   );

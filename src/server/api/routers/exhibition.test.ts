@@ -82,7 +82,7 @@ describe("exhibition API", () => {
       .values({ exhibitionId: 1, categoryId: 1 });
 
     const result = await createCaller(ctx).exhibition.list({
-      region: "Pääkaupunkiseutu",
+      regions: ["Pääkaupunkiseutu"],
       state: "current",
       categoryIds: [1],
       search: "maalausta",
@@ -283,7 +283,7 @@ describe("exhibition API", () => {
       ]);
 
       const result = await createCaller(ctx).exhibition.new({
-        region: "Tampere",
+        regions: ["Tampere"],
       });
       expect(result.map((item) => item.slug)).toEqual(["tampere-new"]);
     });

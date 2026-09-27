@@ -45,7 +45,13 @@ export function InterestControl({
             onClick={() => onChange(option.weight)}
             className={`border-rule min-h-11 flex-1 px-2.5 py-2 text-sm font-semibold transition-colors duration-150 ${
               index > 0 ? "border-l" : ""
-            } ${selected ? "bg-signal text-on-signal" : "hover:bg-surface"}`}
+            } ${
+              !selected
+                ? "hover:bg-surface"
+                : option.weight === null
+                  ? "bg-surface text-fg"
+                  : "bg-signal text-on-signal"
+            }`}
           >
             <span aria-hidden="true" className="sm:hidden">
               {option.icon}
