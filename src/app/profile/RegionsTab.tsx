@@ -31,6 +31,7 @@ export function RegionsTab({
       ? regions.filter((selected) => selected !== region)
       : [...regions, region];
     setRegions(next);
+    setAnnouncement("");
     updateRegions.mutate(
       { regions: next },
       { onSuccess: () => void syncHeader() },
@@ -39,14 +40,14 @@ export function RegionsTab({
 
   return (
     <div className="flex flex-col gap-3">
+      <p aria-live="polite" className="text-kicker text-muted min-h-[1lh]">
+        {announcement}
+      </p>
       <RegionsList
         allRegions={allRegions}
         regions={regions}
         onChange={toggleRegion}
       />
-      <p aria-live="polite" className="sr-only">
-        {announcement}
-      </p>
     </div>
   );
 }

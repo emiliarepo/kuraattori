@@ -35,6 +35,7 @@ test("masthead region label follows a change on the profile page", async ({
     .locator("xpath=..")
     .textContent())!.trim();
   await main.getByRole("checkbox", { name }).click();
+  await expect(main.getByText(t.profile.saved)).toBeVisible();
   await expect(
     page.locator("header").getByRole("button", { name: new RegExp(name) }),
   ).toBeVisible();

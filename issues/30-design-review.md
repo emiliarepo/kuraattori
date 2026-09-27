@@ -32,3 +32,4 @@ Deliverables: fixes committed per area, before/after screenshots for anything vi
 | Home (no interests), sign-in prompts | Action links were rust, which is reserved for urgency, "why" and active states | `--fg`, rust on hover, like the 404 link; rule added to design.md | consistency |
 | /profile/account | Delete confirmation button 40 px and off the button scale | `btn` with the rust fill kept for the destructive action | consistency |
 | /profile, /my tabs | Focus outline clipped by the scrolling tab row | Outline inset by 2 px on both tab bars | consistency |
+| /profile interests, regions | The "Tallennettu" autosave confirmation was screen-reader only, and never re-announced after the first save | Visible muted kicker in a reserved line, cleared when a new change starts; E2E asserts it | behaviour |

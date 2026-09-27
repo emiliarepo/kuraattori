@@ -42,6 +42,7 @@ export function InterestsTab({
     if (weight === null) next.delete(categoryId);
     else next.set(categoryId, weight);
     setInterests(next);
+    setAnnouncement("");
     updateInterests.mutate(
       {
         interests: [...next].map(([categoryId, weight]) => ({
@@ -55,14 +56,14 @@ export function InterestsTab({
 
   return (
     <div className="flex flex-col gap-3">
+      <p aria-live="polite" className="text-kicker text-muted min-h-[1lh]">
+        {announcement}
+      </p>
       <InterestsList
         categories={categories}
         interests={interests}
         onChange={setInterest}
       />
-      <p aria-live="polite" className="sr-only">
-        {announcement}
-      </p>
     </div>
   );
 }
