@@ -68,14 +68,18 @@ export default async function MuseumDetailPage({
 
   return (
     <div className="py-8">
-      <div className="flex flex-wrap items-baseline gap-4">
-        <h1 className="text-headline text-4xl sm:text-6xl">{museum.name}</h1>
+      <div className="flex items-start gap-4">
+        <h1 className="text-headline min-w-0 text-4xl sm:text-6xl">
+          {museum.name}
+        </h1>
         {signedIn && (
-          <FollowToggle
-            museumId={museum.id}
-            museumName={museum.name}
-            initialFollowing={isFollowing}
-          />
+          <div className="text-headline flex h-[1lh] shrink-0 items-center text-4xl sm:text-6xl">
+            <FollowToggle
+              museumId={museum.id}
+              museumName={museum.name}
+              initialFollowing={isFollowing}
+            />
+          </div>
         )}
       </div>
       {museum.city && (
