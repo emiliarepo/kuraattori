@@ -1,5 +1,5 @@
 # 23 Page-load performance and back navigation
-Status: todo · Model: Sonnet 5 · Blocked by: 15, 18, 19
+Status: todo · Model: Sonnet 5 · Blocked by: 24
 
 Two related problems: moving between pages feels slow, and going back doesn't return the user to where they were.
 
