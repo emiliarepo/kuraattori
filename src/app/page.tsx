@@ -94,15 +94,6 @@ export default async function HomePage() {
     <div className="pt-8">
       <h1 className="sr-only">{t.app.name}</h1>
 
-      <div className="mb-4 flex justify-end">
-        <Link
-          href="/trip"
-          className="hover:text-signal font-sans text-sm underline underline-offset-4"
-        >
-          {t.pages.trip.entry}
-        </Link>
-      </div>
-
       {lead ? (
         <LeadStory
           href={`/exhibitions/${lead.exhibition.slug}`}

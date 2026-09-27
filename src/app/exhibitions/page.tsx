@@ -1,6 +1,5 @@
 import { type Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import Link from "next/link";
 
 import { ExhibitionListClient } from "~/app/_components/ExhibitionListClient";
 import { FilterSheet } from "~/app/_components/FilterSheet";
@@ -77,17 +76,9 @@ export default async function ExhibitionsPage({
 
   return (
     <div className="py-8 sm:grid sm:grid-cols-[15rem_1fr] sm:items-start sm:gap-x-10">
-      <div className="mb-6 flex items-baseline justify-between gap-4 sm:col-span-2">
-        <h1 className="text-headline text-4xl sm:text-5xl">
-          {t.pages.browse.title}
-        </h1>
-        <Link
-          href="/trip"
-          className="hover:text-signal font-sans text-sm underline underline-offset-4"
-        >
-          {t.pages.trip.entry}
-        </Link>
-      </div>
+      <h1 className="text-headline mb-6 text-4xl sm:col-span-2 sm:text-5xl">
+        {t.pages.browse.title}
+      </h1>
       <aside className="mb-4 sm:sticky sm:top-6 sm:mb-0">
         <FilterSheet
           filters={filters}

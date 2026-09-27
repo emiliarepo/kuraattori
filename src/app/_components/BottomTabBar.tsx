@@ -29,7 +29,7 @@ export function BottomTabBar({
             aria-label={
               showDot ? t.ui.nav.omatEndingSoon(omatEndingSoonCount) : undefined
             }
-            className={`flex-1 border-t-2 px-2 py-3 text-center text-[0.8125rem] transition-colors duration-150 ${
+            className={`flex min-h-11 min-w-0 flex-1 items-center justify-center border-t-2 px-1 py-3 text-center text-[0.8125rem] transition-colors duration-150 ${
               active
                 ? "border-t-signal text-signal font-semibold"
                 : "border-t-transparent"
