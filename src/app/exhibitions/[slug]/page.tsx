@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CategoryList } from "~/app/_components/CategoryList";
+import { ExhibitionDescription } from "~/app/_components/ExhibitionDescription";
 import { ExhibitionStatusControl } from "~/app/_components/ExhibitionStatusControl";
 import { ImageFallback } from "~/app/_components/ImageFallback";
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
@@ -68,16 +69,10 @@ export default async function ExhibitionDetailPage({
         />
       </div>
 
-      <div className="mt-6 flex flex-col gap-6 sm:mt-0 sm:w-2/5">
+      <div className="mt-6 flex flex-col gap-6 sm:sticky sm:top-20 sm:mt-0 sm:w-2/5 sm:self-start">
         {urgencyLabel && <UrgencyLabel label={urgencyLabel} />}
 
         <h1 className="text-headline text-4xl">{exhibition.titleFi}</h1>
-
-        {exhibition.descriptionFi && (
-          <p className="text-sm leading-relaxed whitespace-pre-line">
-            {exhibition.descriptionFi}
-          </p>
-        )}
 
         <dl className="border-rule-soft divide-rule-soft grid grid-cols-2 gap-y-2 divide-y border-y text-sm [&>*]:py-2">
           <dt className="text-muted">{t.pages.detail.museum}</dt>
@@ -110,6 +105,10 @@ export default async function ExhibitionDetailPage({
           />
         ) : (
           <SignInPrompt message={t.pages.signIn.status} />
+        )}
+
+        {exhibition.descriptionFi && (
+          <ExhibitionDescription text={exhibition.descriptionFi} />
         )}
 
         <CategoryList

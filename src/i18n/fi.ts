@@ -104,6 +104,8 @@ export const t = {
       museumCard: "Museokortti",
       noMuseumCard: "Ei Museokorttia",
       source: "Lähde museot.fi:ssä",
+      showMore: "Näytä lisää",
+      showLess: "Näytä vähemmän",
     },
     museums: {
       title: "Museot",
