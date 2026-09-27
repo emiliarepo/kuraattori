@@ -1,5 +1,5 @@
 # 31 Terms of use, privacy policy and account deletion
-Status: todo · Model: Opus 5.5 (low effort) · Blocked by: none
+Status: done · Model: Opus 5.5 (low effort) · Blocked by: none
 
 Google's OAuth consent screen needs public links to a privacy policy and terms of use. Keep both as short and plain as possible, in Finnish, based on an existing template rather than written from scratch.
 
@@ -12,3 +12,25 @@ Google's OAuth consent screen needs public links to a privacy policy and terms o
 - Add a one-line note at the top of this ticket's report that this is not legal advice and the user should read both texts before publishing.
 
 **Design:** reading pages in the Aikakauslehti style (serif body, `text-headline` title, kicker date line), comfortable measure (~65ch).
+
+## Report
+
+This is not legal advice. Read both texts before publishing.
+
+**Template sources**
+
+- Privacy policy: the Data Protection Ombudsman's list of what the informing obligation requires (GDPR art. 13), https://tietosuoja.fi/documents/6927448/8214536/Informointivelvoitteen+edellytt%C3%A4m%C3%A4t+tiedot/419957bd-fd5a-4090-9c64-cf4769b10570/Informointivelvoitteen+edellytt%C3%A4m%C3%A4t+tiedot.pdf, and its guide https://tietosuoja.fi/rekisteroidyn-informointi. The office no longer publishes a fill-in "tietosuojaselosteen malli", so the headings follow that list.
+- Terms of use: Automattic's open Legalmattic terms (CC BY-SA 4.0), https://github.com/Automattic/legalmattic, cut down to a free hobby service. The share-alike licence requires the attribution line at the bottom of `/terms`.
+
+**Google OAuth consent screen**
+
+- Home page: https://kuraattori.emialis.com/
+- Privacy policy: https://kuraattori.emialis.com/privacy
+- Terms of service: https://kuraattori.emialis.com/terms
+
+**Deviations and notes**
+
+- Google is described as handling sign-in under its own privacy policy, not as a processor. For Google account data, Google acts as a separate controller, and no Google DPA applies to a consumer OAuth client. Cloudflare is the processor and its DPA is linked.
+- The cookie list comes from the code: Auth.js `authjs.session-token`, `authjs.csrf-token`, `authjs.callback-url` and `authjs.pkce.code_verifier` (with `__Secure-`/`__Host-` prefixes over HTTPS), plus `kuraattori_regions` and `kuraattori_onboarded`. The page also mentions the `sessionStorage` rail scroll position.
+- Deletion also clears `user_followed_museum`, which has no UI yet, and `verification_token` rows matching the user's email. The test finds user-linked tables through the schema's foreign keys to `user`, so a future user table (e.g. from ticket 20) fails the test until `deleteUserData` and the privacy text cover it.
+- Deletion is one `db.batch` (atomic in D1). The confirm step is `/profile/account?poista=1`.

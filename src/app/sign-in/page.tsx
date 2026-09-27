@@ -1,4 +1,5 @@
 import { revalidatePath } from "next/cache";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { t } from "~/i18n/fi";
@@ -42,6 +43,17 @@ export default async function SignInPage({
           {t.auth.signIn.google}
         </button>
       </form>
+
+      <p className="text-muted -mt-4 font-sans text-xs">
+        {t.auth.signIn.consentPrefix}
+        <Link href="/terms" className="underline">
+          {t.auth.signIn.consentTerms}
+        </Link>
+        {t.auth.signIn.consentJoin}
+        <Link href="/privacy" className="underline">
+          {t.auth.signIn.consentPrivacy}
+        </Link>
+      </p>
 
       {testAuthEnabled && (
         <form
