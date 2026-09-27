@@ -36,6 +36,13 @@
       "when": 1790478785292,
       "tag": "0004_redundant_tag",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1790496178514,
+      "tag": "0005_goofy_xorn",
+      "breakpoints": true
     }
   ]
 }

@@ -35,7 +35,15 @@ export const myRouter = createTRPCRouter({
         const item = itemByMemberId.get(row.exhibitionId);
         if (!item || seen.has(item.id)) return [];
         seen.add(item.id);
-        return [{ ...item, visitedAt: row.visitedAt, visitNote: row.note }];
+        return [
+          {
+            ...item,
+            visitedAt: row.visitedAt,
+            visitNote: row.note,
+            visitedCardEligible: row.exhibition.museumCardEligible,
+            visitedAdmissionAdultCents: row.exhibition.admissionAdultCents,
+          },
+        ];
       });
     }),
   /** Drives the Omat tab dot: interested exhibitions ending within a week. */

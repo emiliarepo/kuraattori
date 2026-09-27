@@ -33,6 +33,10 @@ describe("parseDetailPage", () => {
     expect(detail?.museumCardEligible).toBe(true);
   });
 
+  it("reads the admission text without the Museum Card link", () => {
+    expect(detail?.admissionText).toBe("23/13/0 €");
+  });
+
   it("extracts the exhibition's themes with their topic ids", () => {
     expect(detail?.categorySourceIds).toEqual(["71", "63"]);
   });

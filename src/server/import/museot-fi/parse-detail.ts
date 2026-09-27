@@ -1,4 +1,4 @@
-import { NodeType, parse } from "node-html-parser";
+import { type HTMLElement, NodeType, parse } from "node-html-parser";
 
 import { parseDateRange } from "./dates";
 import { detailSchema } from "./schemas";
@@ -53,6 +53,8 @@ export function parseDetailPage(html: string): RawDetail | undefined {
       ".sisaanpaasy_museokortilla img[alt='Sisäänpääsy Museokortilla']",
     ) !== null;
 
+  const admissionText = parseAdmissionText(root);
+
   const categorySourceIds =
     root
       .querySelector("h2.kategoriat")
@@ -71,9 +73,23 @@ export function parseDetailPage(html: string): RawDetail | undefined {
     imageUrl: imageSrc ? new URL(imageSrc, BASE_URL).href : undefined,
     websiteUrl,
     museumCardEligible,
+    admissionText,
     categorySourceIds,
   };
 
   const result = detailSchema.safeParse(candidate);
   return result.success ? result.data : undefined;
+}
+
+function parseAdmissionText(root: HTMLElement): string | undefined {
+  const lines: string[] = [];
+  let node = root.querySelector("h2.paasymaksut")?.nextElementSibling;
+  while (node && node.tagName === "P") {
+    if (!node.querySelector("a[href*='/osta']")) {
+      const text = node.text.replace(/\s+/g, " ").trim();
+      if (text) lines.push(text);
+    }
+    node = node.nextElementSibling;
+  }
+  return lines.length > 0 ? lines.join("\n") : undefined;
 }
