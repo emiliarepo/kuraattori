@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { asc, isNotNull, sql } from "drizzle-orm";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { museums } from "~/server/db/schema";
@@ -9,5 +9,15 @@ export const systemRouter = createTRPCRouter({
       .select({ count: sql<number>`count(*)` })
       .from(museums);
     return row?.count ?? 0;
+  }),
+  regions: publicProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db
+      .selectDistinct({ region: museums.region })
+      .from(museums)
+      .where(isNotNull(museums.region))
+      .orderBy(asc(museums.region));
+    return rows
+      .map((row) => row.region)
+      .filter((region): region is string => region !== null);
   }),
 });
