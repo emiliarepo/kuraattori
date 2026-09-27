@@ -65,11 +65,12 @@ export function SharePassportButton({
     try {
       if (typeof navigator.share === "function") {
         const file = await awaitImage();
-        const withImage = file ? { files: [file], text, url } : null;
+        const shareText = `${text}\n${url}`;
+        const withImage = file ? { files: [file], text: shareText } : null;
         await navigator.share(
           withImage && navigator.canShare?.(withImage)
             ? withImage
-            : { text, url },
+            : { text: shareText },
         );
       } else {
         const copied = navigator.clipboard.writeText(`${text}\n${url}`);

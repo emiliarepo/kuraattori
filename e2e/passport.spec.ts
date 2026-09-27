@@ -84,3 +84,43 @@ async function markIntervallumVisited(page: Page, email: string) {
       .click(),
   ]);
 }
+
+test("Jaa passi shares the image with the link inside the text", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const calls: unknown[] = [];
+    (window as unknown as { shareCalls: unknown[] }).shareCalls = calls;
+    Object.defineProperty(Navigator.prototype, "canShare", {
+      configurable: true,
+      value: () => true,
+    });
+    Object.defineProperty(Navigator.prototype, "share", {
+      configurable: true,
+      value: async (data: ShareData) => {
+        calls.push({
+          keys: Object.keys(data).sort(),
+          text: data.text,
+          files: data.files?.length ?? 0,
+        });
+      },
+    });
+  });
+  await markIntervallumVisited(page, uniqueEmail("passport-native-share"));
+  await page.goto("/my/passport");
+
+  await page.getByRole("button", { name: t.pages.my.passport.share }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as unknown as { shareCalls: unknown[] }).shareCalls,
+      ),
+    )
+    .toEqual([
+      {
+        keys: ["files", "text"],
+        text: expect.stringContaining("https://kuraattori.emialis.com"),
+        files: 1,
+      },
+    ]);
+});
