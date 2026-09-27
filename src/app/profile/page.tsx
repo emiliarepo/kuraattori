@@ -25,7 +25,7 @@ export default async function ProfilePage() {
     <ProfileForm
       categories={categories.map(({ id, name }) => ({ id, name }))}
       allRegions={allRegions}
-      initialInterestIds={profile.interests.map(({ categoryId }) => categoryId)}
+      initialInterests={profile.interests}
       initialRegions={profile.regions}
       signOutAction={async () => {
         "use server";

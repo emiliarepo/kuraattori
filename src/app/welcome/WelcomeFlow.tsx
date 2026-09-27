@@ -3,6 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import {
+  InterestControl,
+  type InterestWeight,
+} from "~/app/_components/InterestControl";
 import { markOnboardingDone } from "~/app/welcome/onboarding-action";
 import { t } from "~/i18n/fi";
 import { api } from "~/trpc/react";
@@ -13,29 +17,39 @@ type Step = "interests" | "regions";
 export function WelcomeFlow({
   categories,
   allRegions,
-  initialInterestIds,
+  initialInterests,
   initialRegions,
 }: {
   categories: readonly Category[];
   allRegions: readonly string[];
-  initialInterestIds: readonly number[];
+  initialInterests: readonly { categoryId: number; weight: number }[];
   initialRegions: readonly string[];
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("interests");
-  const [interestIds, setInterestIds] =
-    useState<readonly number[]>(initialInterestIds);
+  const [interests, setInterests] = useState<
+    ReadonlyMap<number, InterestWeight>
+  >(
+    () =>
+      new Map(
+        initialInterests.map(({ categoryId, weight }) => [
+          categoryId,
+          weight as InterestWeight,
+        ]),
+      ),
+  );
   const [regions, setRegions] = useState<readonly string[]>(initialRegions);
 
   const updateInterests = api.profile.updateInterests.useMutation();
   const updateRegions = api.profile.updateRegions.useMutation();
 
-  function toggleInterest(id: number) {
-    setInterestIds((current) =>
-      current.includes(id)
-        ? current.filter((categoryId) => categoryId !== id)
-        : [...current, id],
-    );
+  function setInterest(categoryId: number, weight: InterestWeight | null) {
+    setInterests((current) => {
+      const next = new Map(current);
+      if (weight === null) next.delete(categoryId);
+      else next.set(categoryId, weight);
+      return next;
+    });
   }
 
   function toggleRegion(region: string) {
@@ -54,7 +68,10 @@ export function WelcomeFlow({
   async function finish() {
     await Promise.all([
       updateInterests.mutateAsync({
-        interests: interestIds.map((categoryId) => ({ categoryId, weight: 1 })),
+        interests: [...interests].map(([categoryId, weight]) => ({
+          categoryId,
+          weight,
+        })),
       }),
       updateRegions.mutateAsync({ regions: [...regions] }),
     ]);
@@ -81,18 +98,18 @@ export function WelcomeFlow({
 
       {step === "interests" ? (
         <>
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-2.5">
             {categories.map((category) => (
-              <li key={category.id}>
-                <label className="flex items-center gap-2.5 text-lg">
-                  <input
-                    type="checkbox"
-                    checked={interestIds.includes(category.id)}
-                    onChange={() => toggleInterest(category.id)}
-                    className="accent-signal h-4 w-4 flex-none"
-                  />
-                  {category.name}
-                </label>
+              <li
+                key={category.id}
+                className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+              >
+                <span className="text-lg">{category.name}</span>
+                <InterestControl
+                  categoryName={category.name}
+                  value={interests.get(category.id) ?? null}
+                  onChange={(weight) => setInterest(category.id, weight)}
+                />
               </li>
             ))}
           </ul>

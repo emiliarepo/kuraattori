@@ -42,7 +42,7 @@ export const profileRouter = createTRPCRouter({
           .array(
             z.object({
               categoryId: z.number().int().positive(),
-              weight: z.number().int().min(1).max(5).default(1),
+              weight: z.union([z.literal(-1), z.literal(1), z.literal(2)]),
             }),
           )
           .max(80),

@@ -3,6 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import {
+  InterestControl,
+  type InterestWeight,
+} from "~/app/_components/InterestControl";
 import { refreshHeaderData } from "~/app/_components/refresh-header-action";
 import { t } from "~/i18n/fi";
 import { api } from "~/trpc/react";
@@ -12,18 +16,27 @@ type Category = { id: number; name: string };
 export function ProfileForm({
   categories,
   allRegions,
-  initialInterestIds,
+  initialInterests,
   initialRegions,
   signOutAction,
 }: {
   categories: readonly Category[];
   allRegions: readonly string[];
-  initialInterestIds: readonly number[];
+  initialInterests: readonly { categoryId: number; weight: number }[];
   initialRegions: readonly string[];
   signOutAction: () => Promise<void>;
 }) {
-  const [interestIds, setInterestIds] =
-    useState<readonly number[]>(initialInterestIds);
+  const [interests, setInterests] = useState<
+    ReadonlyMap<number, InterestWeight>
+  >(
+    () =>
+      new Map(
+        initialInterests.map(({ categoryId, weight }) => [
+          categoryId,
+          weight as InterestWeight,
+        ]),
+      ),
+  );
   const [regions, setRegions] = useState<readonly string[]>(initialRegions);
   const router = useRouter();
 
@@ -35,13 +48,18 @@ export function ProfileForm({
     router.refresh();
   }
 
-  function toggleInterest(id: number) {
-    const next = interestIds.includes(id)
-      ? interestIds.filter((categoryId) => categoryId !== id)
-      : [...interestIds, id];
-    setInterestIds(next);
+  function setInterest(categoryId: number, weight: InterestWeight | null) {
+    const next = new Map(interests);
+    if (weight === null) next.delete(categoryId);
+    else next.set(categoryId, weight);
+    setInterests(next);
     updateInterests.mutate(
-      { interests: next.map((categoryId) => ({ categoryId, weight: 1 })) },
+      {
+        interests: [...next].map(([categoryId, weight]) => ({
+          categoryId,
+          weight,
+        })),
+      },
       { onSuccess: () => void syncHeader() },
     );
   }
@@ -65,18 +83,18 @@ export function ProfileForm({
         <h2 className="text-kicker border-rule border-t pt-3">
           {t.profile.interestsHeading}
         </h2>
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-2.5">
           {categories.map((category) => (
-            <li key={category.id}>
-              <label className="flex items-center gap-2.5 text-lg">
-                <input
-                  type="checkbox"
-                  checked={interestIds.includes(category.id)}
-                  onChange={() => toggleInterest(category.id)}
-                  className="accent-signal h-4 w-4 flex-none"
-                />
-                {category.name}
-              </label>
+            <li
+              key={category.id}
+              className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+            >
+              <span className="text-lg">{category.name}</span>
+              <InterestControl
+                categoryName={category.name}
+                value={interests.get(category.id) ?? null}
+                onChange={(weight) => setInterest(category.id, weight)}
+              />
             </li>
           ))}
         </ul>

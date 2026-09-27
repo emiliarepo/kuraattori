@@ -33,6 +33,12 @@ export const t = {
       announceSet: (label: string) => `Merkitty: ${label}`,
       announceCleared: "Merkintä poistettu",
     },
+    interest: {
+      none: "–",
+      interested: "Kiinnostaa",
+      strong: "Erityisesti",
+      excluded: "Ei kiinnosta",
+    },
   },
   auth: {
     signInLink: "Kirjaudu sisään",
