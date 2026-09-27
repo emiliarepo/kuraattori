@@ -1,3 +1,4 @@
+import { TabbedPage } from "~/app/_components/TabbedPage";
 import { SavedTrips } from "~/app/trip/SavedTrips";
 import { TripTabs } from "~/app/trip/TripTabs";
 import { getI18n } from "~/i18n/server";
@@ -14,13 +15,16 @@ export default async function TripLayout({
   const trips = session?.user ? await api.trip.saved() : [];
 
   return (
-    <div className="py-8">
-      <h1 className="text-headline mb-6 text-4xl sm:text-5xl">
-        {t.pages.trip.title}
-      </h1>
-      <SavedTrips trips={trips} />
-      <TripTabs />
+    <TabbedPage
+      title={t.pages.trip.title}
+      tabs={
+        <>
+          <SavedTrips trips={trips} />
+          <TripTabs />
+        </>
+      }
+    >
       {children}
-    </div>
+    </TabbedPage>
   );
 }

@@ -15,7 +15,7 @@ export async function SavingsHeader({
   return (
     <section
       aria-label={t.pages.my.savings.label}
-      className="border-rule-soft border-b pt-4 pb-6"
+      className="border-rule-soft mb-5 border-b pb-5"
     >
       {savings.years.length > 1 && (
         <nav

@@ -116,7 +116,7 @@ export default async function EditionPage({ params }: { params: Params }) {
           urgencyLabel={urgencyLabelText(lead, today, i18n)}
         />
       ) : (
-        <EmptyState message={t.pages.edition.noLead} className="" />
+        <EmptyState message={t.pages.edition.noLead} />
       )}
 
       <Rail

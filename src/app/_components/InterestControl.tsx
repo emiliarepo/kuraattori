@@ -32,7 +32,7 @@ export function InterestControl({
     <div
       role="radiogroup"
       aria-label={categoryName}
-      className="border-rule flex border font-sans"
+      className="border-rule flex border font-sans sm:shrink-0"
     >
       {options(t).map((option, index) => {
         const selected = option.weight === value;
@@ -43,7 +43,7 @@ export function InterestControl({
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(option.weight)}
-            className={`border-rule min-h-11 flex-1 px-2.5 py-2 text-sm font-semibold transition-colors duration-150 ${
+            className={`border-rule min-h-11 flex-1 px-2.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors duration-150 ${
               index > 0 ? "border-l" : ""
             } ${
               !selected

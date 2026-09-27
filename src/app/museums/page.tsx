@@ -36,7 +36,7 @@ export default async function MuseumsPage() {
         {rows.map(({ museum, name }) => (
           <li
             key={museum.id}
-            className="border-rule-soft flex items-baseline justify-between gap-4 border-t py-3 first:border-t-0"
+            className="border-rule-soft flex items-baseline justify-between gap-4 border-t py-3 first:border-t-0 first:pt-0"
           >
             <HoverPrefetchLink
               href={`/museums/${museum.slug}`}

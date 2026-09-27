@@ -61,11 +61,11 @@ export function ExhibitionRow({
       )
     : null;
   return (
-    <li className="border-rule-soft border-t first:border-t-0">
+    <li className="group/row border-rule-soft border-t first:border-t-0">
       <div className="relative">
         <HoverPrefetchLink
           href={href}
-          className={`group flex gap-4 sm:gap-6 ${showRating ? "pt-5 pb-2" : "py-5"}`}
+          className={`group flex gap-4 sm:gap-6 ${showRating ? "pt-5 pb-2" : "py-5"} group-first/row:pt-0`}
         >
           <div className="w-24 flex-shrink-0 sm:w-40">
             <ImageFallback
@@ -110,7 +110,7 @@ export function ExhibitionRow({
             exhibitionId={exhibitionId}
             title={title.text}
             status={status ?? null}
-            className="absolute top-5 right-0 z-10"
+            className="absolute top-5 right-0 z-10 group-first/row:top-0"
           />
         )}
         {showRating && (

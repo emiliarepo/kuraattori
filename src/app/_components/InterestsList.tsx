@@ -37,7 +37,7 @@ export function InterestsList({
                 key={category.id}
                 className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
               >
-                <span lang={category.lang} className="text-lg">
+                <span lang={category.lang} className="min-w-0 text-lg">
                   {category.name}
                 </span>
                 <InterestControl
