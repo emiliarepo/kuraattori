@@ -113,6 +113,7 @@ export const t = {
       months: "Visits by month",
       visit: "Visit",
       firstVisit: "First visit",
+      firstAndLatest: "First and latest",
       latestVisit: "Latest visit",
       busiestMonth: (month: string, count: number) =>
         `Your busiest month was ${month}: ${count === 1 ? "1 visit" : `${count} visits`}`,

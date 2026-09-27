@@ -143,7 +143,7 @@ export default async function ProfileYearPage({
         title={
           review.visitCount === 1
             ? t.profile.year.visit
-            : t.profile.year.firstVisit
+            : t.profile.year.firstAndLatest
         }
       >
         <dl className="grid gap-6 sm:grid-cols-2">

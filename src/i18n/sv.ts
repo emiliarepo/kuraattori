@@ -113,6 +113,7 @@ export const t = {
       months: "Besök per månad",
       visit: "Besök",
       firstVisit: "Första besöket",
+      firstAndLatest: "Första och senaste",
       latestVisit: "Senaste besöket",
       busiestMonth: (month: string, count: number) =>
         `Din livligaste månad var ${month}: ${count === 1 ? "1 besök" : `${count} besök`}`,

@@ -115,6 +115,7 @@ export const t = {
       months: "Käynnit kuukausittain",
       visit: "Käynti",
       firstVisit: "Ensimmäinen käynti",
+      firstAndLatest: "Ensimmäinen ja viimeisin",
       latestVisit: "Viimeisin käynti",
       busiestMonth: (month: string, count: number) =>
         `Vilkkain kuukausi oli ${month}: ${count === 1 ? "1 käynti" : `${count} käyntiä`}`,
