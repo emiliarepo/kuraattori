@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useOptimistic } from "react";
+
+import { usePendingNavigation } from "~/app/_components/PendingNavigation";
 
 import { MY_SORTS, sortForStatus, type MyStatus } from "~/domain/my-sort";
 import { t } from "~/i18n/fi";
@@ -22,6 +25,8 @@ export function MyTabs() {
     status && status in MY_SORTS
       ? sortForStatus(status, searchParams.get("sort"))
       : null;
+  const { pending, start } = usePendingNavigation();
+  const [shownSort, setShownSort] = useOptimistic(sort);
 
   return (
     <div className="border-rule-soft flex flex-col border-b lg:flex-row lg:items-center lg:justify-between">
@@ -46,29 +51,37 @@ export function MyTabs() {
         })}
       </nav>
       {status && status in MY_SORTS && sort && (
-        <label className="text-kicker flex items-center gap-2 self-end py-2 lg:self-auto lg:py-0">
-          {t.pages.my.sortLabel}
-          <select
-            value={sort}
-            onChange={(event) => {
-              const next = event.target.value;
-              const params = new URLSearchParams(searchParams);
-              if (next === MY_SORTS[status][0]) params.delete("sort");
-              else params.set("sort", next);
-              const query = params.toString();
-              router.push(query ? `${pathname}?${query}` : pathname, {
-                scroll: false,
-              });
-            }}
-            className="border-rule-soft bg-bg text-fg focus:border-fg h-11 border px-2 text-sm font-normal tracking-normal normal-case lg:h-9"
-          >
-            {MY_SORTS[status].map((option) => (
-              <option key={option} value={option}>
-                {t.pages.my.sortOptions[option]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="flex items-center gap-3 self-end py-2 lg:self-auto lg:py-0">
+          <span role="status" className="text-muted font-sans text-xs">
+            {pending ? t.ui.updating : ""}
+          </span>
+          <label className="text-kicker flex items-center gap-2">
+            {t.pages.my.sortLabel}
+            <select
+              value={shownSort ?? undefined}
+              onChange={(event) => {
+                const next = event.target.value as NonNullable<typeof sort>;
+                const params = new URLSearchParams(searchParams);
+                if (next === MY_SORTS[status][0]) params.delete("sort");
+                else params.set("sort", next);
+                const query = params.toString();
+                start(() => {
+                  setShownSort(next);
+                  router.push(query ? `${pathname}?${query}` : pathname, {
+                    scroll: false,
+                  });
+                });
+              }}
+              className="border-rule-soft bg-bg text-fg focus:border-fg h-11 border px-2 text-sm font-normal tracking-normal normal-case lg:h-9"
+            >
+              {MY_SORTS[status].map((option) => (
+                <option key={option} value={option}>
+                  {t.pages.my.sortOptions[option]}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       )}
     </div>
   );

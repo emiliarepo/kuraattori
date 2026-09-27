@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 
+import { usePendingNavigation } from "~/app/_components/PendingNavigation";
 import { persistRegionsCookie } from "~/app/_components/region-cookie-action";
 import { refreshHeaderData } from "~/app/_components/refresh-header-action";
 import { useBackToClose } from "~/app/_lib/use-back-to-close";
@@ -36,6 +37,7 @@ export function RegionSelector({
   const groups = groupRegions(allRegions);
   const router = useRouter();
   const updateRegions = api.profile.updateRegions.useMutation();
+  const { pending, start } = usePendingNavigation();
 
   const summary =
     selected.length === 0
@@ -44,24 +46,25 @@ export function RegionSelector({
         ? selected[0]!
         : t.ui.region.regionCount(selected.length);
 
-  async function syncHeader() {
-    await refreshHeaderData();
-    router.refresh();
-  }
-
   function toggle(region: string) {
     const next = selected.includes(region)
       ? selected.filter((selectedRegion) => selectedRegion !== region)
       : [...selected, region];
     setSelected(next);
-    if (isSignedIn) {
-      updateRegions.mutate(
-        { regions: next },
-        { onSuccess: () => void syncHeader() },
-      );
-    } else {
-      void persistRegionsCookie(next).then(() => router.refresh());
-    }
+    start(async () => {
+      try {
+        if (isSignedIn) {
+          await updateRegions.mutateAsync({ regions: next });
+          await refreshHeaderData();
+        } else {
+          await persistRegionsCookie(next);
+        }
+      } catch {
+        // Already logged by the tRPC error-logging middleware; the refresh
+        // below shows the saved state.
+      }
+      router.refresh();
+    });
   }
 
   return (
@@ -75,7 +78,7 @@ export function RegionSelector({
         title={selected.length > 1 ? selected.join(", ") : summary}
         className="hover:text-signal -my-3.5 flex min-h-11 max-w-56 items-center gap-1 font-sans text-xs font-semibold"
       >
-        <span className="truncate">{summary}</span>
+        <span className="truncate">{pending ? t.ui.updating : summary}</span>
         <span aria-hidden>▾</span>
       </button>
       {open && (

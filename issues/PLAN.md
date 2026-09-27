@@ -30,3 +30,8 @@ Commits use the repo-local identity emilia@repo.codes; rebase agent branches if 
 2b. 38 image archive to R2 (Sonnet); needs user-approved R2 bucket and token permission.
 3. 37 final verification (Opus low) after everything.
 4. Public release: fixtures stay as they are (user decision, 27.9.2026); no history rewrite. MIT licence added.
+
+
+## Queue after ticket 42 (27.9.2026)
+
+Migrations run one branch at a time, in this order: 41 → 43 → 44 → 45 → 22 → 34. Then 37, the final verification.
