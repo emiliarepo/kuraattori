@@ -7,6 +7,15 @@ Two related problems: moving between pages feels slow, and going back doesn't re
 
 Record before/after numbers in this ticket for the production build on Workers (`command pnpm preview`, then the live site after deploy): TTFB and time until content is visible for `/`, `/exhibitions`, `/exhibitions/[slug]`, `/museums/[slug]`, `/my/interested`, cold and warm, plus client-side navigation time between them. Identify where time goes (D1 query count and duration per page, serial vs parallel queries, `auth()` and `getActiveRegions()` calls, payload size, image weight) before changing anything.
 
+## D1 read budget (hard requirement)
+
+On 27.9.2026 the site went down for a day: the similar-exhibitions query read ~800 000 rows per detail view and exhausted D1's free-tier limit of 5 M rows read per day (fixed in commit "Fix similar-exhibitions query…"). Budget: every page must read **< 5 000 D1 rows** on a cold request (the whole dataset is ~640 exhibitions, ~1 800 category links, ~250 museums).
+
+- Measure rows read per page (D1 returns `meta.rows_read` per statement; log it per request in dev, or use `wrangler d1 insights` after a deploy) and record the table before/after in this ticket.
+- No correlated subqueries in `ORDER BY`/`SELECT` over whole tables; add indexes where a query filters on a non-leading column (e.g. `exhibition_category(categoryId)`).
+- Cache public reads (regions, categories, museum lists, public exhibition lists) so repeated page views don't hit D1 at all; the header's `select distinct region` alone ran 1 132 times in a day.
+- Add a guard: a dev-only warning when one request reads more than the budget, so regressions show up during agent verification.
+
 ## Likely improvements (confirm with the measurements)
 
 - Run a page's independent queries in parallel; remove N+1 query patterns (e.g. categories fetched per exhibition); keep D1 round trips per page small.
