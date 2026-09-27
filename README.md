@@ -47,9 +47,8 @@ check. Both read from the same local D1 database under `.wrangler/state`.
 Pushes to `main` run `.github/workflows/deploy.yml`: install, typecheck, lint,
 test, apply `drizzle/` migrations to the remote D1 database
 (`wrangler d1 migrations apply DB --remote`), then `pnpm run deploy`. Any
-failed step stops the run before the migration or deploy. Pull requests run
-the same checks via `.github/workflows/ci.yml` without touching D1 or the
-Worker. Both share a `d1-remote` concurrency group with the nightly importer
+failed step stops the run before the migration or deploy. It shares a
+`d1-remote` concurrency group with the nightly importer
 (`import.yml`) so a migration never runs alongside another migration, a
 deploy, or an import.
 

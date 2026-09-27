@@ -6,6 +6,10 @@ import { STATUS_LABEL } from "~/app/_components/StatusActions";
 import { TimeBar } from "~/app/_components/TimeBar";
 import { type ExhibitionRowView } from "~/app/_lib/row";
 
+/**
+ * Fixed line budget so every card in a rail lines up: kicker 1 line, title 2,
+ * byline 1, categories 1, then the time block pinned to the bottom.
+ */
 export function ExhibitionCard({
   item,
   lead,
@@ -13,8 +17,15 @@ export function ExhibitionCard({
   item: ExhibitionRowView;
   lead?: React.ReactNode;
 }) {
+  const kicker = [item.status && STATUS_LABEL[item.status], item.whyLabel]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <Link href={item.href} className="group flex flex-col gap-2">
+    <Link
+      href={item.href}
+      className="group flex h-full w-full flex-col gap-1.5"
+    >
       <ImageFallback
         src={item.imageUrl}
         alt={item.imageAlt}
@@ -22,20 +33,33 @@ export function ExhibitionCard({
         aspectRatio="4 / 5"
       />
       {lead}
-      {item.whyLabel && (
-        <p className="text-kicker text-signal">{item.whyLabel}</p>
-      )}
-      <p className="line-clamp-3 text-lg leading-tight font-medium group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">
+      <p className="text-kicker text-signal mt-0.5 min-h-[1lh] truncate">
+        {kicker}
+      </p>
+      <p
+        title={item.title}
+        className="line-clamp-2 min-h-[2lh] text-base leading-tight font-medium group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4 sm:text-lg sm:leading-tight"
+      >
         {item.title}
       </p>
-      <p className="text-muted font-sans text-xs leading-snug">
+      <p className="text-muted truncate font-sans text-xs leading-snug">
         {item.museum}
         {item.city && `, ${item.city}`}
       </p>
-      <CategoryList categories={item.categories} />
-      {!lead && <TimeBar {...item.timeBar} />}
-      {item.status && (
-        <p className="text-kicker">{STATUS_LABEL[item.status]}</p>
+      {item.categories.length > 0 ? (
+        <CategoryList
+          categories={item.categories}
+          className="truncate leading-snug"
+        />
+      ) : (
+        <p aria-hidden className="font-sans text-xs leading-snug">
+          {"\u00a0"}
+        </p>
+      )}
+      {!lead && (
+        <div className="mt-auto pt-1">
+          <TimeBar {...item.timeBar} stacked />
+        </div>
       )}
     </Link>
   );

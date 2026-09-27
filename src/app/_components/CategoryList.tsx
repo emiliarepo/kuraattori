@@ -4,13 +4,15 @@ export type Category = { label: string; href?: string };
 
 export function CategoryList({
   categories,
+  className = "leading-relaxed",
 }: {
   categories: readonly Category[];
+  className?: string;
 }) {
   if (categories.length === 0) return null;
 
   return (
-    <p className="text-muted font-sans text-xs leading-relaxed">
+    <p className={`text-muted font-sans text-xs ${className}`}>
       {categories.map((category, index) => (
         <span key={category.label}>
           {index > 0 && " · "}

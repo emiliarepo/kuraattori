@@ -23,3 +23,20 @@ export function resolveRegion(
 ): string | undefined {
   return CITY_REGION_OVERRIDES[city] ?? maakuntaByCity.get(city);
 }
+
+const CITY_REGIONS = ["Pääkaupunkiseutu", "Tampere", "Turku"] as const;
+const collator = new Intl.Collator("fi-FI");
+
+/** Splits regions for display: the city regions in fixed order, then the rest alphabetically. */
+export function groupRegions(regions: readonly string[]): {
+  cities: string[];
+  others: string[];
+} {
+  const present = new Set(regions);
+  return {
+    cities: CITY_REGIONS.filter((region) => present.has(region)),
+    others: regions
+      .filter((region) => !(CITY_REGIONS as readonly string[]).includes(region))
+      .sort(collator.compare),
+  };
+}

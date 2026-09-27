@@ -11,7 +11,6 @@ export function LeadStory({
   title,
   museum,
   city,
-  excerpt,
   urgencyLabel,
 }: {
   href: string;
@@ -21,7 +20,6 @@ export function LeadStory({
   title: string;
   museum: string;
   city: string;
-  excerpt?: string | null;
   urgencyLabel?: string | null;
 }) {
   return (
@@ -44,7 +42,6 @@ export function LeadStory({
           {museum}
           {city && `, ${city}`}
         </p>
-        {excerpt && <p className="text-[1.0625rem] leading-snug">{excerpt}</p>}
         {urgencyLabel && (
           <div className="mt-1">
             <UrgencyLabel label={urgencyLabel} />

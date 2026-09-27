@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveRegion } from "./regions";
+import { groupRegions, resolveRegion } from "./regions";
 
 describe("resolveRegion", () => {
   const maakuntaByCity = new Map([
@@ -25,5 +25,23 @@ describe("resolveRegion", () => {
 
   it("returns undefined when the city has no known maakunta", () => {
     expect(resolveRegion("Unknown City", maakuntaByCity)).toBeUndefined();
+  });
+});
+
+describe("groupRegions", () => {
+  it("puts the city regions first in fixed order and sorts the rest in Finnish order", () => {
+    expect(
+      groupRegions([
+        "Uusimaa",
+        "Turku",
+        "Ahvenanmaa",
+        "Pääkaupunkiseutu",
+        "Etelä-Savo",
+        "Tampere",
+      ]),
+    ).toEqual({
+      cities: ["Pääkaupunkiseutu", "Tampere", "Turku"],
+      others: ["Ahvenanmaa", "Etelä-Savo", "Uusimaa"],
+    });
   });
 });
