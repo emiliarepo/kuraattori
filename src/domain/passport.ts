@@ -219,3 +219,51 @@ export function buildPassport(
     regions,
   };
 }
+
+const BAR_CELLS = 5;
+const SHARE_REGIONS = 3;
+
+/** Five cells, at least one filled once a region has any stamp. */
+export function progressBar(stamped: number, total: number): string {
+  const filled =
+    stamped > 0
+      ? Math.max(1, Math.round((stamped / Math.max(total, 1)) * BAR_CELLS))
+      : 0;
+  return "▰".repeat(filled) + "▱".repeat(BAR_CELLS - filled);
+}
+
+export interface ShareCopy {
+  headline: (year: number, stamped: number, total: number) => string;
+  moreRegions: (count: number) => string;
+}
+
+/**
+ * Feed text for "Jaa passi": the headline, then the regions with the most
+ * stamps on one line. The URL is shared separately.
+ */
+export function passportShareText(
+  passport: Passport,
+  year: number,
+  copy: ShareCopy,
+): string {
+  const regions = passport.regions
+    .filter((region) => region.stamped.length)
+    .map((region, order) => ({ region, order }))
+    .sort(
+      (a, b) =>
+        b.region.stamped.length - a.region.stamped.length || a.order - b.order,
+    )
+    .map(({ region }) => region);
+  const parts = regions
+    .slice(0, SHARE_REGIONS)
+    .map(
+      (region) =>
+        `${region.region} ${progressBar(region.stamped.length, region.total)}`,
+    );
+  if (regions.length > SHARE_REGIONS)
+    parts.push(copy.moreRegions(regions.length - SHARE_REGIONS));
+  return [
+    copy.headline(year, passport.stampedCount, passport.total),
+    ...(parts.length ? [parts.join(" · ")] : []),
+  ].join("\n");
+}

@@ -3,9 +3,12 @@ import { Fragment } from "react";
 
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import { EmptyStamp, Stamp } from "~/app/_components/Stamp";
+import { siteUrl } from "~/app/_lib/site-url";
 import { SharePassportButton } from "~/app/my/passport/SharePassportButton";
+import { todayInHelsinki } from "~/domain/dates";
 import {
   buildPassport,
+  passportShareText,
   postmarkDate,
   stampLabel,
   stampLook,
@@ -36,7 +39,16 @@ export default async function MyPassportPage() {
         <p className="text-headline text-4xl tabular-nums sm:text-6xl">
           {copy.summary(passport.stampedCount, passport.total)}
         </p>
-        {passport.stampedCount > 0 && <SharePassportButton />}
+        {passport.stampedCount > 0 && (
+          <SharePassportButton
+            text={passportShareText(
+              passport,
+              Number(todayInHelsinki().slice(0, 4)),
+              copy.shareText,
+            )}
+            url={siteUrl.origin}
+          />
+        )}
       </div>
       {stampedRegions.length > 0 ? (
         <p className="text-muted mt-3 font-sans text-sm">

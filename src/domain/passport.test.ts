@@ -4,13 +4,16 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildPassport,
+  passportShareText,
   postmarkDate,
+  progressBar,
   STAMP_INKS,
   STAMP_PAPER,
   STAMP_POSTMARK,
   stampLabel,
   stampLook,
 } from "~/domain/passport";
+import { t } from "~/i18n/fi";
 
 function luminance(hex: string): number {
   const [r, g, b] = [1, 3, 5].map((index) => {
@@ -145,5 +148,56 @@ describe("buildPassport", () => {
     expect(passport.regions[1]!.unstamped.map((m) => m.name)).toEqual([
       "Vapriikki",
     ]);
+  });
+});
+
+describe("progressBar", () => {
+  it.each([
+    [0, 10, "▱▱▱▱▱"],
+    [1, 40, "▰▱▱▱▱"],
+    [5, 10, "▰▰▰▱▱"],
+    [10, 10, "▰▰▰▰▰"],
+  ])("%i of %i is %s", (stamped, total, bar) => {
+    expect(progressBar(stamped, total)).toBe(bar);
+  });
+});
+
+describe("passportShareText", () => {
+  const copy = t.pages.my.passport.shareText;
+  const museums = (region: string, count: number, from: number) =>
+    Array.from({ length: count }, (_, i) => ({
+      id: from + i,
+      name: `Museo ${from + i}`,
+      slug: `m${from + i}`,
+      city: null,
+      region,
+    }));
+  const visits = (ids: number[]) =>
+    new Map(ids.map((id) => [id, new Date("2026-06-01")]));
+  const all = [
+    ...museums("Pääkaupunkiseutu", 10, 1),
+    ...museums("Tampere", 5, 101),
+    ...museums("Turku", 5, 201),
+    ...museums("Lappi", 5, 301),
+    ...museums("Kainuu", 5, 401),
+  ];
+
+  it("leads with the count, then the regions with the most stamps", () => {
+    const passport = buildPassport(
+      all,
+      visits([1, 2, 101, 102, 103, 104, 105, 201, 301]),
+      "Muu",
+    );
+    expect(passportShareText(passport, 2026, copy)).toBe(
+      "Museopassi 2026 🏛️ 9/30 museota\n" +
+        "Tampere ▰▰▰▰▰ · Pääkaupunkiseutu ▰▱▱▱▱ · Turku ▰▱▱▱▱ · +1",
+    );
+  });
+
+  it("is only the headline for an empty passport", () => {
+    const passport = buildPassport(all, new Map(), "Muu");
+    expect(passportShareText(passport, 2026, copy)).toBe(
+      "Museopassi 2026 🏛️ 0/30 museota",
+    );
   });
 });
