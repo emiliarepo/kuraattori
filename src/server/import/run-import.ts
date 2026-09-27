@@ -1,4 +1,4 @@
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, desc, eq, isNotNull } from "drizzle-orm";
 
 import { type Db } from "~/server/db";
 import {
@@ -9,6 +9,7 @@ import {
 } from "~/server/db/schema";
 
 import { classify } from "./grouping";
+import { importSanityError } from "./sanity";
 import type { ExhibitionSourceAdapter } from "./types";
 import {
   loadExistingCategories,
@@ -100,6 +101,17 @@ export async function runImport(
   adapter: ExhibitionSourceAdapter,
 ): Promise<ImportRunStats> {
   const dataSourceId = await getOrCreateDataSource(db, adapter);
+  const [previousSuccessfulRun] = await db
+    .select({ itemsFetched: importRuns.itemsFetched })
+    .from(importRuns)
+    .where(
+      and(
+        eq(importRuns.dataSourceId, dataSourceId),
+        eq(importRuns.status, "succeeded"),
+      ),
+    )
+    .orderBy(desc(importRuns.id))
+    .limit(1);
   const [run] = await db
     .insert(importRuns)
     .values({ dataSourceId, status: "running" })
@@ -108,12 +120,18 @@ export async function runImport(
 
   try {
     const stats = await performImport(db, adapter);
+    const sanityError = importSanityError(
+      previousSuccessfulRun?.itemsFetched,
+      stats.itemsFetched,
+      stats.itemsFailed,
+    );
 
     await db
       .update(importRuns)
       .set({
-        status: "succeeded",
+        status: sanityError ? "failed" : "succeeded",
         completedAt: new Date(),
+        errorMessage: sanityError,
         itemsFetched: stats.itemsFetched,
         itemsCreated: stats.itemsCreated,
         itemsUpdated: stats.itemsUpdated,
@@ -122,12 +140,18 @@ export async function runImport(
         itemsFailed: stats.itemsFailed,
       })
       .where(eq(importRuns.id, run.id));
-    await db
-      .update(dataSources)
-      .set({ lastSuccessfulImportAt: new Date() })
-      .where(eq(dataSources.id, dataSourceId));
+    if (!sanityError) {
+      await db
+        .update(dataSources)
+        .set({ lastSuccessfulImportAt: new Date() })
+        .where(eq(dataSources.id, dataSourceId));
+    }
 
-    return { status: "succeeded", ...stats };
+    return {
+      status: sanityError ? "failed" : "succeeded",
+      ...stats,
+      errorMessage: sanityError,
+    };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     await db

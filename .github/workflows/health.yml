@@ -1,0 +1,27 @@
+name: Production health
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+    - cron: "15 2 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check public routes
+        run: node scripts/check-health.mjs
+
+      - name: Check daily D1 reads
+        if: ${{ always() && (github.event_name == 'workflow_dispatch' || github.event.schedule == '15 2 * * *') }}
+        run: node scripts/check-d1-usage.mjs
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
