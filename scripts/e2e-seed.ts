@@ -23,7 +23,10 @@ import {
   distinctTranslation,
   parseTranslatedListing,
 } from "~/server/import/museot-fi/translations";
-import { archiveImages } from "~/server/import/image-archive";
+import {
+  archiveImages,
+  DEFAULT_IMAGE_ARCHIVE_LIMITS,
+} from "~/server/import/image-archive";
 import { runImport } from "~/server/import/run-import";
 import type {
   ExhibitionSourceAdapter,
@@ -301,7 +304,12 @@ async function main() {
         resize: resizeImage,
         put: createBindingArchiveStore(proxy.env.IMAGES_ARCHIVE).put,
       },
-      Infinity,
+      {
+        ...DEFAULT_IMAGE_ARCHIVE_LIMITS,
+        maxDownloads: Infinity,
+        budgetMs: Infinity,
+        intervalMs: 0,
+      },
     );
     console.log(JSON.stringify({ imageArchive }, null, 2));
   } finally {

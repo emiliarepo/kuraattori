@@ -32,6 +32,7 @@ export interface ExistingMuseumRow extends ExistingRow {
   name: string;
   openingHours: OpeningHours | null;
   freeDays: string[] | null;
+  pageFetchedAt: Date | null;
 }
 
 export interface ExistingExhibitionRow extends ExistingRow {
@@ -58,6 +59,7 @@ export async function loadExistingMuseums(
       city: museums.city,
       openingHours: museums.openingHours,
       freeDays: museums.freeDays,
+      pageFetchedAt: museums.pageFetchedAt,
     })
     .from(museums)
     .where(eq(museums.source, source));
@@ -128,7 +130,7 @@ export async function upsertMuseum(
   db: Db,
   source: string,
   museum: NormalizedMuseum,
-  existing: Map<string, ExistingRow>,
+  existing: Map<string, ExistingMuseumRow>,
   takenSlugs: Set<string>,
 ): Promise<number> {
   const found = existing.get(museum.sourceId);
@@ -171,7 +173,15 @@ export async function upsertMuseum(
     .returning({ id: museums.id });
   if (!row) throw new Error(`Failed to insert museum ${museum.sourceId}`);
 
-  existing.set(museum.sourceId, { id: row.id, slug, city: museum.city });
+  existing.set(museum.sourceId, {
+    id: row.id,
+    slug,
+    name: museum.name,
+    city: museum.city,
+    openingHours: null,
+    freeDays: null,
+    pageFetchedAt: null,
+  });
   return row.id;
 }
 
@@ -409,4 +419,12 @@ export async function updateMuseumSchedule(
     .update(museums)
     .set({ openingHours, freeDays: page.freeDays })
     .where(eq(museums.id, existing.id));
+}
+
+export async function markMuseumPageFetched(
+  db: Db,
+  id: number,
+  at: Date,
+): Promise<void> {
+  await db.update(museums).set({ pageFetchedAt: at }).where(eq(museums.id, id));
 }

@@ -35,3 +35,5 @@ Commits use the repo-local identity emilia@repo.codes; rebase agent branches if 
 ## Queue after ticket 42 (27.9.2026)
 
 Migrations run one branch at a time, in this order: 41 → 43 → 44 → 45 → 22 → 34. Then 37, the final verification.
+
+49 import budget (Opus low) owns the migration slot after 34 (`0014`, `museum.pageFetchedAt`).

@@ -58,8 +58,9 @@ async function fetchMaakuntaByCity(
   return byCity;
 }
 
-export function createMuseotFiAdapter(): ExhibitionSourceAdapter {
-  const client = new MuseotFiHttpClient();
+export function createMuseotFiAdapter(
+  client = new MuseotFiHttpClient(),
+): ExhibitionSourceAdapter {
   return {
     name: "museot.fi",
     async fetchMuseumPage(sourceId, city) {
