@@ -4,6 +4,10 @@ import {
   APP_BASE_URL,
   APP_LOG_PATH,
   APP_PORT,
+  MAINTENANCE_BASE_URL,
+  MAINTENANCE_LOG_PATH,
+  MAINTENANCE_PERSIST_DIR,
+  MAINTENANCE_PORT,
   PROD_CHECK_BASE_URL,
   PROD_CHECK_PORT,
 } from "./e2e/env";
@@ -29,7 +33,11 @@ export default defineConfig({
   projects: [
     {
       name: "e2e",
-      testIgnore: ["**/accessibility.spec.ts", "**/auth-providers.spec.ts"],
+      testIgnore: [
+        "**/accessibility.spec.ts",
+        "**/auth-providers.spec.ts",
+        "**/maintenance.spec.ts",
+      ],
       use: {
         ...devices["Desktop Chrome"],
         baseURL: APP_BASE_URL,
@@ -53,6 +61,14 @@ export default defineConfig({
         baseURL: PROD_CHECK_BASE_URL,
       },
     },
+    {
+      name: "maintenance",
+      testMatch: "**/maintenance.spec.ts",
+      use: {
+        ...devices["Desktop Chrome"],
+        baseURL: MAINTENANCE_BASE_URL,
+      },
+    },
   ],
   webServer: [
     {
@@ -69,6 +85,21 @@ export default defineConfig({
       // Worker as closely as a local build can, for `auth-providers.spec.ts`.
       command: `wrangler dev --port ${PROD_CHECK_PORT} --persist-to ${PROD_CHECK_PERSIST_DIR} --var AUTH_SECRET:${TEST_AUTH_SECRET}`,
       url: `${PROD_CHECK_BASE_URL}/api/auth/providers`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      name: "maintenance-server",
+      // Its own server and persisted KV, so setting the maintenance flag
+      // mid-test (maintenance.spec.ts) can't 503 the other projects' shared
+      // "app" server. `NEXTJS_ENV:development` turns on the D1 read-budget
+      // log line (src/server/db/read-budget.ts), which the test reads to
+      // prove the flag short-circuits before any D1 access. `port`, not
+      // `url`, for readiness: the flag may already be set by a previous,
+      // interrupted run, which would make an `/api/...` readiness URL 503
+      // forever.
+      command: `tsx scripts/e2e-server.ts ${MAINTENANCE_LOG_PATH} -- --port ${MAINTENANCE_PORT} --persist-to ${MAINTENANCE_PERSIST_DIR} --var NEXTJS_ENV:development --var AUTH_SECRET:${TEST_AUTH_SECRET}`,
+      port: MAINTENANCE_PORT,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },

@@ -46,5 +46,10 @@
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
 		"binding": "IMAGES"
+	},
+	"limits": {
+		// About 3× the measured p99 CPU time per request; see
+		// issues/39-cost-guardrails.md for the measurement.
+		"cpu_ms": 1100
 	}
 }

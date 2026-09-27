@@ -3,7 +3,6 @@ name: Production health
 on:
   schedule:
     - cron: "*/30 * * * *"
-    - cron: "15 2 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -19,9 +18,18 @@ jobs:
       - name: Check public routes
         run: node scripts/check-health.mjs
 
-      - name: Check daily D1 reads
-        if: ${{ always() && (github.event_name == 'workflow_dispatch' || github.event.schedule == '15 2 * * *') }}
-        run: node scripts/check-d1-usage.mjs
+      - name: Check usage against budgets
+        if: always()
+        run: node scripts/check-usage-budgets.mjs
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          BUDGET_WORKER_REQUESTS: ${{ vars.BUDGET_WORKER_REQUESTS }}
+          BUDGET_WORKER_CPU_MS: ${{ vars.BUDGET_WORKER_CPU_MS }}
+          BUDGET_D1_ROWS_READ: ${{ vars.BUDGET_D1_ROWS_READ }}
+          BUDGET_D1_ROWS_WRITTEN: ${{ vars.BUDGET_D1_ROWS_WRITTEN }}
+          BUDGET_KV_READS: ${{ vars.BUDGET_KV_READS }}
+          BUDGET_KV_WRITES: ${{ vars.BUDGET_KV_WRITES }}
+          BUDGET_R2_CLASS_A: ${{ vars.BUDGET_R2_CLASS_A }}
+          BUDGET_R2_CLASS_B: ${{ vars.BUDGET_R2_CLASS_B }}
