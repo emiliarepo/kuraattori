@@ -42,6 +42,30 @@ check. Both read from the same local D1 database under `.wrangler/state`.
 - `pnpm build` — plain Next.js build (fast feedback while coding).
 - `pnpm preview` / `pnpm deploy` — build and run/deploy the actual Worker.
 
+## Deployment
+
+Pushes to `main` run `.github/workflows/deploy.yml`: install, typecheck, lint,
+test, apply `drizzle/` migrations to the remote D1 database
+(`wrangler d1 migrations apply DB --remote`), then `pnpm run deploy`. Any
+failed step stops the run before the migration or deploy. Pull requests run
+the same checks via `.github/workflows/ci.yml` without touching D1 or the
+Worker. Both share a `d1-remote` concurrency group with the nightly importer
+(`import.yml`) so a migration never runs alongside another migration, a
+deploy, or an import.
+
+`CLOUDFLARE_API_TOKEN` (a repo secret) needs:
+
+- **Workers Scripts: Edit** — upload the Worker bundle.
+- **D1: Edit** — apply migrations.
+- **Workers Routes: Edit** on zone `emialis.com` — keep the
+  `kuraattori.emialis.com` custom domain route attached.
+- **Account Settings: Read** — `wrangler` reads this on every command.
+
+`AUTH_SECRET`, `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` are set directly on
+the Worker (`wrangler secret put`) and are never read or written by CI; the
+typecheck/lint/build steps run with `SKIP_ENV_VALIDATION=1` instead, since
+they only need `src/env.js`'s schema satisfied, not the real values.
+
 ## Notes
 
 - `wrangler.jsonc`'s `database_id` is a placeholder for local-only development.
