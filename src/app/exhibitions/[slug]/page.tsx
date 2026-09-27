@@ -6,6 +6,7 @@ import { CategoryList } from "~/app/_components/CategoryList";
 import { ExhibitionDescription } from "~/app/_components/ExhibitionDescription";
 import { ExhibitionStatusControl } from "~/app/_components/ExhibitionStatusControl";
 import { ImageFallback } from "~/app/_components/ImageFallback";
+import { Rail } from "~/app/_components/Rail";
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import { TimeBar } from "~/app/_components/TimeBar";
 import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
@@ -16,6 +17,7 @@ import {
   timeBarProps,
   urgencyLabelText,
 } from "~/app/_lib/exhibition-format";
+import { toRowView } from "~/app/_lib/row";
 import { todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
 import { auth } from "~/server/auth";
@@ -67,6 +69,7 @@ export default async function ExhibitionDetailPage({
   if (!exhibition) notFound();
 
   const today = todayInHelsinki();
+  const similar = await api.exhibition.similar({ slug });
   const urgencyLabel = urgencyLabelText(exhibition, today);
   const openLabel = exhibition.endDate
     ? `${formatLongDate(exhibition.startDate)}–${formatLongDate(exhibition.endDate)}`
@@ -211,6 +214,11 @@ export default async function ExhibitionDetailPage({
           </div>
         )}
       </div>
+      <Rail
+        title="Samankaltaisia"
+        items={similar.map((item) => ({ view: toRowView(item, today) }))}
+        emptyMessage="Ei samankaltaisia näyttelyitä."
+      />
     </article>
   );
 }

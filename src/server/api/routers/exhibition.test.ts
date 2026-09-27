@@ -512,4 +512,209 @@ describe("exhibition API", () => {
       ]);
     });
   });
+
+  it("ranks similar exhibitions, collapses groups, and excludes self, hidden, ended, and notices", async () => {
+    await db.insert(schema.users).values({ id: "u1", email: "u1@example.com" });
+    await db.insert(schema.museums).values([
+      {
+        id: 1,
+        source: "test",
+        sourceId: "m1",
+        name: "Museum 1",
+        slug: "m1",
+        region: "Home",
+      },
+      {
+        id: 2,
+        source: "test",
+        sourceId: "m2",
+        name: "Museum 2",
+        slug: "m2",
+        region: "Away",
+      },
+      {
+        id: 3,
+        source: "test",
+        sourceId: "m3",
+        name: "Museum 3",
+        slug: "m3",
+        region: "Home",
+      },
+      {
+        id: 4,
+        source: "test",
+        sourceId: "m4",
+        name: "Museum 4",
+        slug: "m4",
+        region: "Home",
+      },
+      {
+        id: 5,
+        source: "test",
+        sourceId: "m5",
+        name: "Museum 5",
+        slug: "m5",
+        region: "Away",
+      },
+    ]);
+    await db.insert(schema.categories).values([
+      { id: 1, source: "test", sourceId: "c1", name: "One", slug: "one" },
+      { id: 2, source: "test", sourceId: "c2", name: "Two", slug: "two" },
+    ]);
+    await db.insert(schema.exhibitions).values([
+      {
+        id: 1,
+        source: "test",
+        sourceId: "e1",
+        museumId: 1,
+        slug: "source",
+        titleFi: "Source",
+        startDate: "2026-01-01",
+        endDate: "2026-12-31",
+        sourcePayloadHash: "a",
+        exhibitionGroup: "source-group",
+      },
+      {
+        id: 2,
+        source: "test",
+        sourceId: "e2",
+        museumId: 2,
+        slug: "shared-category",
+        titleFi: "Shared category",
+        startDate: "2026-01-01",
+        endDate: "2026-10-20",
+        sourcePayloadHash: "b",
+      },
+      {
+        id: 3,
+        source: "test",
+        sourceId: "e3",
+        museumId: 3,
+        slug: "shared-region",
+        titleFi: "Shared region",
+        startDate: "2026-01-01",
+        endDate: "2026-10-31",
+        sourcePayloadHash: "c",
+      },
+      {
+        id: 4,
+        source: "test",
+        sourceId: "e4",
+        museumId: 1,
+        slug: "same-museum",
+        titleFi: "Same museum",
+        startDate: "2026-01-01",
+        endDate: "2026-11-01",
+        sourcePayloadHash: "d",
+      },
+      {
+        id: 5,
+        source: "test",
+        sourceId: "e5",
+        museumId: 4,
+        slug: "tie-earlier",
+        titleFi: "Tie earlier",
+        startDate: "2026-01-01",
+        endDate: "2026-09-28",
+        sourcePayloadHash: "e",
+      },
+      {
+        id: 6,
+        source: "test",
+        sourceId: "e6",
+        museumId: 5,
+        slug: "source-sibling",
+        titleFi: "Source sibling",
+        startDate: "2026-01-01",
+        endDate: "2026-10-01",
+        sourcePayloadHash: "f",
+        exhibitionGroup: "source-group",
+      },
+      {
+        id: 7,
+        source: "test",
+        sourceId: "e7",
+        museumId: 2,
+        slug: "ended",
+        titleFi: "Ended",
+        startDate: "2026-01-01",
+        endDate: "2026-09-26",
+        sourcePayloadHash: "g",
+      },
+      {
+        id: 8,
+        source: "test",
+        sourceId: "e8",
+        museumId: 2,
+        slug: "notice",
+        titleFi: "Notice",
+        startDate: "2026-01-01",
+        endDate: "2026-11-01",
+        sourcePayloadHash: "h",
+        kind: "notice",
+      },
+      {
+        id: 9,
+        source: "test",
+        sourceId: "e9",
+        museumId: 2,
+        slug: "hidden",
+        titleFi: "Hidden",
+        startDate: "2026-01-01",
+        endDate: "2026-11-01",
+        sourcePayloadHash: "i",
+      },
+      {
+        id: 10,
+        source: "test",
+        sourceId: "e10",
+        museumId: 3,
+        slug: "group-member",
+        titleFi: "Group member",
+        startDate: "2026-01-01",
+        endDate: "2026-11-01",
+        sourcePayloadHash: "j",
+        exhibitionGroup: "candidate-group",
+      },
+      {
+        id: 11,
+        source: "test",
+        sourceId: "e11",
+        museumId: 4,
+        slug: "group-canonical",
+        titleFi: "Group canonical",
+        startDate: "2026-01-01",
+        endDate: "2026-11-01",
+        sourcePayloadHash: "k",
+        exhibitionGroup: "candidate-group",
+      },
+    ]);
+    await db.insert(schema.exhibitionCategories).values([
+      { exhibitionId: 1, categoryId: 1 },
+      { exhibitionId: 1, categoryId: 2 },
+      { exhibitionId: 2, categoryId: 1 },
+      { exhibitionId: 3, categoryId: 1 },
+      { exhibitionId: 5, categoryId: 1 },
+      { exhibitionId: 6, categoryId: 1 },
+    ]);
+    await db
+      .insert(schema.userExhibitions)
+      .values({ userId: "u1", exhibitionId: 9, status: "hidden" });
+
+    const signedIn = {
+      ...ctx,
+      session: { user: { id: "u1" }, expires: "2099-01-01" },
+    } as typeof ctx;
+    const result = await createCaller(signedIn).exhibition.similar({
+      slug: "source",
+    });
+    expect(result.map((item) => item.slug)).toEqual([
+      "tie-earlier",
+      "shared-region",
+      "shared-category",
+      "same-museum",
+      "group-member",
+    ]);
+    expect(result).toHaveLength(5);
+  });
 });
