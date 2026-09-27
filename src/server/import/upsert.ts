@@ -8,6 +8,7 @@ import {
   museums,
 } from "~/server/db/schema";
 
+import type { Classification } from "./grouping";
 import { uniqueSlug } from "./slug";
 import type {
   NormalizedCategory,
@@ -22,6 +23,10 @@ export interface ExistingRow {
 
 export interface ExistingExhibitionRow extends ExistingRow {
   sourcePayloadHash: string;
+  titleFi: string;
+  startDate: string;
+  endDate: string | null;
+  descriptionFi: string | null;
 }
 
 export async function loadExistingMuseums(
@@ -47,13 +52,25 @@ export async function loadExistingExhibitions(
       id: exhibitions.id,
       slug: exhibitions.slug,
       sourcePayloadHash: exhibitions.sourcePayloadHash,
+      titleFi: exhibitions.titleFi,
+      startDate: exhibitions.startDate,
+      endDate: exhibitions.endDate,
+      descriptionFi: exhibitions.descriptionFi,
     })
     .from(exhibitions)
     .where(eq(exhibitions.source, source));
   return new Map(
     rows.map((row) => [
       row.sourceId,
-      { id: row.id, slug: row.slug, sourcePayloadHash: row.sourcePayloadHash },
+      {
+        id: row.id,
+        slug: row.slug,
+        sourcePayloadHash: row.sourcePayloadHash,
+        titleFi: row.titleFi,
+        startDate: row.startDate,
+        endDate: row.endDate,
+        descriptionFi: row.descriptionFi,
+      },
     ]),
   );
 }
@@ -155,6 +172,8 @@ export async function upsertExhibition(
         imageUrl: exhibition.imageUrl,
         museumCardEligible: exhibition.museumCardEligible,
         sourcePayloadHash: exhibition.payloadHash,
+        exhibitionGroup: exhibition.exhibitionGroup,
+        kind: exhibition.kind,
         lastFetchedAt: now,
         lastSeenAt: now,
       })
@@ -182,6 +201,8 @@ export async function upsertExhibition(
       imageUrl: exhibition.imageUrl,
       museumCardEligible: exhibition.museumCardEligible,
       sourcePayloadHash: exhibition.payloadHash,
+      exhibitionGroup: exhibition.exhibitionGroup,
+      kind: exhibition.kind,
       lastFetchedAt: now,
       lastSeenAt: now,
     })
@@ -193,14 +214,28 @@ export async function upsertExhibition(
     id: row.id,
     slug,
     sourcePayloadHash: exhibition.payloadHash,
+    titleFi: exhibition.title,
+    startDate: exhibition.startDate,
+    endDate: exhibition.endDate ?? null,
+    descriptionFi: exhibition.description ?? null,
   });
   return { id: row.id, created: true };
 }
 
-export async function touchExhibition(db: Db, id: number): Promise<void> {
+/**
+ * Marks an unchanged listing as seen this run, and (re)classifies it from its
+ * already-stored fields. This is how existing rows pick up `exhibitionGroup`
+ * and `kind` after the migration backfilled `kind` but left `exhibitionGroup`
+ * null: every run reclassifies every exhibition, changed or not.
+ */
+export async function touchExhibition(
+  db: Db,
+  id: number,
+  classification: Classification,
+): Promise<void> {
   await db
     .update(exhibitions)
-    .set({ lastSeenAt: new Date() })
+    .set({ lastSeenAt: new Date(), ...classification })
     .where(eq(exhibitions.id, id));
 }
 
