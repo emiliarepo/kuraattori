@@ -21,9 +21,8 @@ export function ProfileForm({
   initialRegions: readonly string[];
   signOutAction: () => Promise<void>;
 }) {
-  const [interestIds, setInterestIds] = useState<readonly number[]>(
-    initialInterestIds,
-  );
+  const [interestIds, setInterestIds] =
+    useState<readonly number[]>(initialInterestIds);
   const [regions, setRegions] = useState<readonly string[]>(initialRegions);
 
   const updateInterests = api.profile.updateInterests.useMutation();
@@ -56,9 +55,7 @@ export function ProfileForm({
       <h1 className="text-headline text-3xl">{t.profile.title}</h1>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">
-          {t.profile.interestsHeading}
-        </h2>
+        <h2 className="text-lg font-semibold">{t.profile.interestsHeading}</h2>
         <ul className="flex flex-col gap-2">
           {categories.map((category) => (
             <li key={category.id}>

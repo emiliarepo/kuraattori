@@ -23,9 +23,8 @@ export function WelcomeFlow({
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("interests");
-  const [interestIds, setInterestIds] = useState<readonly number[]>(
-    initialInterestIds,
-  );
+  const [interestIds, setInterestIds] =
+    useState<readonly number[]>(initialInterestIds);
   const [regions, setRegions] = useState<readonly string[]>(initialRegions);
 
   const updateInterests = api.profile.updateInterests.useMutation();

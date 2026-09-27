@@ -38,7 +38,10 @@ export default async function SignInPage({
           action={async (formData: FormData) => {
             "use server";
             revalidatePath("/", "layout");
-            await signIn("dev", { ...Object.fromEntries(formData), redirectTo });
+            await signIn("dev", {
+              ...Object.fromEntries(formData),
+              redirectTo,
+            });
           }}
           className="border-rule flex flex-col gap-3 border-t pt-8"
         >

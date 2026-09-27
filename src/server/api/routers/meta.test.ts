@@ -55,15 +55,13 @@ describe("meta API", () => {
   });
 
   it("hides the Museokortti filter when every exhibition is eligible", async () => {
-    await db
-      .insert(schema.museums)
-      .values({
-        id: 1,
-        source: "test",
-        sourceId: "m1",
-        name: "Ateneum",
-        slug: "ateneum",
-      });
+    await db.insert(schema.museums).values({
+      id: 1,
+      source: "test",
+      sourceId: "m1",
+      name: "Ateneum",
+      slug: "ateneum",
+    });
     await db.insert(schema.exhibitions).values({
       id: 1,
       source: "test",
