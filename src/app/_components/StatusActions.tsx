@@ -12,7 +12,7 @@ const STATUS_ORDER: readonly ExhibitionStatus[] = [
   "hidden",
 ];
 
-const STATUS_LABEL: Record<ExhibitionStatus, string> = {
+export const STATUS_LABEL: Record<ExhibitionStatus, string> = {
   interested: t.ui.status.interested,
   visited: t.ui.status.visited,
   hidden: t.ui.status.hidden,
@@ -39,7 +39,7 @@ export function StatusActions({
 
   return (
     <div>
-      <div role="group" className="border-rule flex border">
+      <div role="group" className="border-rule flex border font-sans">
         {STATUS_ORDER.map((value, index) => {
           const pressed = status === value;
           return (
@@ -48,9 +48,9 @@ export function StatusActions({
               type="button"
               aria-pressed={pressed}
               onClick={() => handleClick(value)}
-              className={`border-rule flex-1 px-3 py-2 text-sm font-semibold transition-colors duration-150 ${
+              className={`border-rule flex-1 px-3 py-2.5 text-sm font-semibold transition-colors duration-150 ${
                 index > 0 ? "border-l" : ""
-              } ${pressed ? "bg-fg text-bg" : "hover:bg-surface"}`}
+              } ${pressed ? "bg-signal text-on-signal" : "hover:bg-surface"}`}
             >
               {STATUS_LABEL[value]}
             </button>

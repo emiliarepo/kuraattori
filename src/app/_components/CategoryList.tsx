@@ -10,7 +10,7 @@ export function CategoryList({
   if (categories.length === 0) return null;
 
   return (
-    <p className="text-muted text-sm">
+    <p className="text-muted font-sans text-xs leading-relaxed">
       {categories.map((category, index) => (
         <span key={category.label}>
           {index > 0 && " · "}

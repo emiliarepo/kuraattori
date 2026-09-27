@@ -22,7 +22,7 @@ export default async function SignInPage({
 
   return (
     <div className="mx-auto flex max-w-sm flex-col gap-8 py-12">
-      <h1 className="text-headline text-3xl">{t.auth.signIn.title}</h1>
+      <h1 className="text-headline text-4xl">{t.auth.signIn.title}</h1>
 
       <form
         action={async () => {
@@ -33,7 +33,7 @@ export default async function SignInPage({
       >
         <button
           type="submit"
-          className="bg-fg text-bg w-full py-3 text-sm font-semibold"
+          className="bg-fg text-bg w-full py-3 font-sans text-sm font-semibold"
         >
           {t.auth.signIn.google}
         </button>
@@ -49,16 +49,16 @@ export default async function SignInPage({
               redirectTo,
             });
           }}
-          className="border-rule flex flex-col gap-3 border-t pt-8"
+          className="border-rule flex flex-col gap-3 border-t pt-8 font-sans"
         >
-          <p className="text-sm font-semibold">{t.auth.signIn.devHeading}</p>
+          <p className="text-kicker">{t.auth.signIn.devHeading}</p>
           <label className="flex flex-col gap-1 text-sm">
             {t.auth.signIn.devEmailLabel}
             <input
               type="email"
               name="email"
               defaultValue="dev@kuraattori.local"
-              className="border-rule border px-2 py-1"
+              className="border-rule-soft bg-bg border px-2 py-2 text-base"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -67,7 +67,7 @@ export default async function SignInPage({
               type="text"
               name="name"
               defaultValue="Devaaja"
-              className="border-rule border px-2 py-1"
+              className="border-rule-soft bg-bg border px-2 py-2 text-base"
             />
           </label>
           <button

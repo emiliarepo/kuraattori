@@ -67,81 +67,138 @@ export default async function ExhibitionDetailPage({
     ? `${formatLongDate(exhibition.startDate)}–${formatLongDate(exhibition.endDate)}`
     : t.time.indefinite;
 
+  const city = exhibition.museum.city;
+
   return (
-    <article className="py-8 sm:flex sm:gap-8">
-      <div className="sm:w-3/5">
-        <ImageFallback
-          src={exhibition.imageUrl}
-          alt={imageAlt(exhibition.titleFi, exhibition.museum.name)}
-          title={exhibition.titleFi}
-          aspectRatio="4 / 5"
-        />
-      </div>
-
-      <div className="mt-6 flex flex-col gap-6 sm:sticky sm:top-20 sm:mt-0 sm:w-2/5 sm:self-start">
-        {urgencyLabel && <UrgencyLabel label={urgencyLabel} />}
-
-        <h1 className="text-headline text-4xl">{exhibition.titleFi}</h1>
-
-        <dl className="border-rule-soft divide-rule-soft grid grid-cols-2 gap-y-2 divide-y border-y text-sm [&>*]:py-2">
-          <dt className="text-muted">{t.pages.detail.museum}</dt>
-          <dd>
+    <article className="py-6 sm:py-8">
+      <nav
+        aria-label={t.pages.detail.breadcrumb}
+        className="text-muted font-sans text-xs"
+      >
+        <Link href="/exhibitions" className="hover:text-fg hover:underline">
+          {t.pages.detail.exhibitions}
+        </Link>
+        {city && (
+          <>
+            {" / "}
             <Link
-              href={`/museums/${exhibition.museum.slug}`}
-              className="hover:text-signal underline-offset-2 hover:underline"
+              href={`/exhibitions?city=${encodeURIComponent(city)}`}
+              className="hover:text-fg hover:underline"
             >
-              {exhibition.museum.name}
+              {city}
             </Link>
-          </dd>
-          <dt className="text-muted">{t.pages.detail.city}</dt>
-          <dd>{exhibition.museum.city}</dd>
-          <dt className="text-muted">{t.pages.detail.open}</dt>
-          <dd>{openLabel}</dd>
-          {!exhibition.museumCardEligible && (
-            <>
-              <dt className="text-muted">{t.pages.detail.museumCard}</dt>
-              <dd className="font-semibold">{t.pages.detail.noMuseumCard}</dd>
-            </>
-          )}
-        </dl>
-
-        <TimeBar {...timeBarProps(exhibition, today)} />
-
-        {session?.user ? (
-          <ExhibitionStatusControl
-            exhibitionId={exhibition.id}
-            initialStatus={exhibition.status}
-          />
-        ) : (
-          <SignInPrompt message={t.pages.signIn.status} />
+          </>
         )}
+        {" / "}
+        <Link
+          href={`/museums/${exhibition.museum.slug}`}
+          className="hover:text-fg hover:underline"
+        >
+          {exhibition.museum.name}
+        </Link>
+      </nav>
+
+      <header className="mt-4 flex max-w-4xl flex-col gap-3">
+        {urgencyLabel && (
+          <div>
+            <UrgencyLabel label={urgencyLabel} />
+          </div>
+        )}
+        <h1 className="text-headline text-4xl sm:text-6xl">
+          {exhibition.titleFi}
+        </h1>
+        <p className="text-muted text-xl italic">
+          {exhibition.museum.name}
+          {city && `, ${city}`}
+        </p>
+      </header>
+
+      <div className="mt-6 grid gap-8 sm:grid-cols-[1.6fr_1fr] sm:gap-10">
+        <div className="sm:col-start-1">
+          <ImageFallback
+            src={exhibition.imageUrl}
+            alt={imageAlt(exhibition.titleFi, exhibition.museum.name)}
+            title={exhibition.titleFi}
+            aspectRatio="3 / 2"
+          />
+        </div>
+
+        <aside className="sm:border-rule-soft flex flex-col gap-6 sm:sticky sm:top-6 sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:self-start sm:border-l sm:pl-6">
+          <dl className="divide-rule-soft border-rule-soft grid grid-cols-[auto_1fr] gap-x-4 divide-y border-y [&>*]:py-2.5">
+            <dt className="text-kicker text-muted">{t.pages.detail.museum}</dt>
+            <dd>
+              <Link
+                href={`/museums/${exhibition.museum.slug}`}
+                className="hover:text-signal underline decoration-1 underline-offset-4"
+              >
+                {exhibition.museum.name}
+              </Link>
+            </dd>
+            <dt className="text-kicker text-muted">{t.pages.detail.city}</dt>
+            <dd>{city}</dd>
+            <dt className="text-kicker text-muted">{t.pages.detail.open}</dt>
+            <dd className="tabular-nums">{openLabel}</dd>
+            {!exhibition.museumCardEligible && (
+              <>
+                <dt className="text-kicker text-muted">
+                  {t.pages.detail.museumCard}
+                </dt>
+                <dd className="font-semibold">{t.pages.detail.noMuseumCard}</dd>
+              </>
+            )}
+            {exhibition.categories.length > 0 && (
+              <>
+                <dt className="text-kicker text-muted">
+                  {t.pages.detail.categories}
+                </dt>
+                <dd>
+                  <CategoryList
+                    categories={exhibition.categories.map((category) => ({
+                      label: category.name,
+                      href: `/exhibitions?category=${category.id}`,
+                    }))}
+                  />
+                </dd>
+              </>
+            )}
+          </dl>
+
+          <TimeBar {...timeBarProps(exhibition, today)} />
+
+          {session?.user ? (
+            <ExhibitionStatusControl
+              exhibitionId={exhibition.id}
+              initialStatus={exhibition.status}
+            />
+          ) : (
+            <SignInPrompt message={t.pages.signIn.status} />
+          )}
+
+          <div className="flex flex-col gap-1 font-sans text-xs">
+            {exhibition.sourceUrl && (
+              <a
+                href={exhibition.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-signal font-semibold underline underline-offset-4"
+              >
+                {t.pages.detail.source}
+              </a>
+            )}
+            {exhibition.lastFetchedAt && (
+              <p className="text-muted">
+                {t.pages.updated(
+                  dateTimeFormat.format(exhibition.lastFetchedAt),
+                )}
+              </p>
+            )}
+          </div>
+        </aside>
 
         {exhibition.descriptionFi && (
-          <ExhibitionDescription text={exhibition.descriptionFi} />
-        )}
-
-        <CategoryList
-          categories={exhibition.categories.map((category) => ({
-            label: category.name,
-            href: `/exhibitions?category=${category.id}`,
-          }))}
-        />
-
-        {exhibition.sourceUrl && (
-          <a
-            href={exhibition.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-semibold underline-offset-2 hover:underline"
-          >
-            {t.pages.detail.source}
-          </a>
-        )}
-
-        {exhibition.lastFetchedAt && (
-          <p className="text-muted text-xs">
-            {t.pages.updated(dateTimeFormat.format(exhibition.lastFetchedAt))}
-          </p>
+          <div className="max-w-prose sm:col-start-1">
+            <ExhibitionDescription text={exhibition.descriptionFi} />
+          </div>
         )}
       </div>
     </article>

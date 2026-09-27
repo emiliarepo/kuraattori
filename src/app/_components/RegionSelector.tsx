@@ -58,7 +58,7 @@ export function RegionSelector({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
-        className="hover:text-signal text-sm font-semibold"
+        className="hover:text-signal text-right font-sans text-xs font-semibold"
       >
         {summary} <span aria-hidden>▾</span>
       </button>
@@ -77,20 +77,20 @@ export function RegionSelector({
             onKeyDown={(event) => {
               if (event.key === "Escape") setOpen(false);
             }}
-            className="border-rule bg-bg fixed inset-x-0 bottom-0 z-20 border-t p-4 sm:absolute sm:top-full sm:right-0 sm:bottom-auto sm:mt-2 sm:w-64 sm:border"
+            className="border-rule bg-bg fixed inset-x-0 bottom-0 z-20 border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:absolute sm:top-full sm:right-0 sm:bottom-auto sm:mt-2 sm:w-64 sm:border sm:pb-4"
           >
-            <p className="text-headline mb-3 text-lg">
+            <p className="text-headline mb-3 text-xl">
               {t.ui.region.sheetTitle}
             </p>
             <ul className="flex flex-col gap-2">
               {allRegions.map((region) => (
                 <li key={region}>
-                  <label className="flex items-center gap-2 text-sm">
+                  <label className="flex items-center gap-2 py-0.5">
                     <input
                       type="checkbox"
                       checked={selected.includes(region)}
                       onChange={() => toggle(region)}
-                      className="accent-fg h-4 w-4"
+                      className="accent-signal h-4 w-4"
                     />
                     {region}
                   </label>
@@ -100,7 +100,7 @@ export function RegionSelector({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="bg-fg text-bg mt-4 w-full py-2 text-sm font-semibold"
+              className="bg-fg text-bg mt-4 w-full py-2.5 font-sans text-sm font-semibold"
             >
               {t.ui.region.apply}
             </button>

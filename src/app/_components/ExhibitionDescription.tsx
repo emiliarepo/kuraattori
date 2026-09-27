@@ -14,12 +14,12 @@ export function ExhibitionDescription({ text }: { text: string }) {
 
   return (
     <div>
-      <p className="text-sm leading-relaxed whitespace-pre-line">{shown}</p>
+      <p className="text-lg leading-relaxed whitespace-pre-line">{shown}</p>
       {isLong && (
         <button
           type="button"
           onClick={() => setExpanded((value) => !value)}
-          className="mt-2 text-sm font-semibold underline-offset-2 hover:underline"
+          className="hover:text-signal mt-3 font-sans text-sm font-semibold underline underline-offset-4"
         >
           {expanded ? t.pages.detail.showLess : t.pages.detail.showMore}
         </button>

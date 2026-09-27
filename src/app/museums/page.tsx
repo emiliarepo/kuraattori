@@ -14,7 +14,9 @@ export default async function MuseumsPage() {
 
   return (
     <div className="py-8">
-      <h1 className="text-headline mb-6 text-4xl">{t.pages.museums.title}</h1>
+      <h1 className="text-headline mb-6 text-4xl sm:text-5xl">
+        {t.pages.museums.title}
+      </h1>
       <ul>
         {museums.map((museum) => (
           <li
@@ -23,11 +25,15 @@ export default async function MuseumsPage() {
           >
             <Link
               href={`/museums/${museum.slug}`}
-              className="hover:bg-surface flex items-baseline justify-between gap-4 py-4"
+              className="group flex items-baseline justify-between gap-4 py-3"
             >
-              <span className="font-semibold">{museum.name}</span>
+              <span className="text-lg group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4">
+                {museum.name}
+              </span>
               {museum.city && (
-                <span className="text-muted text-sm">{museum.city}</span>
+                <span className="text-muted flex-none font-sans text-xs">
+                  {museum.city}
+                </span>
               )}
             </Link>
           </li>

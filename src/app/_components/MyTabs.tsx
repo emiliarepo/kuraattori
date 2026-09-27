@@ -15,7 +15,7 @@ export function MyTabs() {
   const pathname = usePathname();
 
   return (
-    <nav aria-label={t.ui.nav.mine} className="border-rule flex border-b">
+    <nav aria-label={t.ui.nav.mine} className="border-rule-soft flex border-b">
       {TABS.map((tab) => {
         const active = pathname.startsWith(tab.href);
         return (
@@ -23,7 +23,7 @@ export function MyTabs() {
             key={tab.href}
             href={tab.href}
             aria-current={active ? "page" : undefined}
-            className={`border-b-2 px-4 py-2 text-sm font-semibold transition-colors duration-150 ${
+            className={`text-kicker -mb-px border-b-2 px-3 py-3 whitespace-nowrap transition-colors duration-150 first:pl-0 sm:px-4 ${
               active ? "border-b-signal text-signal" : "border-b-transparent"
             }`}
           >

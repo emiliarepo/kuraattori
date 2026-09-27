@@ -10,12 +10,14 @@ export default function ErrorBoundary({
 }) {
   return (
     <div className="flex flex-col items-start gap-4 py-16">
-      <h1 className="text-headline text-4xl">{t.pages.error.title}</h1>
-      <p className="text-muted">{t.pages.error.body}</p>
+      <h1 className="text-headline text-4xl sm:text-5xl">
+        {t.pages.error.title}
+      </h1>
+      <p className="text-muted text-lg italic">{t.pages.error.body}</p>
       <button
         type="button"
         onClick={reset}
-        className="bg-fg text-bg px-4 py-2 text-sm font-semibold"
+        className="bg-fg text-bg px-4 py-2.5 font-sans text-sm font-semibold"
       >
         {t.pages.error.retry}
       </button>
