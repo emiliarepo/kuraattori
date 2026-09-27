@@ -3,6 +3,7 @@
 	"main": ".open-next/worker.js",
 	"name": "kuraattori",
 	"compatibility_date": "2026-09-26",
+	"routes": [{ "pattern": "kuraattori.emialis.com", "custom_domain": true }],
 	"compatibility_flags": [
 		"nodejs_compat",
 		"global_fetch_strictly_public"
@@ -17,8 +18,8 @@
 			// database. Replace it with the id from `wrangler d1 create` before
 			// any remote deploy.
 			"binding": "DB",
-			"database_name": "kuraattori-db",
-			"database_id": "7111592d-14ad-489c-8389-1ee3670a277d",
+			"database_name": "kuraattori",
+			"database_id": "04d53796-2160-455d-ba5e-0fb4f6bee0b7",
 			"migrations_dir": "drizzle"
 		}
 	],
