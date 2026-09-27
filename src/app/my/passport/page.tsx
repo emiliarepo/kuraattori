@@ -3,9 +3,12 @@ import { Fragment } from "react";
 
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import { EmptyStamp, Stamp } from "~/app/_components/Stamp";
+import { siteUrl } from "~/app/_lib/site-url";
 import { SharePassportButton } from "~/app/my/passport/SharePassportButton";
+import { todayInHelsinki } from "~/domain/dates";
 import {
   buildPassport,
+  passportShareText,
   postmarkDate,
   stampLabel,
   stampLook,
@@ -36,7 +39,16 @@ export default async function MyPassportPage() {
         <p className="text-headline text-4xl tabular-nums sm:text-6xl">
           {copy.summary(passport.stampedCount, passport.total)}
         </p>
-        {passport.stampedCount > 0 && <SharePassportButton />}
+        {passport.stampedCount > 0 && (
+          <SharePassportButton
+            text={passportShareText(
+              passport,
+              Number(todayInHelsinki().slice(0, 4)),
+              copy.shareText,
+            )}
+            url={siteUrl.origin}
+          />
+        )}
       </div>
       {stampedRegions.length > 0 ? (
         <p className="text-muted mt-3 font-sans text-sm">
@@ -58,7 +70,7 @@ export default async function MyPassportPage() {
         <section
           key={region.region}
           aria-labelledby={`region-${region.region}`}
-          className="border-rule-soft mt-8 border-t pt-3"
+          className="border-rule-soft mt-4 border-t pt-5"
         >
           <div className="flex items-baseline justify-between gap-4">
             <h2
@@ -79,11 +91,11 @@ export default async function MyPassportPage() {
             </ul>
           )}
           {region.unstamped.length > 0 && (
-            <details className="mt-2">
+            <details className={region.stamped.length ? "mt-2" : "mt-1"}>
               <summary className="text-kicker flex min-h-11 cursor-pointer items-center">
                 {copy.unstamped(region.unstamped.length)}
               </summary>
-              <ul className="grid grid-cols-4 gap-3 pb-2 sm:grid-cols-6 lg:grid-cols-10">
+              <ul className="grid grid-cols-3 gap-x-4 gap-y-4 pb-2 sm:grid-cols-4 sm:gap-x-6 lg:grid-cols-6">
                 {region.unstamped.map((museum) => (
                   <li key={museum.id}>
                     <Link

@@ -1,13 +1,10 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { ImageResponse } from "next/og";
 
-import {
-  LABEL_CENTER_Y,
-  labelSize,
-  POSTMARK_CENTER,
-} from "~/app/_components/Stamp";
+import { LABEL_CENTER_Y, POSTMARK_CENTER } from "~/app/_components/Stamp";
 import {
   buildPassport,
+  labelSize,
   postmarkDate,
   STAMP_INKS,
   STAMP_PAPER,
@@ -18,19 +15,21 @@ import {
   type StampedMuseum,
 } from "~/domain/passport";
 import { t } from "~/i18n/fi";
+import { siteUrl } from "~/app/_lib/site-url";
+import { todayInHelsinki } from "~/domain/dates";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 
-const WIDTH = 1080;
-const HEIGHT = 1350;
-const PAD = 60;
-const GRID_TOP = 300;
+const SIZE = 1080;
+const PAD = 64;
+const GRID_TOP = 400;
+const GRID_BOTTOM = SIZE - 120;
 const GAP = 22;
-const MAX_STAMPS = 120;
-const REGION_LINE_MAX = 150;
+const MAX_STAMPS = 60;
 const PAGE_BG = "#f6f1e7";
 const FG = "#1f1a14";
 const MUTED = "#62594d";
+const RULE_SOFT = "#ddd3c3";
 
 async function loadFont(path: string, request: Request) {
   const url = new URL(path, request.url);
@@ -42,9 +41,9 @@ async function loadFont(path: string, request: Request) {
 }
 
 function gridFor(count: number) {
-  const area = { width: WIDTH - 2 * PAD, height: HEIGHT - GRID_TOP - PAD };
+  const area = { width: SIZE - 2 * PAD, height: GRID_BOTTOM - GRID_TOP };
   for (let cols = 1; ; cols++) {
-    const width = Math.min(200, (area.width - (cols - 1) * GAP) / cols);
+    const width = Math.min(240, (area.width - (cols - 1) * GAP) / cols);
     const rows = Math.ceil(count / cols);
     if (rows * (width * 1.25 + GAP) - GAP <= area.height) return { width };
   }
@@ -221,29 +220,18 @@ export async function GET(request: Request) {
     .flatMap((region) => region.stamped)
     .slice(0, MAX_STAMPS);
   const { width } = gridFor(Math.max(stamped.length, 1));
-  const regionLine = passport.regions
-    .filter((region) => region.stamped.length)
-    .map(
-      (region) =>
-        `${region.region} ${copy.regionCount(region.stamped.length, region.total)}`,
-    )
-    .reduce(
-      (line, part) =>
-        !line
-          ? part
-          : line.endsWith("…")
-            ? line
-            : line.length + part.length > REGION_LINE_MAX
-              ? `${line} …`
-              : `${line} · ${part}`,
-      "",
-    );
+  const sansLabel = {
+    fontFamily: "Inter",
+    fontSize: 22,
+    letterSpacing: 3,
+    textTransform: "uppercase",
+  } as const;
 
   return new ImageResponse(
     <div
       style={{
-        width: WIDTH,
-        height: HEIGHT,
+        width: SIZE,
+        height: SIZE,
         display: "flex",
         flexDirection: "column",
         padding: PAD,
@@ -253,46 +241,53 @@ export async function GET(request: Request) {
     >
       <div
         style={{
-          fontFamily: "Inter",
-          fontSize: 22,
-          letterSpacing: 3,
-          textTransform: "uppercase",
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          paddingBottom: 18,
+          borderBottom: `2px solid ${FG}`,
         }}
       >
-        {`${t.app.name} · ${copy.tab}`}
+        <div
+          style={{
+            fontFamily: "Newsreader",
+            fontStyle: "italic",
+            fontSize: 56,
+          }}
+        >
+          {t.app.name}
+        </div>
+        <div style={sansLabel}>
+          {`${copy.tab} ${todayInHelsinki().slice(0, 4)}`}
+        </div>
       </div>
       <div
         style={{
+          display: "flex",
+          alignItems: "flex-end",
+          marginTop: 20,
           fontFamily: "Newsreader",
           fontStyle: "italic",
-          fontSize: 96,
-          lineHeight: 1.05,
-          marginTop: 16,
         }}
       >
-        {copy.summary(passport.stampedCount, passport.total)}
-      </div>
-      <div
-        style={{
-          fontFamily: "Inter",
-          fontSize: 20,
-          color: MUTED,
-          marginTop: 16,
-          lineHeight: 1.4,
-          maxHeight: 56,
-          overflow: "hidden",
-        }}
-      >
-        {regionLine}
+        <div style={{ fontSize: 200, lineHeight: 1 }}>
+          {String(passport.stampedCount)}
+        </div>
+        <div style={{ fontSize: 60, marginLeft: 20, marginBottom: 22 }}>
+          {copy.shareImageTotal(passport.total)}
+        </div>
       </div>
       <div
         style={{
           position: "absolute",
           top: GRID_TOP,
           left: PAD,
-          width: WIDTH - 2 * PAD,
+          width: SIZE - 2 * PAD,
+          height: GRID_BOTTOM - GRID_TOP,
           display: "flex",
           flexWrap: "wrap",
+          alignContent: "center",
+          justifyContent: "center",
           gap: GAP,
         }}
       >
@@ -300,10 +295,25 @@ export async function GET(request: Request) {
           <ShareStamp key={museum.id} museum={museum} width={width} />
         ))}
       </div>
+      <div
+        style={{
+          position: "absolute",
+          left: PAD,
+          right: PAD,
+          bottom: PAD - 12,
+          display: "flex",
+          paddingTop: 16,
+          borderTop: `1px solid ${RULE_SOFT}`,
+          ...sansLabel,
+          color: MUTED,
+        }}
+      >
+        {siteUrl.host}
+      </div>
     </div>,
     {
-      width: WIDTH,
-      height: HEIGHT,
+      width: SIZE,
+      height: SIZE,
       fonts: [
         { name: "Newsreader", data: serif, style: "italic", weight: 500 },
         { name: "Inter", data: sans, style: "normal", weight: 600 },
