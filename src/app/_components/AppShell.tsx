@@ -23,7 +23,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <PendingNavigationProvider>
       <Header omatEndingSoonCount={omatEndingSoonCount} />
-      <main className="mx-auto max-w-5xl px-4 pb-20 sm:px-6 sm:pb-8">
+      <main className="mx-auto max-w-5xl px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-8">
         <PendingContent>{children}</PendingContent>
         <footer className="border-rule-soft text-muted mt-12 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-0.5 border-t py-6 font-sans text-xs">
           <div className="flex gap-2">

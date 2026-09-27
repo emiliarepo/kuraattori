@@ -16,7 +16,7 @@ export function BottomTabBar({
   return (
     <nav
       aria-label="Päänavigaatio"
-      className="border-rule-soft bg-bg fixed inset-x-0 bottom-0 z-10 flex border-t pb-[env(safe-area-inset-bottom)] font-sans sm:hidden"
+      className="border-rule-soft bg-bg fixed inset-x-0 bottom-0 z-10 flex border-t pb-[max(0.75rem,env(safe-area-inset-bottom))] font-sans sm:hidden"
     >
       {NAV_ITEMS.map((item) => {
         const active = isNavItemActive(item.href, pathname);
