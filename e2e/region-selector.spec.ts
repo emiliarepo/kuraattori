@@ -7,6 +7,8 @@ test("region popover stays open and anchored while toggling regions", async ({
   assertPageClean,
 }) => {
   await page.goto("/");
+  const nav = page.locator("header nav").first();
+  const navX = (await nav.boundingBox())!.x;
   await page.getByRole("button", { name: t.ui.region.allRegions }).click();
   const dialog = page.getByRole("dialog", { name: t.ui.region.sheetTitle });
   const checkboxes = dialog.getByRole("checkbox");
@@ -18,6 +20,7 @@ test("region popover stays open and anchored while toggling regions", async ({
     await page.waitForLoadState("networkidle");
     await expect(dialog).toBeVisible();
     expect((await dialog.boundingBox())!.x).toBe(left);
+    expect((await nav.boundingBox())!.x).toBe(navX);
   }
   await expect(
     page.getByRole("button", { name: t.ui.region.regionCount(3) }),
