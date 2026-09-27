@@ -52,7 +52,7 @@ test("plan a museum day from the trip tab and save it", async ({
   const planUrl = page.url();
   await page.goto("/");
   await page.goBack();
-  expect(page.url()).toBe(planUrl);
+  await expect(page).toHaveURL(planUrl);
   await expect(itinerary.getByRole("listitem")).toHaveCount(2);
   assertPageClean();
 });
