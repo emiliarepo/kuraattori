@@ -1,5 +1,5 @@
 # 18 Travel mode ("Matkalla")
-Status: todo · Model: Sonnet 5 · Blocked by: 12, 13
+Status: done · Model: Sonnet 5 · Blocked by: 12, 13
 
 Plan a trip: pick a place (region or city) and a date range, see what is open during those days.
 

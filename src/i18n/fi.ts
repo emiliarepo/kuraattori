@@ -105,6 +105,25 @@ export const t = {
       loading: "Ladataan…",
       empty: "Ei näyttelyitä näillä suodattimilla.",
     },
+    trip: {
+      entry: "Matkalla?",
+      title: "Matkalla",
+      intro:
+        "Valitse paikka ja matkasi päivämäärät, niin näet mitkä näyttelyt ovat auki silloin.",
+      place: "Paikka",
+      allPlaces: "Kaikkialla",
+      cityRegions: "Kaupungit",
+      regions: "Alueet",
+      otherCities: "Tietty kaupunki",
+      from: "Saapuminen",
+      to: "Lähtö",
+      submit: "Näytä näyttelyt",
+      missingRange: "Valitse saapumis- ja lähtöpäivä nähdäksesi näyttelyt.",
+      invalidRange: "Lähtöpäivän tulee olla saapumispäivän jälkeen.",
+      empty: "Ei näyttelyitä valitulla paikalla ja ajalla.",
+      endsDuringTrip: "Päättyy matkasi aikana",
+      opensDuringTrip: (date: string) => `Avautuu ${date}`,
+    },
     detail: {
       breadcrumb: "Murupolku",
       exhibitions: "Näyttelyt",
@@ -157,6 +176,7 @@ export const t = {
       browse:
         "Selaa käynnissä ja tulevia näyttelyitä alueen, museon, aiheen ja Museokortin mukaan.",
       museums: "Museot ja niiden näyttelyt.",
+      trip: "Suunnittele matka: näe mitkä näyttelyt ovat auki valitulla paikalla ja ajalla.",
     },
   },
 } as const;

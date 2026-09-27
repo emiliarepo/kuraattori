@@ -1,4 +1,8 @@
-import { timeBarProps, imageAlt } from "~/app/_lib/exhibition-format";
+import {
+  timeBarProps,
+  imageAlt,
+  tripWhyLabel,
+} from "~/app/_lib/exhibition-format";
 import { type Category } from "~/app/_components/CategoryList";
 import { type ExhibitionStatus } from "~/app/_components/StatusActions";
 import { type TimeBarProps } from "~/app/_components/TimeBar";
@@ -50,6 +54,16 @@ export function toRowView(
     status: item.status,
     whyLabel: null,
   };
+}
+
+/** Trip mode's row: same shape as `toRowView`, with the why-slot set to the trip's overlap reason. */
+export function tripToRowView(
+  item: ExhibitionWithDetails,
+  today: string,
+  from: string,
+  to: string,
+): ExhibitionRowView {
+  return { ...toRowView(item, today), whyLabel: tripWhyLabel(item, from, to) };
 }
 
 /** `recommendation.forYou` doesn't join categories or user state (ineligible exhibitions are excluded already). */

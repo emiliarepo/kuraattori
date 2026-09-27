@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { getDaysRemaining, getPhase, getTimeBarProgress } from "./dates";
+import {
+  getDaysRemaining,
+  getPhase,
+  getTimeBarProgress,
+  overlapsRange,
+} from "./dates";
 
 const today = "2026-09-27";
 
@@ -74,5 +79,69 @@ describe("getTimeBarProgress", () => {
     expect(
       getTimeBarProgress({ startDate: today, endDate: "2026-10-27" }, today),
     ).toBe(0);
+  });
+});
+
+describe("overlapsRange", () => {
+  const range = { from: "2026-10-01", to: "2026-10-10" };
+
+  it("overlaps when the run spans the whole range", () => {
+    expect(
+      overlapsRange(
+        { startDate: "2026-09-01", endDate: "2026-12-31" },
+        range.from,
+        range.to,
+      ),
+    ).toBe(true);
+  });
+
+  it("overlaps when it starts inside the range and has no end date", () => {
+    expect(
+      overlapsRange(
+        { startDate: "2026-10-05", endDate: null },
+        range.from,
+        range.to,
+      ),
+    ).toBe(true);
+  });
+
+  it("overlaps when it ends exactly on the range's start", () => {
+    expect(
+      overlapsRange(
+        { startDate: "2026-09-01", endDate: "2026-10-01" },
+        range.from,
+        range.to,
+      ),
+    ).toBe(true);
+  });
+
+  it("overlaps when it starts exactly on the range's end", () => {
+    expect(
+      overlapsRange(
+        { startDate: "2026-10-10", endDate: "2026-11-01" },
+        range.from,
+        range.to,
+      ),
+    ).toBe(true);
+  });
+
+  it("does not overlap when it ends before the range starts", () => {
+    expect(
+      overlapsRange(
+        { startDate: "2026-08-01", endDate: "2026-09-30" },
+        range.from,
+        range.to,
+      ),
+    ).toBe(false);
+  });
+
+  it("does not overlap when it starts after the range ends", () => {
+    expect(
+      overlapsRange(
+        { startDate: "2026-10-11", endDate: "2026-12-31" },
+        range.from,
+        range.to,
+      ),
+    ).toBe(false);
   });
 });

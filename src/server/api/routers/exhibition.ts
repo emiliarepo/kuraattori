@@ -65,7 +65,21 @@ export const whereVisible = (userId: string | null) =>
 type ApiContext = Awaited<ReturnType<typeof createTRPCContext>>;
 type ListInput = z.infer<typeof listInput>;
 
-async function withDetails(
+const ID_BATCH_SIZE = 90;
+
+/** Runs `fetch` over `ids` in batches, staying under D1's SQL variable limit for large `IN` lists. */
+async function batchedByIds<T>(
+  ids: readonly number[],
+  fetch: (batch: number[]) => Promise<T[]>,
+): Promise<T[]> {
+  const results: T[] = [];
+  for (let offset = 0; offset < ids.length; offset += ID_BATCH_SIZE) {
+    results.push(...(await fetch(ids.slice(offset, offset + ID_BATCH_SIZE))));
+  }
+  return results;
+}
+
+export async function withDetails(
   db: Db,
   rows: {
     exhibition: typeof exhibitions.$inferSelect;
@@ -77,29 +91,33 @@ async function withDetails(
   const groups = groupExhibitionRows(rows);
   const canonicalIds = groups.map((group) => group.exhibition.id);
   const memberIds = groups.flatMap((group) => group.memberIds);
-  const categoryRows = await db
-    .select({
-      exhibitionId: exhibitionCategories.exhibitionId,
-      id: categories.id,
-      name: categories.name,
-      slug: categories.slug,
-    })
-    .from(exhibitionCategories)
-    .innerJoin(categories, eq(categories.id, exhibitionCategories.categoryId))
-    .where(inArray(exhibitionCategories.exhibitionId, canonicalIds));
+  const categoryRows = await batchedByIds(canonicalIds, (batch) =>
+    db
+      .select({
+        exhibitionId: exhibitionCategories.exhibitionId,
+        id: categories.id,
+        name: categories.name,
+        slug: categories.slug,
+      })
+      .from(exhibitionCategories)
+      .innerJoin(categories, eq(categories.id, exhibitionCategories.categoryId))
+      .where(inArray(exhibitionCategories.exhibitionId, batch)),
+  );
   const states = userId
-    ? await db
-        .select({
-          exhibitionId: userExhibitions.exhibitionId,
-          status: userExhibitions.status,
-        })
-        .from(userExhibitions)
-        .where(
-          and(
-            eq(userExhibitions.userId, userId),
-            inArray(userExhibitions.exhibitionId, memberIds),
+    ? await batchedByIds(memberIds, (batch) =>
+        db
+          .select({
+            exhibitionId: userExhibitions.exhibitionId,
+            status: userExhibitions.status,
+          })
+          .from(userExhibitions)
+          .where(
+            and(
+              eq(userExhibitions.userId, userId),
+              inArray(userExhibitions.exhibitionId, batch),
+            ),
           ),
-        )
+      )
     : [];
   const today = todayInHelsinki();
   return groups.map(({ exhibition, museum, venues, memberIds: groupIds }) => ({
