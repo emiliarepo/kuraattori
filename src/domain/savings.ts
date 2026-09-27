@@ -12,6 +12,14 @@ export interface Savings {
   unpricedTitles: string[];
 }
 
+export function formatEuros(cents: number): string {
+  return new Intl.NumberFormat("fi-FI", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
+  }).format(cents / 100);
+}
+
 export function visitYear(visitedAt: Date): number {
   return Number(
     new Intl.DateTimeFormat("fi-FI", {

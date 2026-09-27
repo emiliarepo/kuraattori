@@ -1,15 +1,7 @@
 import Link from "next/link";
 
-import { type Savings } from "~/domain/savings";
+import { formatEuros, type Savings } from "~/domain/savings";
 import { t } from "~/i18n/fi";
-
-function formatEuros(cents: number): string {
-  return new Intl.NumberFormat("fi-FI", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
-  }).format(cents / 100);
-}
 
 export function SavingsHeader({
   savings,
@@ -53,6 +45,12 @@ export function SavingsHeader({
           {savings.unpricedTitles.join(" · ")}
         </p>
       )}
+      <Link
+        href={`/profile/year/${savings.year}`}
+        className="hover:text-signal mt-4 inline-block font-sans text-sm underline underline-offset-4"
+      >
+        {t.profile.year.cta(savings.year)}
+      </Link>
     </section>
   );
 }
