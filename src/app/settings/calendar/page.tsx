@@ -1,5 +1,5 @@
-import { CalendarPanel } from "~/app/profile/CalendarPanel";
-import { PushToggle } from "~/app/profile/PushToggle";
+import { CalendarPanel } from "~/app/settings/CalendarPanel";
+import { PushToggle } from "~/app/settings/PushToggle";
 import { siteUrl } from "~/app/_lib/site-url";
 import { api } from "~/trpc/server";
 

@@ -33,7 +33,7 @@ test("masthead region label follows a change on the profile page", async ({
   page,
 }) => {
   await devSignIn(page, uniqueEmail("region-sync"));
-  await page.goto("/profile/regions");
+  await page.goto("/settings/regions");
   const main = page.getByRole("main");
   const name = (await main
     .getByRole("checkbox", { checked: false })

@@ -9,7 +9,7 @@ export async function CalendarPrompt({ token }: { token: string | null }) {
     return (
       <p className="mt-2 mb-4 font-sans text-sm">
         <Link
-          href="/profile/calendar"
+          href="/settings/calendar"
           className="hover:text-signal underline underline-offset-4"
         >
           {t.pages.my.calendarPrompt}
@@ -30,7 +30,7 @@ export async function CalendarPrompt({ token }: { token: string | null }) {
         {t.profile.calendarAdd}
       </a>
       <Link
-        href="/profile/calendar"
+        href="/settings/calendar"
         className="hover:text-signal underline underline-offset-4"
       >
         {t.pages.my.calendarSettings}

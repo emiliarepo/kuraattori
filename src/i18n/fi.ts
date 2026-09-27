@@ -25,7 +25,7 @@ export const t = {
       browse: "Selaa",
       trip: "Matkalla",
       mine: "Omat",
-      profile: "Profiili",
+      profile: "Asetukset",
       omatEndingSoon: (count: number) => `Omat, ${count} päättyy pian`,
     },
     region: {
@@ -93,13 +93,12 @@ export const t = {
     finish: "Valmis",
   },
   profile: {
-    title: "Profiili",
+    title: "Asetukset",
     saved: "Tallennettu",
     tabs: {
       interests: "Kiinnostukset",
       regions: "Alueet",
       calendar: "Kalenteri",
-      year: "Vuosikatsaus",
       account: "Tili",
     },
     year: {
@@ -332,6 +331,7 @@ export const t = {
       interested: "Kiinnostavat",
       visited: "Käydyt",
       hidden: "Piilotetut",
+      yearTab: "Vuosi",
       passport: {
         tab: "Museopassi",
         summary: (stamped: number, total: number) =>

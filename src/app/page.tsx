@@ -172,7 +172,7 @@ export default async function HomePage() {
           <Section title={t.pages.home.forYou}>
             <p className="text-muted italic">
               <Link
-                href="/profile"
+                href="/settings"
                 className="text-fg hover:text-signal font-sans text-sm font-semibold not-italic underline underline-offset-4"
               >
                 {t.pages.home.chooseInterests}

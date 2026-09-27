@@ -5,6 +5,7 @@ export interface SavingsVisit {
   visitedAt: Date | null;
   museumCardEligible: boolean;
   admissionAdultCents: number | null;
+  museumId: number;
 }
 
 export interface Savings {
@@ -22,6 +23,12 @@ export function formatEuros(cents: number, locale: Locale = "fi"): string {
   }).format(cents / 100);
 }
 
+function helsinkiDate(visitedAt: Date): string {
+  return new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Helsinki",
+  }).format(visitedAt);
+}
+
 export function visitYear(visitedAt: Date): number {
   return Number(
     new Intl.DateTimeFormat("fi-FI", {
@@ -37,7 +44,15 @@ export function summarizeSavings(
   requestedYear: number | undefined,
 ): Savings | undefined {
   const dated = visits.flatMap((visit) =>
-    visit.visitedAt ? [{ ...visit, year: visitYear(visit.visitedAt) }] : [],
+    visit.visitedAt
+      ? [
+          {
+            ...visit,
+            visitedAt: visit.visitedAt,
+            year: visitYear(visit.visitedAt),
+          },
+        ]
+      : [],
   );
   const years = [...new Set(dated.map((visit) => visit.year))].sort(
     (a, b) => b - a,
@@ -49,18 +64,27 @@ export function summarizeSavings(
       ? requestedYear
       : latest;
 
-  const eligible = dated.filter(
-    (visit) => visit.year === year && visit.museumCardEligible,
-  );
+  // One ticket covers every exhibition a museum shows that day; the dearest
+  // price is the ticket that covers them all.
+  const tickets = new Map<string, { cents: number | null; titles: string[] }>();
+  for (const visit of dated) {
+    if (visit.year !== year || !visit.museumCardEligible) continue;
+    const key = `${visit.museumId}:${helsinkiDate(visit.visitedAt)}`;
+    const ticket = tickets.get(key) ?? { cents: null, titles: [] };
+    ticket.titles.push(visit.title);
+    if (visit.admissionAdultCents !== null)
+      ticket.cents = Math.max(ticket.cents ?? 0, visit.admissionAdultCents);
+    tickets.set(key, ticket);
+  }
   return {
     year,
     years,
-    savedCents: eligible.reduce(
-      (sum, visit) => sum + (visit.admissionAdultCents ?? 0),
+    savedCents: [...tickets.values()].reduce(
+      (sum, ticket) => sum + (ticket.cents ?? 0),
       0,
     ),
-    unpricedTitles: eligible
-      .filter((visit) => visit.admissionAdultCents === null)
-      .map((visit) => visit.title),
+    unpricedTitles: [...tickets.values()]
+      .filter((ticket) => ticket.cents === null)
+      .flatMap((ticket) => ticket.titles),
   };
 }

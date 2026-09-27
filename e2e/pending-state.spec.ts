@@ -27,7 +27,7 @@ const busy = (page: Page) => page.locator('main [aria-busy="true"]');
 test("a profile sub-tab marks itself and dims the page on the first click", async ({
   page,
 }) => {
-  await devSignIn(page, uniqueEmail("pending-tab"), "/profile/interests");
+  await devSignIn(page, uniqueEmail("pending-tab"), "/settings/interests");
   const release = await holdServer(page);
   const tab = page
     .getByRole("navigation", { name: t.ui.nav.profile })
@@ -38,7 +38,7 @@ test("a profile sub-tab marks itself and dims the page on the first click", asyn
   await expect(busy(page)).toHaveCount(1);
 
   release();
-  await expect(page).toHaveURL(/\/profile\/regions$/);
+  await expect(page).toHaveURL(/\/settings\/regions$/);
   await expect(busy(page)).toHaveCount(0);
 });
 

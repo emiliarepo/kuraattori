@@ -164,7 +164,7 @@ export default async function PrivacyPage() {
         Sinulla on oikeus saada pääsy tietoihisi, oikaista ne, poistaa ne,
         siirtää ne toiseen palveluun ja vastustaa niiden käsittelyä. Voit ladata
         tietosi JSON-tiedostona ja poistaa tilisi kaikkine tietoineen
-        Profiili-sivun Tili-välilehdeltä. Muissa pyynnöissä ota yhteyttä
+        Asetukset-sivun Tili-välilehdeltä. Muissa pyynnöissä ota yhteyttä
         sähköpostilla.
       </p>
       <p>

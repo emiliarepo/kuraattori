@@ -6,9 +6,9 @@ import {
   formatVisitDate,
   monthLabel,
   monthName,
-} from "~/app/profile/year/[yyyy]/format";
-import { StatFigure } from "~/app/profile/year/[yyyy]/StatFigure";
-import { toYearReviewVisits } from "~/app/profile/year/visits";
+} from "~/app/my/year/[yyyy]/format";
+import { StatFigure } from "~/app/my/year/[yyyy]/StatFigure";
+import { toYearReviewVisits } from "~/app/my/year/visits";
 import { formatEuros, summarizeSavings } from "~/domain/savings";
 import { summarizeYear } from "~/domain/year-review";
 import { getI18n } from "~/i18n/server";
@@ -39,6 +39,7 @@ export default async function ProfileYearPage({
       visitedAt: item.visitedAt,
       museumCardEligible: item.visitedCardEligible,
       admissionAdultCents: item.visitedAdmissionAdultCents,
+      museumId: item.visitedMuseumId,
     })),
     requestedYear,
   )!;
@@ -60,7 +61,7 @@ export default async function ProfileYearPage({
             {review.years.map((year) => (
               <Link
                 key={year}
-                href={`/profile/year/${year}`}
+                href={`/my/year/${year}`}
                 aria-current={year === review.year ? "page" : undefined}
                 className={`text-kicker py-1 tabular-nums ${year === review.year ? "text-signal" : ""}`}
               >

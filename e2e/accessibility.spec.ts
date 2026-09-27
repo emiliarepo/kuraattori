@@ -10,7 +10,7 @@ const PAGES: { name: string; path: string; requiresAuth?: boolean }[] = [
     name: "detail",
     path: "/exhibitions/oliver-beer-resonance-project-the-cave",
   },
-  { name: "profile", path: "/profile", requiresAuth: true },
+  { name: "profile", path: "/settings", requiresAuth: true },
 ];
 
 for (const { name, path, requiresAuth } of PAGES) {

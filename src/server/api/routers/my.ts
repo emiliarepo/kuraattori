@@ -102,6 +102,7 @@ export const myRouter = createTRPCRouter({
           updatedAt: row.updatedAt,
           visitedCardEligible: row.exhibition.museumCardEligible,
           visitedAdmissionAdultCents: row.exhibition.admissionAdultCents,
+          visitedMuseumId: row.exhibition.museumId,
         },
       ];
     });

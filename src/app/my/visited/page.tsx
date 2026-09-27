@@ -24,6 +24,7 @@ export default async function MyVisitedPage({
             visitedAt: item.visitedAt,
             museumCardEligible: item.visitedCardEligible,
             admissionAdultCents: item.visitedAdmissionAdultCents,
+            museumId: item.visitedMuseumId,
           })),
           requestedYear,
         );

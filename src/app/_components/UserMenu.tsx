@@ -44,7 +44,7 @@ export function UserMenu({
             className="border-rule bg-bg absolute top-full right-0 z-20 w-48 border p-3 font-sans"
           >
             <Link
-              href="/profile"
+              href="/settings"
               onClick={() => setOpen(false)}
               className="hover:text-signal block py-1 text-sm font-semibold"
             >

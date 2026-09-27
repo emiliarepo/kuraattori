@@ -5,7 +5,24 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  async redirects() {
+    return [
+      { source: "/profile/year", destination: "/my/year", permanent: true },
+      {
+        source: "/profile/year/:yyyy",
+        destination: "/my/year/:yyyy",
+        permanent: true,
+      },
+      { source: "/profile", destination: "/settings", permanent: true },
+      {
+        source: "/profile/:path*",
+        destination: "/settings/:path*",
+        permanent: true,
+      },
+    ];
+  },
+};
 
 export default config;
 

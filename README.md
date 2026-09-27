@@ -105,7 +105,7 @@ To run your own copy:
 
 [`.github/workflows/health.yml`](.github/workflows/health.yml) requests the main public routes every 30 minutes and fails if any of them is slow or returns an error. The import fails loudly when museot.fi suddenly returns far fewer exhibitions than the previous run, because that usually means the markup changed. Failed scheduled runs notify the repository owner through GitHub.
 
-To check push delivery end to end, turn on reminders in Profiili → Kalenteri on a device, then run `gh workflow run import.yml -f push_test_email=<account email>`. That skips the import and sends a test notification to that user's subscriptions; the run fails if none accepted it.
+To check push delivery end to end, turn on reminders in Asetukset → Kalenteri on a device, then run `gh workflow run import.yml -f push_test_email=<account email>`. That skips the import and sends a test notification to that user's subscriptions; the run fails if none accepted it.
 
 Server errors are logged with context (route, tRPC procedure, D1 error code) to Workers Logs. Users see a Finnish error page, and one failing section no longer takes down the whole page.
 

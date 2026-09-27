@@ -23,7 +23,7 @@ export const t = {
       browse: "Browse",
       trip: "Travel",
       mine: "Mine",
-      profile: "Profile",
+      profile: "Settings",
       omatEndingSoon: (count: number) => `Mine, ${count} ending soon`,
     },
     region: {
@@ -91,13 +91,12 @@ export const t = {
     finish: "Done",
   },
   profile: {
-    title: "Profile",
+    title: "Settings",
     saved: "Saved",
     tabs: {
       interests: "Interests",
       regions: "Regions",
       calendar: "Calendar",
-      year: "Year in review",
       account: "Account",
     },
     year: {
@@ -330,6 +329,7 @@ export const t = {
       interested: "Interested",
       visited: "Visited",
       hidden: "Hidden",
+      yearTab: "Year",
       passport: {
         tab: "Museum passport",
         summary: (stamped: number, total: number) =>

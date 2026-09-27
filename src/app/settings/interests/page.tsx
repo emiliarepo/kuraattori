@@ -1,5 +1,5 @@
-import { FollowedMuseumsSection } from "~/app/profile/FollowedMuseumsSection";
-import { InterestsTab } from "~/app/profile/InterestsTab";
+import { FollowedMuseumsSection } from "~/app/settings/FollowedMuseumsSection";
+import { InterestsTab } from "~/app/settings/InterestsTab";
 import { localized } from "~/domain/localized";
 import { getI18n } from "~/i18n/server";
 import { api } from "~/trpc/server";

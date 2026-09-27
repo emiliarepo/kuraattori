@@ -16,6 +16,7 @@ export function MyTabs() {
     { href: "/my/interested", label: t.pages.my.interested },
     { href: "/my/visited", label: t.pages.my.visited },
     { href: "/my/passport", label: t.pages.my.passport.tab },
+    { href: "/my/year", label: t.pages.my.yearTab },
     { href: "/my/hidden", label: t.pages.my.hidden },
   ] as const;
   const pathname = usePathname();
@@ -34,7 +35,7 @@ export function MyTabs() {
     <div className="border-rule-soft flex flex-col border-b lg:flex-row lg:items-center lg:justify-between">
       <nav
         aria-label={t.ui.nav.mine}
-        className="flex justify-between sm:justify-start"
+        className="-mb-px flex [scrollbar-width:none] justify-between gap-3 overflow-x-auto overflow-y-hidden overscroll-x-contain sm:justify-start sm:gap-0"
       >
         {TABS.map((tab) => {
           const active = (target ?? pathname).startsWith(tab.href);
@@ -44,7 +45,7 @@ export function MyTabs() {
               href={tab.href}
               onClick={onClick}
               aria-current={active ? "page" : undefined}
-              className={`text-kicker -mb-px border-b-2 py-3.5 whitespace-nowrap transition-colors duration-150 focus-visible:-outline-offset-2 sm:px-4 sm:first:pl-0 ${
+              className={`text-kicker border-b-2 py-3.5 whitespace-nowrap transition-colors duration-150 focus-visible:-outline-offset-2 sm:px-4 sm:first:pl-0 ${
                 active ? "border-b-signal text-signal" : "border-b-transparent"
               }`}
             >

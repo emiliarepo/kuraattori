@@ -37,7 +37,7 @@ test("opt in to closing-soon notifications and back out", async ({
     };
   }, FAKE_ENDPOINT);
 
-  await devSignIn(page, uniqueEmail("push"), "/profile/calendar");
+  await devSignIn(page, uniqueEmail("push"), "/settings/calendar");
   resetPageClean();
 
   const enable = page.getByRole("button", { name: t.profile.push.enable });

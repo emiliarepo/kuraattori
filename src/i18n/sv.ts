@@ -23,7 +23,7 @@ export const t = {
       browse: "Bläddra",
       trip: "På resa",
       mine: "Mina",
-      profile: "Profil",
+      profile: "Inställningar",
       omatEndingSoon: (count: number) => `Mina, ${count} slutar snart`,
     },
     region: {
@@ -91,13 +91,12 @@ export const t = {
     finish: "Klar",
   },
   profile: {
-    title: "Profil",
+    title: "Inställningar",
     saved: "Sparat",
     tabs: {
       interests: "Intressen",
       regions: "Regioner",
       calendar: "Kalender",
-      year: "Årsöversikt",
       account: "Konto",
     },
     year: {
@@ -330,6 +329,7 @@ export const t = {
       interested: "Intressanta",
       visited: "Besökta",
       hidden: "Dolda",
+      yearTab: "År",
       passport: {
         tab: "Museipass",
         summary: (stamped: number, total: number) =>

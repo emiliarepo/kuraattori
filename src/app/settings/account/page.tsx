@@ -71,14 +71,14 @@ export default async function ProfileAccountPage({
               <button type="submit" className="btn bg-signal text-on-signal">
                 {t.profile.deleteConfirmSubmit}
               </button>
-              <Link href="/profile/account" className="underline">
+              <Link href="/settings/account" className="underline">
                 {t.profile.deleteCancel}
               </Link>
             </div>
           </form>
         ) : (
           <Link
-            href="/profile/account?delete=1"
+            href="/settings/account?delete=1"
             className="text-muted self-start underline"
           >
             {t.profile.deleteAccount}

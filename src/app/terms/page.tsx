@@ -56,7 +56,7 @@ export default async function TermsPage() {
 
       <h2>Tilin päättäminen</h2>
       <p>
-        Voit poistaa tilisi milloin tahansa Profiili-sivun Tili-välilehdeltä.
+        Voit poistaa tilisi milloin tahansa Asetukset-sivun Tili-välilehdeltä.
         Ylläpitäjä voi sulkea tilin, jos palvelua käytetään näiden ehtojen
         vastaisesti, tai lopettaa palvelun kokonaan.
       </p>

@@ -47,7 +47,7 @@ export async function SavingsHeader({
         </p>
       )}
       <Link
-        href={`/profile/year/${savings.year}`}
+        href={`/my/year/${savings.year}`}
         className="hover:text-signal mt-4 inline-block font-sans text-sm underline underline-offset-4"
       >
         {t.profile.year.cta(savings.year)}

@@ -77,7 +77,7 @@ test("a signed-in user's language is saved on the account", async ({
   resetPageClean,
   assertPageClean,
 }) => {
-  await devSignIn(page, uniqueEmail("locale"), "/profile/account");
+  await devSignIn(page, uniqueEmail("locale"), "/settings/account");
   resetPageClean();
   await page.getByRole("radio", { name: "English" }).check();
   await expect(page.locator("html")).toHaveAttribute("lang", "en");

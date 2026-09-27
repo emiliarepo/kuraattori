@@ -9,11 +9,10 @@ import { useI18n } from "~/i18n/client";
 export function ProfileTabs() {
   const { t } = useI18n();
   const TABS = [
-    { href: "/profile/interests", label: t.profile.tabs.interests },
-    { href: "/profile/regions", label: t.profile.tabs.regions },
-    { href: "/profile/calendar", label: t.profile.tabs.calendar },
-    { href: "/profile/year", label: t.profile.tabs.year },
-    { href: "/profile/account", label: t.profile.tabs.account },
+    { href: "/settings/interests", label: t.profile.tabs.interests },
+    { href: "/settings/regions", label: t.profile.tabs.regions },
+    { href: "/settings/calendar", label: t.profile.tabs.calendar },
+    { href: "/settings/account", label: t.profile.tabs.account },
   ] as const;
   const pathname = usePathname();
   const { target, onClick } = usePendingLink();

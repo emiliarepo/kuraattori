@@ -107,8 +107,8 @@ for (const viewport of VIEWPORTS) {
       "/exhibitions",
       detailHref!,
       "/my/visited",
-      "/profile",
-      `/profile/year/${year}`,
+      "/settings",
+      `/settings/year/${year}`,
     ];
     const findings: string[] = [];
     for (const path of paths) {

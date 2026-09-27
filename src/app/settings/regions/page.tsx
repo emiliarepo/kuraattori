@@ -1,4 +1,4 @@
-import { RegionsTab } from "~/app/profile/RegionsTab";
+import { RegionsTab } from "~/app/settings/RegionsTab";
 import { api } from "~/trpc/server";
 
 export default async function ProfileRegionsPage() {

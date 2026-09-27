@@ -5,7 +5,7 @@ export const NAV_ITEMS: readonly { key: NavKey; href: string }[] = [
   { key: "browse", href: "/exhibitions" },
   { key: "trip", href: "/trip" },
   { key: "mine", href: "/my" },
-  { key: "profile", href: "/profile" },
+  { key: "profile", href: "/settings" },
 ];
 
 export function isNavItemActive(href: string, pathname: string): boolean {
