@@ -15,6 +15,7 @@ import {
   type StampedMuseum,
 } from "~/domain/passport";
 import { getI18n } from "~/i18n/server";
+import { INTER_600_GLYPHS } from "./ring-glyphs";
 import { siteUrl } from "~/app/_lib/site-url";
 import { todayInHelsinki } from "~/domain/dates";
 import { auth } from "~/server/auth";
@@ -30,6 +31,26 @@ const PAGE_BG = "#f6f1e7";
 const FG = "#1f1a14";
 const MUTED = "#62594d";
 const RULE_SOFT = "#ddd3c3";
+const RING_TEXT = "KURAATTORI";
+const RING_RADIUS = 14.8;
+const RING_FONT_SIZE = 4.4;
+const RING_LETTER_SPACING = 1;
+
+function ringGlyphs() {
+  const glyphs = [...RING_TEXT].map((char) => INTER_600_GLYPHS[char]!);
+  const total =
+    glyphs.reduce((sum, glyph) => sum + glyph.advance * RING_FONT_SIZE, 0) +
+    RING_LETTER_SPACING * (glyphs.length - 1);
+  let offset = -total / 2;
+  return glyphs
+    .map((glyph) => {
+      const width = glyph.advance * RING_FONT_SIZE;
+      const angle = ((offset + width / 2) / RING_RADIUS) * (180 / Math.PI);
+      offset += width + RING_LETTER_SPACING;
+      return `<path transform="rotate(${angle}) translate(${-width / 2} ${-RING_RADIUS}) scale(${RING_FONT_SIZE})" d="${glyph.d}"/>`;
+    })
+    .join("");
+}
 
 async function loadFont(path: string, request: Request) {
   const url = new URL(path, request.url);
@@ -78,7 +99,8 @@ function stampBody(ink: string, postmarkRotation: number) {
 <rect x="10.5" y="10.5" width="79" height="104" fill="none" stroke="${ink}" stroke-width="0.5"/>
 <rect x="10.5" y="95" width="79" height="19.5" fill="${ink}"/>
 <g transform="translate(${POSTMARK_CENTER.x} ${POSTMARK_CENTER.y}) rotate(${postmarkRotation})" fill="none" stroke="${STAMP_POSTMARK}" stroke-opacity="0.62">
-<circle r="21" stroke-width="1.3"/><circle r="12.5" stroke-width="0.6"/>${waves}</g>
+<circle r="21" stroke-width="1.3"/><circle r="12.5" stroke-width="0.6"/>${waves}
+<g fill="${STAMP_POSTMARK}" fill-opacity="0.62" stroke="none">${ringGlyphs()}</g></g>
 </svg>`;
   return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
@@ -183,17 +205,7 @@ function ShareStamp({
         <div
           style={{
             fontFamily: "Inter",
-            fontSize: 2.9 * u,
-            ...postmarkInk,
-          }}
-        >
-          KURAATTORI
-        </div>
-        <div
-          style={{
-            fontFamily: "Inter",
             fontSize: 4.6 * u,
-            marginTop: 0.6 * u,
             ...postmarkInk,
           }}
         >
