@@ -40,8 +40,8 @@ export default async function PrivacyPage() {
           käyttöliittymän kieli.
         </li>
         <li>
-          Näyttelymerkintäsi (kiinnostaa, käyty, piilotettu), käyntipäivät ja
-          muistiinpanot.
+          Näyttelymerkintäsi (kiinnostaa, käyty, piilotettu), käyntipäivät,
+          muistiinpanot ja käyntien arviot (👍/👎).
         </li>
         <li>
           Tallentamasi matkat: paikka, päivämäärät, valitut näyttelyt ja

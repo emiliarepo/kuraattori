@@ -1,6 +1,6 @@
 # Kuraattori
 
-Kuraattori is a Finnish-language web app for finding museum exhibitions in Finland and keeping track of the ones you want to see. It shows what is on, what closes soon and what matches your interests, and it remembers where you have been.
+Kuraattori is a Finnish web app (also in English and Swedish) for finding museum exhibitions in Finland and keeping track of the ones you want to see. It shows what is on, what closes soon and what matches your interests, and it remembers where you have been.
 
 Live at **https://kuraattori.emialis.com**.
 
@@ -8,13 +8,16 @@ Live at **https://kuraattori.emialis.com**.
 
 - **Home:** a daily lead pick, then rails for exhibitions closing soon, recommendations ("Sinulle"), new openings, upcoming ones and followed museums.
 - **Browse:** filters by region, city, museum, category and dates, with results and paging kept in the URL.
-- **Personal state:** mark exhibitions *Kiinnostaa*, *Käyty* or *Piilota*, add a visit date and a private note, and sort the Omat lists.
+- **Personal state:** mark exhibitions *Kiinnostaa*, *Käyty* or *Piilota*, add a visit date, a private note and a 👍/👎 rating, and sort the Omat lists.
+- **Museopassi:** a stamp for every museum you have visited, grouped by region, shareable as an image with a short text.
 - **Explainable recommendations:** a deterministic score from weighted interests (Kiinnostaa, Erityisesti, Ei kiinnosta), preferred regions and followed museums. Closing dates only break ties; they never push an unrelated exhibition to the top. Every recommendation shows its reasons.
 - **Matkalla:** what is open in a given place over a date range, a museum day planner that orders the chosen exhibitions into a walking route (map link and `.ics`), and saved trips.
-- **Museum pages:** addresses with a map link (Apple Maps on Apple devices, Google Maps elsewhere) and a follow button.
+- **Museum pages:** opening hours and upcoming free days, addresses with a map link (Apple Maps on Apple devices, Google Maps elsewhere) and a follow button. Exhibition pages say whether the museum is open today, and the day planner leaves out museums closed that day.
+- **Sunday edition:** a weekly issue per city region with a lead story, what closes and opens this week, and one lesser-known pick.
 - **Museokortti savings and year in review:** admission prices you saved with the Museum Card, and a yearly summary of your visits.
-- **Calendar feed:** a private `.ics` subscription with the closing dates of the exhibitions you are interested in.
+- **Calendar feed and reminders:** a private `.ics` subscription with the closing dates of the exhibitions you are interested in, and opt-in push notifications when one has a week left.
 - **Installable (PWA):** works offline for your saved list.
+- **Languages:** Finnish, English and Swedish. Imported texts use museot.fi's translations where they exist and fall back to Finnish field by field.
 - **Accounts:** Google sign-in, data export as JSON and account deletion.
 
 ## Stack
@@ -95,11 +98,14 @@ To run your own copy:
 2. Set the Worker secrets: `wrangler secret put AUTH_SECRET`, `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`. Use a Google OAuth web client with `https://<your-domain>/api/auth/callback/google` as the redirect URI.
 3. Set `NEXT_PUBLIC_SITE_URL` in `.env.production`.
 4. Add the repository secrets `CLOUDFLARE_ACCOUNT_ID`, `D1_DATABASE_ID` and `CLOUDFLARE_API_TOKEN`. The token needs Workers Scripts: Edit, D1: Edit, Workers Routes: Edit on your zone, Account Settings: Read, Account Analytics: Read (for the usage check) Workers KV Storage: Edit (for the cost guardrail's kill switch, below) and Workers R2 Storage: Edit (the importer uploads archived images with it).
-5. Add the repository variables listed under [Cost guardrails](#cost-guardrails) below, so the kill switch has budgets to compare against.
+5. For push notifications, generate a VAPID key pair (`npx web-push generate-vapid-keys`), put the public key in `src/push/vapid.ts` and store the private key as the repository secret `VAPID_PRIVATE_KEY`. The nightly import workflow sends the notifications; the Worker never does.
+6. Add the repository variables listed under [Cost guardrails](#cost-guardrails) below, so the kill switch has budgets to compare against.
 
 ## Monitoring
 
 [`.github/workflows/health.yml`](.github/workflows/health.yml) requests the main public routes every 30 minutes and fails if any of them is slow or returns an error. The import fails loudly when museot.fi suddenly returns far fewer exhibitions than the previous run, because that usually means the markup changed. Failed scheduled runs notify the repository owner through GitHub.
+
+To check push delivery end to end, turn on reminders in Profiili → Kalenteri on a device, then run `gh workflow run import.yml -f push_test_email=<account email>`. That skips the import and sends a test notification to that user's subscriptions; the run fails if none accepted it.
 
 Server errors are logged with context (route, tRPC procedure, D1 error code) to Workers Logs. Users see a Finnish error page, and one failing section no longer takes down the whole page.
 
@@ -119,6 +125,8 @@ Cloudflare has no hard spending cap on the Workers paid plan, so `health.yml` al
 | `BUDGET_R2_CLASS_B` | R2 Class B (read-like) operations |
 
 The job summary shows usage vs. budget for every metric on every run. If any metric is over budget, the script writes a `maintenance` key to the `CACHE` KV namespace (reason plus an expiry at the next 00:00 UTC) and fails the run, which makes GitHub email the repository owner. [`src/middleware.ts`](src/middleware.ts) checks that key on every request — one KV read, cached in the isolate for 60 seconds so the check itself can't become the cost problem it's guarding against — and while it's set, every route (including `/api/auth/*` and the calendar feed) returns the Finnish maintenance page with HTTP 503 and `Retry-After`, without touching D1, R2 or any other binding. Static assets are served by Cloudflare directly and are unaffected. The flag expires on its own at the recorded time; for manual control (e.g. planned maintenance), run `pnpm exec tsx scripts/maintenance.ts on "<reason>"` or `... off` with `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` set.
+
+If a budget trips on normal traffic, raise its repository variable first, then turn maintenance off; otherwise the next check, within 30 minutes, sets the flag again. Without a terminal, delete the `maintenance` key in the Cloudflare dashboard (Storage & Databases → KV → the `CACHE` namespace) and re-run the health workflow.
 
 `wrangler.jsonc`'s `limits.cpu_ms` caps CPU time per request well above any real request, so one runaway invocation can't itself become a cost incident; see [issues/39-cost-guardrails.md](issues/39-cost-guardrails.md) for the baseline measurements behind both the budgets and this limit, and how they were derived.
 
