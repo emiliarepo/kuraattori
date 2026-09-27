@@ -6,14 +6,16 @@ import { t } from "~/i18n/fi";
 export default async function MyVisitedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ year?: string }>;
+  searchParams: Promise<{ sort?: string | string[]; year?: string }>;
 }) {
-  const { year } = await searchParams;
+  const { sort, year } = await searchParams;
   const requestedYear = year && /^\d{4}$/.test(year) ? Number(year) : undefined;
+  const sortParam = typeof sort === "string" ? sort : undefined;
   return (
     <MyStatusPage
       status="visited"
       emptyMessage={t.pages.my.emptyVisited}
+      searchParams={searchParams}
       renderHeader={(items) => {
         const savings = summarizeSavings(
           items.map((item) => ({
@@ -24,7 +26,7 @@ export default async function MyVisitedPage({
           })),
           requestedYear,
         );
-        return savings && <SavingsHeader savings={savings} />;
+        return savings && <SavingsHeader savings={savings} sort={sortParam} />;
       }}
     />
   );

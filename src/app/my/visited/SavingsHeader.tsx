@@ -11,7 +11,13 @@ function formatEuros(cents: number): string {
   }).format(cents / 100);
 }
 
-export function SavingsHeader({ savings }: { savings: Savings }) {
+export function SavingsHeader({
+  savings,
+  sort,
+}: {
+  savings: Savings;
+  sort: string | undefined;
+}) {
   const amount = formatEuros(savings.savedCents);
   return (
     <section
@@ -26,7 +32,7 @@ export function SavingsHeader({ savings }: { savings: Savings }) {
           {savings.years.map((year) => (
             <Link
               key={year}
-              href={`/my/visited?year=${year}`}
+              href={`/my/visited?${new URLSearchParams({ ...(sort && { sort }), year: String(year) }).toString()}`}
               aria-current={year === savings.year ? "page" : undefined}
               className={`text-kicker py-1 tabular-nums ${year === savings.year ? "text-signal" : ""}`}
             >
