@@ -15,6 +15,13 @@
       "when": 1790471316027,
       "tag": "0001_overconfident_toro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790473014326,
+      "tag": "0002_aspiring_senator_kelly",
+      "breakpoints": true
     }
   ]
 }

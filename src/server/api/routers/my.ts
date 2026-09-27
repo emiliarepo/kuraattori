@@ -18,11 +18,14 @@ export const myRouter = createTRPCRouter({
         .createCaller(ctx)
         .listByStatus(input);
       const items = await Promise.all(
-        rows.map((row) =>
-          exhibitionRouter
+        rows.map(async (row) => {
+          const item = await exhibitionRouter
             .createCaller(ctx)
-            .bySlug({ slug: row.exhibition.slug }),
-        ),
+            .bySlug({ slug: row.exhibition.slug });
+          return item
+            ? { ...item, visitedAt: row.visitedAt, visitNote: row.note }
+            : null;
+        }),
       );
       const found = items.filter(
         (item): item is NonNullable<typeof item> => item !== null,

@@ -21,9 +21,11 @@ export const STATUS_LABEL: Record<ExhibitionStatus, string> = {
 export function StatusActions({
   status,
   onChange,
+  disabledStatuses = [],
 }: {
   status: ExhibitionStatus | null;
   onChange: (status: ExhibitionStatus | null) => void;
+  disabledStatuses?: readonly ExhibitionStatus[];
 }) {
   const [announcement, setAnnouncement] = useState("");
 
@@ -46,11 +48,12 @@ export function StatusActions({
             <button
               key={value}
               type="button"
+              disabled={disabledStatuses.includes(value)}
               aria-pressed={pressed}
               onClick={() => handleClick(value)}
               className={`border-rule flex-1 px-3 py-2.5 text-sm font-semibold transition-colors duration-150 ${
                 index > 0 ? "border-l" : ""
-              } ${pressed ? "bg-signal text-on-signal" : "hover:bg-surface"}`}
+              } ${pressed ? "bg-signal text-on-signal" : "hover:bg-surface"} ${disabledStatuses.includes(value) ? "cursor-not-allowed opacity-50" : ""}`}
             >
               {STATUS_LABEL[value]}
             </button>

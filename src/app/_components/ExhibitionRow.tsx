@@ -19,6 +19,8 @@ export function ExhibitionRow({
   timeBar,
   status,
   whyLabel,
+  visitedAt,
+  visitNote,
 }: {
   href: string;
   title: string;
@@ -30,7 +32,12 @@ export function ExhibitionRow({
   timeBar: TimeBarProps;
   status?: ExhibitionStatus | null;
   whyLabel?: string | null;
+  visitedAt?: Date | null;
+  visitNote?: string | null;
 }) {
+  const visitedLabel = visitedAt
+    ? `Käyty ${new Intl.DateTimeFormat("fi-FI", { timeZone: "Europe/Helsinki", day: "numeric", month: "numeric", year: "numeric" }).format(visitedAt)}`
+    : null;
   return (
     <li className="border-rule-soft border-t first:border-t-0">
       <Link href={href} className="group flex gap-4 py-5 sm:gap-6">
@@ -55,8 +62,17 @@ export function ExhibitionRow({
           <div className="mt-1 max-w-sm">
             <TimeBar {...timeBar} />
           </div>
-          {status && (
-            <p className="text-kicker mt-0.5">{STATUS_LABEL[status]}</p>
+          {status === "visited" ? (
+            <>
+              <p className="text-kicker mt-0.5">{visitedLabel}</p>
+              {visitNote && (
+                <p className="text-muted line-clamp-2 text-sm">{visitNote}</p>
+              )}
+            </>
+          ) : (
+            status && (
+              <p className="text-kicker mt-0.5">{STATUS_LABEL[status]}</p>
+            )
           )}
         </div>
       </Link>
