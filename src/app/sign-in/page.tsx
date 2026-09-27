@@ -1,0 +1,74 @@
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import { env } from "~/env";
+import { t } from "~/i18n/fi";
+import { auth, signIn } from "~/server/auth";
+
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  const [session, { callbackUrl }] = await Promise.all([auth(), searchParams]);
+  const redirectTo = callbackUrl ?? "/welcome";
+  if (session?.user) redirect(redirectTo);
+
+  return (
+    <div className="mx-auto flex max-w-sm flex-col gap-8 py-12">
+      <h1 className="text-headline text-3xl">{t.auth.signIn.title}</h1>
+
+      <form
+        action={async () => {
+          "use server";
+          revalidatePath("/", "layout");
+          await signIn("google", { redirectTo });
+        }}
+      >
+        <button
+          type="submit"
+          className="bg-fg text-bg w-full py-3 text-sm font-semibold"
+        >
+          {t.auth.signIn.google}
+        </button>
+      </form>
+
+      {env.NODE_ENV === "development" && (
+        <form
+          action={async (formData: FormData) => {
+            "use server";
+            revalidatePath("/", "layout");
+            await signIn("dev", { ...Object.fromEntries(formData), redirectTo });
+          }}
+          className="border-rule flex flex-col gap-3 border-t pt-8"
+        >
+          <p className="text-sm font-semibold">{t.auth.signIn.devHeading}</p>
+          <label className="flex flex-col gap-1 text-sm">
+            {t.auth.signIn.devEmailLabel}
+            <input
+              type="email"
+              name="email"
+              defaultValue="dev@kuraattori.local"
+              className="border-rule border px-2 py-1"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            {t.auth.signIn.devNameLabel}
+            <input
+              type="text"
+              name="name"
+              defaultValue="Devaaja"
+              className="border-rule border px-2 py-1"
+            />
+          </label>
+          <button
+            type="submit"
+            className="border-rule border py-2 text-sm font-semibold"
+          >
+            {t.auth.signIn.devSubmit}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}

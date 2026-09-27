@@ -2,32 +2,45 @@
 
 import { useId, useState } from "react";
 
+import { persistRegionsCookie } from "~/app/_components/region-cookie-action";
+import { refreshHeaderData } from "~/app/_components/refresh-header-action";
 import { t } from "~/i18n/fi";
+import { api } from "~/trpc/react";
 
-export type Region = { id: string; label: string; selected: boolean };
-
+/**
+ * For signed-in users, selection persists to `user_regions`; for anonymous
+ * users, to a cookie. See `docs/design.md`'s RegionSelector entry.
+ */
 export function RegionSelector({
-  regions,
-  onChange,
+  allRegions,
+  initialSelected,
+  isSignedIn,
 }: {
-  regions: readonly Region[];
-  onChange: (ids: string[]) => void;
+  allRegions: readonly string[];
+  initialSelected: readonly string[];
+  isSignedIn: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<readonly string[]>(initialSelected);
   const panelId = useId();
+  const updateRegions = api.profile.updateRegions.useMutation();
 
-  const selectedLabels = regions.filter((r) => r.selected).map((r) => r.label);
   const summary =
-    selectedLabels.length > 0
-      ? selectedLabels.join(", ")
-      : t.ui.region.allRegions;
+    selected.length > 0 ? selected.join(", ") : t.ui.region.allRegions;
 
-  function toggle(id: string) {
-    const selectedIds = regions.filter((r) => r.selected).map((r) => r.id);
-    const next = selectedIds.includes(id)
-      ? selectedIds.filter((selectedId) => selectedId !== id)
-      : [...selectedIds, id];
-    onChange(next);
+  function toggle(region: string) {
+    const next = selected.includes(region)
+      ? selected.filter((selectedRegion) => selectedRegion !== region)
+      : [...selected, region];
+    setSelected(next);
+    if (isSignedIn) {
+      updateRegions.mutate(
+        { regions: next },
+        { onSuccess: () => void refreshHeaderData() },
+      );
+    } else {
+      void persistRegionsCookie(next);
+    }
   }
 
   return (
@@ -63,16 +76,16 @@ export function RegionSelector({
               {t.ui.region.sheetTitle}
             </p>
             <ul className="flex flex-col gap-2">
-              {regions.map((region) => (
-                <li key={region.id}>
+              {allRegions.map((region) => (
+                <li key={region}>
                   <label className="flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
-                      checked={region.selected}
-                      onChange={() => toggle(region.id)}
+                      checked={selected.includes(region)}
+                      onChange={() => toggle(region)}
                       className="accent-fg h-4 w-4"
                     />
-                    {region.label}
+                    {region}
                   </label>
                 </li>
               ))}
