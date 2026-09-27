@@ -34,4 +34,29 @@ export const t = {
       announceCleared: "Merkintä poistettu",
     },
   },
+  auth: {
+    signInLink: "Kirjaudu sisään",
+    signOut: "Kirjaudu ulos",
+    signIn: {
+      title: "Kirjaudu sisään",
+      google: "Jatka Googlella",
+      devHeading: "Kehitystila",
+      devEmailLabel: "Sähköposti",
+      devNameLabel: "Nimi",
+      devSubmit: "Kirjaudu kehityskäyttäjänä",
+    },
+  },
+  onboarding: {
+    title: "Tervetuloa",
+    interestsHeading: "Mitkä aiheet kiinnostavat?",
+    regionsHeading: "Mistä alueista haluat näyttelyitä?",
+    skip: "Ohita",
+    next: "Seuraava",
+    finish: "Valmis",
+  },
+  profile: {
+    title: "Profiili",
+    interestsHeading: "Kiinnostuksen kohteet",
+    regionsHeading: "Alueet",
+  },
 } as const;
