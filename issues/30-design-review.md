@@ -14,3 +14,11 @@ Also check: type scale and weights, spacing rhythm, rule weights, rust used only
 Known issue to fix (user, 27.9.2026): **on desktop the region selector popover jumps horizontally when the selected-regions label changes length.** Anchor it so it never moves while open (e.g. a fixed-width trigger with truncated label, or the popover aligned to the masthead's right edge), and keep the masthead date line layout stable as the label changes.
 
 Deliverables: fixes committed per area, before/after screenshots for anything visibly changed, and design.md updated where a rule was unclear. Don't add features.
+
+## Findings
+
+| Screen | Issue | Fix | Commit |
+|---|---|---|---|
+| Masthead (desktop) | Region popover jumped horizontally as the label changed: base `inset-x-0` kept `left:0` at `sm`, so the panel hung off the trigger's left edge and overflowed the masthead by 140 px | `sm:left-auto`; trigger capped at `max-w-56` with a truncated label; date line no longer wraps | region |
+| Masthead | First region toggle closed the popover (the `RegionSelector` key included the active regions, so `router.refresh()` remounted it) | Key by user only; E2E `region-selector.spec.ts` | region |
+| Masthead (390 px) | Date wrapped onto two lines next to a long region label | Date `whitespace-nowrap`, selector shrinks | region |
