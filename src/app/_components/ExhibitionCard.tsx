@@ -7,7 +7,7 @@ import { TimeBar } from "~/app/_components/TimeBar";
 import { type ExhibitionRowView } from "~/app/_lib/row";
 
 /**
- * Fixed line budget so every card in a rail lines up: kicker 1 line, title 2,
+ * Fixed line budget so every card in a rail lines up: kicker (or lead) 1 line, title 2,
  * byline 1, categories 1, then the time block pinned to the bottom. The
  * status heart sits over the image as a sibling of the link, not nested
  * inside it.
@@ -34,9 +34,11 @@ export function ExhibitionCard({
           aspectRatio="4 / 5"
         />
         {lead}
-        <p className="text-kicker text-signal mt-0.5 min-h-[1lh] truncate">
-          {item.whyLabel}
-        </p>
+        {!lead && (
+          <p className="text-kicker text-signal mt-0.5 min-h-[1lh] truncate">
+            {item.whyLabel}
+          </p>
+        )}
         <p
           title={item.title}
           className="line-clamp-2 min-h-[2lh] text-base leading-tight font-medium group-hover:underline group-hover:decoration-1 group-hover:underline-offset-4 sm:text-lg sm:leading-tight"

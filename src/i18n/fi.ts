@@ -30,6 +30,7 @@ export const t = {
       label: "Alueet",
       sheetTitle: "Valitse alueet",
       allRegions: "Kaikki alueet",
+      regionCount: (count: number) => `${count} aluetta`,
       apply: "Valmis",
     },
     status: {

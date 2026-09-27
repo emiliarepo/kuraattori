@@ -12,7 +12,8 @@
   --color-surface: var(--surface);
 
   --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif,
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
@@ -43,7 +44,9 @@
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.25rem;
-  transition: background-color 150ms, color 150ms;
+  transition:
+    background-color 150ms,
+    color 150ms;
 }
 
 @utility btn-primary {

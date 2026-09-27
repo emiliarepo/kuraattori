@@ -38,7 +38,11 @@ export function RegionSelector({
   const updateRegions = api.profile.updateRegions.useMutation();
 
   const summary =
-    selected.length > 0 ? selected.join(", ") : t.ui.region.allRegions;
+    selected.length === 0
+      ? t.ui.region.allRegions
+      : selected.length === 1
+        ? selected[0]!
+        : t.ui.region.regionCount(selected.length);
 
   async function syncHeader() {
     await refreshHeaderData();
@@ -68,7 +72,7 @@ export function RegionSelector({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
-        title={summary}
+        title={selected.length > 1 ? selected.join(", ") : summary}
         className="hover:text-signal -my-3.5 flex min-h-11 max-w-56 items-center gap-1 font-sans text-xs font-semibold"
       >
         <span className="truncate">{summary}</span>

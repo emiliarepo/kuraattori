@@ -19,6 +19,9 @@ test("region popover stays open and anchored while toggling regions", async ({
     await expect(dialog).toBeVisible();
     expect((await dialog.boundingBox())!.x).toBe(left);
   }
+  await expect(
+    page.getByRole("button", { name: t.ui.region.regionCount(3) }),
+  ).toBeVisible();
 
   assertPageClean();
 });
