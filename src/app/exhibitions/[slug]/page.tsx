@@ -140,59 +140,76 @@ export default async function ExhibitionDetailPage({
         </div>
 
         <aside className="sm:border-rule-soft flex flex-col gap-6 sm:sticky sm:top-6 sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:self-start sm:border-l sm:pl-6">
-          <dl className="divide-rule-soft border-rule-soft grid grid-cols-[auto_1fr] gap-x-4 divide-y border-y [&>*]:py-2.5">
-            <dt className="text-kicker text-muted">{t.pages.detail.museum}</dt>
-            <dd>
-              {exhibition.venues.map((venue, index) => (
-                <span key={venue.slug}>
-                  {index > 0 && ", "}
-                  <Link
-                    href={`/museums/${venue.slug}`}
-                    className="hover:text-signal underline decoration-1 underline-offset-4"
-                  >
-                    {venue.name}
-                  </Link>
-                </span>
-              ))}
-            </dd>
-            <dt className="text-kicker text-muted">{t.pages.detail.city}</dt>
-            <dd>{city}</dd>
+          <dl className="divide-rule-soft border-rule-soft grid grid-cols-[auto_1fr] gap-x-4 divide-y border-y font-sans text-sm leading-snug">
+            <div className="col-span-2 grid grid-cols-subgrid items-baseline py-2.5">
+              <dt className="text-kicker text-muted">
+                {t.pages.detail.museum}
+              </dt>
+              <dd>
+                {exhibition.venues.map((venue, index) => (
+                  <span key={venue.slug}>
+                    {index > 0 && ", "}
+                    <Link
+                      href={`/museums/${venue.slug}`}
+                      className="hover:text-signal underline decoration-1 underline-offset-4"
+                    >
+                      {venue.name}
+                    </Link>
+                  </span>
+                ))}
+              </dd>
+            </div>
+            <div className="col-span-2 grid grid-cols-subgrid items-baseline py-2.5">
+              <dt className="text-kicker text-muted">{t.pages.detail.city}</dt>
+              <dd>{city}</dd>
+            </div>
             {exhibition.museum.address && (
               <>
-                <dt className="text-kicker text-muted">
-                  {t.pages.detail.address}
-                </dt>
-                <dd>
-                  <MuseumAddress
-                    name={exhibition.museum.name}
-                    address={exhibition.museum.address}
-                  />
-                </dd>
+                <div className="col-span-2 grid grid-cols-subgrid items-baseline py-2.5">
+                  <dt className="text-kicker text-muted">
+                    {t.pages.detail.address}
+                  </dt>
+                  <dd>
+                    <MuseumAddress
+                      name={exhibition.museum.name}
+                      address={exhibition.museum.address}
+                    />
+                  </dd>
+                </div>
               </>
             )}
-            <dt className="text-kicker text-muted">{t.pages.detail.open}</dt>
-            <dd className="tabular-nums">{openLabel}</dd>
+            <div className="col-span-2 grid grid-cols-subgrid items-baseline py-2.5">
+              <dt className="text-kicker text-muted">{t.pages.detail.open}</dt>
+              <dd className="tabular-nums">{openLabel}</dd>
+            </div>
             {!exhibition.museumCardEligible && (
               <>
-                <dt className="text-kicker text-muted">
-                  {t.pages.detail.museumCard}
-                </dt>
-                <dd className="font-semibold">{t.pages.detail.noMuseumCard}</dd>
+                <div className="col-span-2 grid grid-cols-subgrid items-baseline py-2.5">
+                  <dt className="text-kicker text-muted">
+                    {t.pages.detail.museumCard}
+                  </dt>
+                  <dd className="font-semibold">
+                    {t.pages.detail.noMuseumCard}
+                  </dd>
+                </div>
               </>
             )}
             {exhibition.categories.length > 0 && (
               <>
-                <dt className="text-kicker text-muted">
-                  {t.pages.detail.categories}
-                </dt>
-                <dd>
-                  <CategoryList
-                    categories={exhibition.categories.map((category) => ({
-                      label: category.name,
-                      href: `/exhibitions?category=${category.id}`,
-                    }))}
-                  />
-                </dd>
+                <div className="col-span-2 grid grid-cols-subgrid items-baseline py-2.5">
+                  <dt className="text-kicker text-muted">
+                    {t.pages.detail.categories}
+                  </dt>
+                  <dd>
+                    <CategoryList
+                      className="text-sm leading-snug"
+                      categories={exhibition.categories.map((category) => ({
+                        label: category.name,
+                        href: `/exhibitions?category=${category.id}`,
+                      }))}
+                    />
+                  </dd>
+                </div>
               </>
             )}
           </dl>

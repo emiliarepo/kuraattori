@@ -2,7 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Section } from "~/app/_components/Section";
-import { formatVisitDate, monthLabel } from "~/app/profile/year/[yyyy]/format";
+import {
+  formatVisitDate,
+  monthLabel,
+  monthName,
+} from "~/app/profile/year/[yyyy]/format";
 import { StatFigure } from "~/app/profile/year/[yyyy]/StatFigure";
 import { toYearReviewVisits } from "~/app/profile/year/visits";
 import { formatEuros, summarizeSavings } from "~/domain/savings";
@@ -43,7 +47,9 @@ export default async function ProfileYearPage({
     <div className="pb-10">
       <header className="border-rule border-b pb-6">
         <p className="text-kicker text-muted">{t.profile.year.kicker}</p>
-        <h2 className="text-headline text-5xl sm:text-7xl">{review.year}</h2>
+        <h2 className="text-headline mt-2 text-5xl sm:text-7xl">
+          {review.year}
+        </h2>
         {review.years.length > 1 && (
           <nav
             aria-label={t.profile.year.years}
@@ -103,14 +109,17 @@ export default async function ProfileYearPage({
       <Section title={t.profile.year.months}>
         <p className="text-muted mb-3 italic">
           {t.profile.year.busiestMonth(
-            monthLabel(review.busiestMonth.month),
+            monthName(review.busiestMonth.month),
             review.busiestMonth.count,
           )}
         </p>
-        <ul>
+        <ul className="grid grid-cols-[auto_1fr_auto] items-center gap-x-3">
           {review.months.map((month) => (
-            <li key={month.month} className="flex items-center gap-3 py-1">
-              <span className="text-kicker text-muted w-8 shrink-0">
+            <li
+              key={month.month}
+              className="col-span-3 grid grid-cols-subgrid items-center py-1"
+            >
+              <span className="text-kicker text-muted">
                 {monthLabel(month.month)}
               </span>
               <span className="bg-rule-soft h-3 flex-1" aria-hidden>

@@ -42,7 +42,7 @@ export function MyTabs() {
         })}
       </nav>
       {status && status in MY_SORTS && sort && (
-        <label className="text-kicker flex items-center gap-2 py-3 lg:py-0">
+        <label className="text-kicker flex items-center gap-2 self-end py-2 lg:self-auto lg:py-0">
           {t.pages.my.sortLabel}
           <select
             value={sort}
@@ -56,7 +56,7 @@ export function MyTabs() {
                 scroll: false,
               });
             }}
-            className="border-rule-soft bg-bg text-fg focus:border-fg min-h-11 border px-2 py-1.5 text-sm font-normal tracking-normal normal-case"
+            className="border-rule-soft bg-bg text-fg focus:border-fg h-11 border px-2 text-sm font-normal tracking-normal normal-case lg:h-9"
           >
             {MY_SORTS[status].map((option) => (
               <option key={option} value={option}>

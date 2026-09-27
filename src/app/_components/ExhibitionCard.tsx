@@ -50,7 +50,7 @@ export function ExhibitionCard({
         {item.categories.length > 0 ? (
           <CategoryList
             categories={item.categories}
-            className="truncate leading-snug"
+            className="truncate text-xs leading-snug"
           />
         ) : (
           <p aria-hidden className="font-sans text-xs leading-snug">

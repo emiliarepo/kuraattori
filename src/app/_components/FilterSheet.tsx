@@ -55,7 +55,7 @@ function FilterFields({
 
       <fieldset className="flex flex-col gap-2">
         <legend className="text-kicker mb-1">{t.pages.browse.state}</legend>
-        <label className="flex min-h-11 items-center gap-2 text-sm sm:min-h-0">
+        <label className="flex min-h-11 shrink-0 items-center gap-2 text-sm sm:min-h-0">
           <input
             type="radio"
             name="state"
@@ -65,7 +65,7 @@ function FilterFields({
           />
           {t.pages.browse.stateCurrent}
         </label>
-        <label className="flex min-h-11 items-center gap-2 text-sm sm:min-h-0">
+        <label className="flex min-h-11 shrink-0 items-center gap-2 text-sm sm:min-h-0">
           <input
             type="radio"
             name="state"
@@ -139,7 +139,7 @@ function FilterFields({
                 key={museum.id}
                 className={
                   museum.label.toLowerCase().includes(normalizedMuseumFilter)
-                    ? "flex min-h-11 items-center gap-2 text-sm sm:min-h-0"
+                    ? "flex min-h-11 shrink-0 items-center gap-2 text-sm sm:min-h-0"
                     : "hidden"
                 }
               >
@@ -166,7 +166,7 @@ function FilterFields({
             {categories.map((category) => (
               <label
                 key={category.id}
-                className="flex min-h-11 items-center gap-2 text-sm sm:min-h-0"
+                className="flex min-h-11 shrink-0 items-center gap-2 text-sm sm:min-h-0"
               >
                 <input
                   type="checkbox"

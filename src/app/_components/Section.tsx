@@ -10,7 +10,7 @@ export function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border-rule mt-10 border-t pt-3">
+    <section className="border-rule mt-8 border-t pt-5">
       <div className="mb-4 flex items-baseline justify-between gap-4">
         <h2 className="text-headline text-2xl sm:text-3xl">{title}</h2>
         {more && (

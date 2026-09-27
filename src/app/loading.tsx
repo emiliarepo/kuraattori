@@ -2,7 +2,7 @@ import { CardSkeleton, Skeleton } from "~/app/_components/Skeleton";
 
 function RailSkeleton() {
   return (
-    <section className="border-rule mt-10 border-t pt-3">
+    <section className="border-rule mt-8 border-t pt-5">
       <Skeleton className="mb-4 h-8 w-40" />
       <div className="-mx-4 flex gap-3 overflow-hidden px-4 sm:-mx-6 sm:gap-5 sm:px-6">
         {Array.from({ length: 4 }, (_, i) => (

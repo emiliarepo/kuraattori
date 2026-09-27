@@ -45,7 +45,7 @@ export async function MyStatusPage({
       )}
       {endedAt >= 0 && (
         <section className="mt-8">
-          <h2 className="text-headline border-rule border-t pt-3 text-2xl">
+          <h2 className="text-headline border-rule border-t pt-5 text-2xl">
             {t.pages.my.ended}
           </h2>
           <ExhibitionList
