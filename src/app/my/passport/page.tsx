@@ -70,7 +70,7 @@ export default async function MyPassportPage() {
         <section
           key={region.region}
           aria-labelledby={`region-${region.region}`}
-          className="border-rule-soft mt-8 border-t pt-3"
+          className="border-rule-soft mt-4 border-t pt-5"
         >
           <div className="flex items-baseline justify-between gap-4">
             <h2
@@ -91,7 +91,7 @@ export default async function MyPassportPage() {
             </ul>
           )}
           {region.unstamped.length > 0 && (
-            <details className="mt-2">
+            <details className={region.stamped.length ? "mt-2" : "mt-1"}>
               <summary className="text-kicker flex min-h-11 cursor-pointer items-center">
                 {copy.unstamped(region.unstamped.length)}
               </summary>
