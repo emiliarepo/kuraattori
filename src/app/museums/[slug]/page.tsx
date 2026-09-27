@@ -2,6 +2,7 @@ import { type Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
+import { Section } from "~/app/_components/Section";
 import { toRowView } from "~/app/_lib/row";
 import { todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
@@ -57,46 +58,41 @@ export default async function MuseumDetailPage({
 
   return (
     <div className="py-8">
-      <h1 className="text-headline text-4xl">{museum.name}</h1>
-      {museum.city && <p className="text-muted mt-1 text-sm">{museum.city}</p>}
+      <h1 className="text-headline text-4xl sm:text-6xl">{museum.name}</h1>
+      {museum.city && (
+        <p className="text-muted mt-2 text-xl italic">{museum.city}</p>
+      )}
       {museum.websiteUrl && (
         <a
           href={museum.websiteUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-block text-sm font-semibold underline-offset-2 hover:underline"
+          className="hover:text-signal mt-3 inline-block font-sans text-sm break-all underline underline-offset-4"
         >
           {museum.websiteUrl}
         </a>
       )}
 
-      <section className="border-rule-soft mt-8 border-t pt-8">
-        <h2 className="text-headline mb-4 text-2xl">
-          {t.pages.museums.current}
-        </h2>
+      <Section title={t.pages.museums.current}>
         <ExhibitionList
           items={byPhase.current.map((item) => toRowView(item, today))}
           emptyMessage={t.pages.museums.empty}
         />
-      </section>
+      </Section>
 
-      <section className="border-rule-soft mt-8 border-t pt-8">
-        <h2 className="text-headline mb-4 text-2xl">
-          {t.pages.museums.upcoming}
-        </h2>
+      <Section title={t.pages.museums.upcoming}>
         <ExhibitionList
           items={byPhase.upcoming.map((item) => toRowView(item, today))}
           emptyMessage={t.pages.museums.empty}
         />
-      </section>
+      </Section>
 
-      <section className="border-rule-soft mt-8 border-t pt-8">
-        <h2 className="text-headline mb-4 text-2xl">{t.pages.museums.past}</h2>
+      <Section title={t.pages.museums.past}>
         <ExhibitionList
           items={byPhase.ended.map((item) => toRowView(item, today))}
           emptyMessage={t.pages.museums.empty}
         />
-      </section>
+      </Section>
     </div>
   );
 }

@@ -23,7 +23,7 @@ export function UserMenu({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
-        className="hover:text-signal text-sm font-semibold"
+        className="hover:text-signal font-sans text-[0.8125rem]"
       >
         {label} <span aria-hidden>▾</span>
       </button>
@@ -39,7 +39,7 @@ export function UserMenu({
             id={panelId}
             role="dialog"
             aria-label={label}
-            className="border-rule bg-bg absolute top-full right-0 z-20 mt-2 w-48 border p-3"
+            className="border-rule bg-bg absolute top-full right-0 z-20 mt-2 w-48 border p-3 font-sans"
           >
             <Link
               href="/profile"

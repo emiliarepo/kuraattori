@@ -66,9 +66,11 @@ export default async function ExhibitionsPage({
   ].sort((a, b) => a.localeCompare(b, "fi"));
 
   return (
-    <div className="py-8 sm:grid sm:grid-cols-[16rem_1fr] sm:items-start sm:gap-8">
-      <h1 className="text-headline sr-only text-4xl">{t.pages.browse.title}</h1>
-      <aside className="mb-6 sm:sticky sm:top-20 sm:mb-0">
+    <div className="py-8 sm:grid sm:grid-cols-[15rem_1fr] sm:items-start sm:gap-x-10">
+      <h1 className="text-headline mb-6 text-4xl sm:col-span-2 sm:text-5xl">
+        {t.pages.browse.title}
+      </h1>
+      <aside className="mb-4 sm:sticky sm:top-6 sm:mb-0">
         <FilterSheet
           filters={filters}
           cities={cities}

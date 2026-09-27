@@ -14,7 +14,7 @@ export function StaleDataNotice({
   lastImportAt: string | null;
 }) {
   return (
-    <p className="text-muted text-xs">
+    <p className="text-muted font-sans text-xs">
       {lastImportAt
         ? t.pages.updated(dateFormat.format(new Date(lastImportAt)))
         : t.pages.updatedUnknown}

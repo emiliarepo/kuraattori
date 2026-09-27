@@ -3,11 +3,14 @@ import { type Metadata } from "next";
 import { CategoryList, type Category } from "~/app/_components/CategoryList";
 import { DaysNumeral } from "~/app/_components/DaysNumeral";
 import { ExhibitionRow } from "~/app/_components/ExhibitionRow";
-import { Hero } from "~/app/_components/Hero";
 import { ImageFallback } from "~/app/_components/ImageFallback";
+import { LeadStory } from "~/app/_components/LeadStory";
+import { Rail } from "~/app/_components/Rail";
+import { Section } from "~/app/_components/Section";
 import { StatusActionsDemo } from "~/app/dev/components/StatusActionsDemo";
 import { type TimeBarProps } from "~/app/_components/TimeBar";
 import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
+import { type ExhibitionRowView } from "~/app/_lib/row";
 
 export const metadata: Metadata = {
   title: "Komponentit — dev",
@@ -212,46 +215,78 @@ const EXHIBITIONS: {
   },
 ];
 
-const HERO = EXHIBITIONS[2]!;
+const LEAD = EXHIBITIONS[2]!;
 const ENDING_SOON = [EXHIBITIONS[0]!, EXHIBITIONS[1]!];
 
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="border-rule-soft border-t py-8 first:border-t-0 first:pt-0">
-      <h2 className="text-headline mb-4 text-2xl">{title}</h2>
-      {children}
-    </section>
-  );
+function toView(
+  exhibition: (typeof EXHIBITIONS)[number],
+  index: number,
+): ExhibitionRowView {
+  return {
+    href: `/exhibitions/${exhibition.slug}`,
+    title: exhibition.title,
+    museum: exhibition.museum,
+    city: exhibition.city,
+    imageUrl: exhibition.imageUrl,
+    imageAlt: `${exhibition.title}, ${exhibition.museum}`,
+    categories: exhibition.categories,
+    timeBar: timeBarProps(exhibition.start, exhibition.end),
+    status: index === 0 ? "interested" : index === 3 ? "visited" : null,
+    whyLabel: index === 2 ? "Luonto ja eläimet · Pääkaupunkiseutu" : null,
+  };
 }
 
 export default function ComponentLibraryPage() {
   return (
     <div className="py-8">
-      <h1 className="text-headline mb-2 text-4xl">Komponenttikirjasto</h1>
-      <p className="text-muted mb-8 text-sm">
+      <h1 className="text-headline mb-2 text-4xl sm:text-5xl">
+        Komponenttikirjasto
+      </h1>
+      <p className="text-muted mb-8 font-sans text-sm">
         Ei linkitetty, ei indeksoitu. Otsikko, tabit ja aluevalitsin näkyvät
         yllä olevassa sovelluskuoressa; mobiilin alanavigaatio näkyy alla 640
         px:n leveydellä.
       </p>
 
-      <Section title="Hero">
-        <Hero
-          imageUrl={HERO.imageUrl}
-          imageAlt={`${HERO.title}, ${HERO.museum}`}
-          title={HERO.title}
-          museum={HERO.museum}
-          href={`/exhibitions/${HERO.slug}`}
+      <Section title="LeadStory">
+        <LeadStory
+          href={`/exhibitions/${LEAD.slug}`}
+          imageUrl={LEAD.imageUrl}
+          imageAlt={`${LEAD.title}, ${LEAD.museum}`}
+          kicker="Sinulle · Luonto ja eläimet · Pääkaupunkiseutu"
+          title={LEAD.title}
+          museum={LEAD.museum}
+          city={LEAD.city}
+          excerpt="Näyttely kertoo elämän kehityksestä maapallolla ensimmäisistä soluista nykyhetkeen."
+          urgencyLabel="126 päivää jäljellä"
         />
-        <div className="mt-2">
-          <UrgencyLabel label="126 päivää jäljellä" />
-        </div>
       </Section>
+
+      <Rail
+        title="Rail (ExhibitionCard)"
+        emptyMessage="Ei näyttelyitä."
+        more={{ href: "/exhibitions", label: "Kaikki" }}
+        items={EXHIBITIONS.map((exhibition, index) => ({
+          view: toView(exhibition, index),
+        }))}
+      />
+
+      <Rail
+        title="Rail, DaysNumeral (Päättyy pian)"
+        emptyMessage="Ei näyttelyitä."
+        items={ENDING_SOON.map((exhibition, index) => {
+          const remaining = daysBetween(
+            TODAY,
+            new Date(`${exhibition.end}T00:00:00`),
+          );
+          return {
+            view: toView(exhibition, index),
+            lead: (
+              <DaysNumeral days={remaining} caption={dayCaption(remaining)} />
+            ),
+          };
+        })}
+      />
 
       <Section title="UrgencyLabel">
         <div className="flex flex-wrap gap-2">
@@ -260,23 +295,12 @@ export default function ComponentLibraryPage() {
         </div>
       </Section>
 
-      <Section title="DaysNumeral (Päättyy pian)">
-        <ul className="grid grid-cols-2 gap-6 sm:flex sm:gap-10">
-          {ENDING_SOON.map((exhibition) => {
-            const remaining = daysBetween(
-              TODAY,
-              new Date(`${exhibition.end}T00:00:00`),
-            );
-            return (
-              <li key={exhibition.slug} className="flex flex-col gap-2">
-                <DaysNumeral days={remaining} caption={dayCaption(remaining)} />
-                <p className="max-w-32 text-sm font-semibold">
-                  {exhibition.title}
-                </p>
-              </li>
-            );
-          })}
-        </ul>
+      <Section title="DaysNumeral">
+        <div className="flex flex-wrap gap-8">
+          <DaysNumeral days={3} caption={dayCaption(3)} />
+          <DaysNumeral days={1} caption={dayCaption(1)} />
+          <DaysNumeral days={0} caption={dayCaption(0)} />
+        </div>
       </Section>
 
       <Section title="StatusActions">
@@ -323,17 +347,7 @@ export default function ComponentLibraryPage() {
           {EXHIBITIONS.map((exhibition, index) => (
             <ExhibitionRow
               key={exhibition.slug}
-              href={`/exhibitions/${exhibition.slug}`}
-              title={exhibition.title}
-              museum={exhibition.museum}
-              city={exhibition.city}
-              imageUrl={exhibition.imageUrl}
-              imageAlt={`${exhibition.title}, ${exhibition.museum}`}
-              categories={exhibition.categories}
-              timeBar={timeBarProps(exhibition.start, exhibition.end)}
-              status={
-                index === 0 ? "interested" : index === 3 ? "visited" : null
-              }
+              {...toView(exhibition, index)}
             />
           ))}
         </ul>

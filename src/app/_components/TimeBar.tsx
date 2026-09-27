@@ -14,27 +14,27 @@ export function TimeBar({
   urgent,
 }: TimeBarProps) {
   if (progress === null) {
-    return <p className="text-muted text-sm">{remainingLabel}</p>;
+    return <p className="text-muted font-sans text-xs">{remainingLabel}</p>;
   }
 
   const clamped = Math.min(100, Math.max(0, progress));
 
   return (
-    <div>
+    <div className="font-sans">
       <div
         role="progressbar"
         aria-valuenow={Math.round(clamped)}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label={remainingLabel}
-        className="bg-rule-soft h-1 w-full"
+        className="bg-rule-soft h-0.5 w-full"
       >
         <div
           className={`h-full transition-[width] duration-150 ${urgent ? "bg-signal" : "bg-fg"}`}
           style={{ width: `${clamped}%` }}
         />
       </div>
-      <div className="mt-1 flex items-baseline justify-between gap-2 text-sm tabular-nums">
+      <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-2 text-xs tabular-nums">
         <span className="text-muted">
           {startLabel}–{endLabel}
         </span>

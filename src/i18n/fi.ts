@@ -72,6 +72,7 @@ export const t = {
       new: "Uudet näyttelyt",
       upcoming: "Tulossa",
       whyNew: "Uusi",
+      seeAll: "Kaikki",
     },
     browse: {
       title: "Selaa",
@@ -99,6 +100,9 @@ export const t = {
       empty: "Ei näyttelyitä näillä suodattimilla.",
     },
     detail: {
+      breadcrumb: "Murupolku",
+      exhibitions: "Näyttelyt",
+      categories: "Aiheet",
       museum: "Museo",
       city: "Kaupunki",
       open: "Avoinna",

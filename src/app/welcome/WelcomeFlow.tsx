@@ -64,8 +64,8 @@ export function WelcomeFlow({
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6 py-12">
-      <div className="flex items-center justify-between">
-        <h1 className="text-headline text-3xl">
+      <div className="flex items-baseline justify-between gap-4">
+        <h1 className="text-headline text-4xl">
           {step === "interests"
             ? t.onboarding.interestsHeading
             : t.onboarding.regionsHeading}
@@ -73,7 +73,7 @@ export function WelcomeFlow({
         <button
           type="button"
           onClick={() => void skip()}
-          className="text-muted hover:text-signal text-sm font-semibold"
+          className="text-muted hover:text-signal flex-none font-sans text-sm font-semibold"
         >
           {t.onboarding.skip}
         </button>
@@ -84,12 +84,12 @@ export function WelcomeFlow({
           <ul className="flex flex-col gap-2">
             {categories.map((category) => (
               <li key={category.id}>
-                <label className="flex items-center gap-2 text-sm">
+                <label className="flex items-center gap-2.5 text-lg">
                   <input
                     type="checkbox"
                     checked={interestIds.includes(category.id)}
                     onChange={() => toggleInterest(category.id)}
-                    className="accent-fg h-4 w-4"
+                    className="accent-signal h-4 w-4 flex-none"
                   />
                   {category.name}
                 </label>
@@ -99,7 +99,7 @@ export function WelcomeFlow({
           <button
             type="button"
             onClick={() => setStep("regions")}
-            className="bg-fg text-bg w-full py-3 text-sm font-semibold"
+            className="bg-fg text-bg w-full py-3 font-sans text-sm font-semibold"
           >
             {t.onboarding.next}
           </button>
@@ -109,12 +109,12 @@ export function WelcomeFlow({
           <ul className="flex flex-col gap-2">
             {allRegions.map((region) => (
               <li key={region}>
-                <label className="flex items-center gap-2 text-sm">
+                <label className="flex items-center gap-2.5 text-lg">
                   <input
                     type="checkbox"
                     checked={regions.includes(region)}
                     onChange={() => toggleRegion(region)}
-                    className="accent-fg h-4 w-4"
+                    className="accent-signal h-4 w-4 flex-none"
                   />
                   {region}
                 </label>
@@ -124,7 +124,7 @@ export function WelcomeFlow({
           <button
             type="button"
             onClick={() => void finish()}
-            className="bg-fg text-bg w-full py-3 text-sm font-semibold"
+            className="bg-fg text-bg w-full py-3 font-sans text-sm font-semibold"
           >
             {t.onboarding.finish}
           </button>

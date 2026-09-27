@@ -5,14 +5,11 @@ import { usePathname } from "next/navigation";
 
 import { isNavItemActive, NAV_ITEMS } from "~/app/_components/nav";
 
-export function BottomTabBar() {
+export function DesktopNav() {
   const pathname = usePathname();
 
   return (
-    <nav
-      aria-label="Päänavigaatio"
-      className="border-rule-soft bg-bg fixed inset-x-0 bottom-0 z-10 flex border-t pb-[env(safe-area-inset-bottom)] font-sans sm:hidden"
-    >
+    <nav aria-label="Päänavigaatio" className="hidden gap-6 sm:flex">
       {NAV_ITEMS.map((item) => {
         const active = isNavItemActive(item.href, pathname);
         return (
@@ -20,10 +17,8 @@ export function BottomTabBar() {
             key={item.key}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            className={`flex-1 border-t-2 px-2 py-3 text-center text-[0.8125rem] transition-colors duration-150 ${
-              active
-                ? "border-t-signal text-signal font-semibold"
-                : "border-t-transparent"
+            className={`text-kicker hover:text-signal transition-colors duration-150 ${
+              active ? "text-signal" : ""
             }`}
           >
             {item.label}

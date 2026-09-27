@@ -40,29 +40,27 @@ function FilterFields({
   const normalizedMuseumFilter = museumFilter.trim().toLowerCase();
 
   return (
-    <div className="flex flex-col gap-6">
-      <label className="flex flex-col gap-1 text-sm font-semibold">
+    <div className="flex flex-col gap-6 font-sans">
+      <label className="text-kicker flex flex-col gap-1.5">
         {t.pages.browse.search}
         <input
           type="search"
           name="q"
           defaultValue={filters.search ?? ""}
           placeholder={t.pages.browse.searchPlaceholder}
-          className="border-rule border px-2 py-1 text-sm font-normal"
+          className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
         />
       </label>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-sm font-semibold">
-          {t.pages.browse.state}
-        </legend>
+        <legend className="text-kicker mb-1">{t.pages.browse.state}</legend>
         <label className="flex items-center gap-2 text-sm">
           <input
             type="radio"
             name="state"
             value="current"
             defaultChecked={filters.state === "current"}
-            className="accent-fg h-4 w-4"
+            className="accent-signal h-4 w-4 flex-none"
           />
           {t.pages.browse.stateCurrent}
         </label>
@@ -72,18 +70,18 @@ function FilterFields({
             name="state"
             value="upcoming"
             defaultChecked={filters.state === "upcoming"}
-            className="accent-fg h-4 w-4"
+            className="accent-signal h-4 w-4 flex-none"
           />
           {t.pages.browse.stateUpcoming}
         </label>
       </fieldset>
 
-      <label className="flex flex-col gap-1 text-sm font-semibold">
+      <label className="text-kicker flex flex-col gap-1.5">
         {t.pages.browse.city}
         <select
           name="city"
           defaultValue={filters.city ?? ""}
-          className="border-rule border px-2 py-1 text-sm font-normal"
+          className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
         >
           <option value="">{t.pages.browse.allCities}</option>
           {cities.map((city) => (
@@ -94,12 +92,12 @@ function FilterFields({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-sm font-semibold">
+      <label className="text-kicker flex flex-col gap-1.5">
         {t.pages.browse.endingWithin}
         <select
           name="ending"
           defaultValue={filters.endingWithinDays?.toString() ?? ""}
-          className="border-rule border px-2 py-1 text-sm font-normal"
+          className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
         >
           <option value="">{t.pages.browse.endingWithinAny}</option>
           {ENDING_WITHIN_OPTIONS.map((days) => (
@@ -117,7 +115,7 @@ function FilterFields({
             name="card"
             value="1"
             defaultChecked={filters.museumCardOnly}
-            className="accent-fg h-4 w-4"
+            className="accent-signal h-4 w-4 flex-none"
           />
           {t.pages.browse.museumCardOnly}
         </label>
@@ -125,16 +123,14 @@ function FilterFields({
 
       {museums.length > 0 && (
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 text-sm font-semibold">
-            {t.pages.browse.museums}
-          </legend>
+          <legend className="text-kicker mb-1">{t.pages.browse.museums}</legend>
           <input
             type="search"
             value={museumFilter}
             onChange={(event) => setMuseumFilter(event.target.value)}
             placeholder={t.pages.browse.museumFilter}
             aria-label={t.pages.browse.museumFilter}
-            className="border-rule border px-2 py-1 text-sm font-normal"
+            className="border-rule-soft bg-bg focus:border-fg border px-2 py-2 text-base font-normal tracking-normal normal-case"
           />
           <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
             {museums.map((museum) => (
@@ -151,7 +147,7 @@ function FilterFields({
                   name="museum"
                   value={museum.id}
                   defaultChecked={filters.museumIds.includes(museum.id)}
-                  className="accent-fg h-4 w-4"
+                  className="accent-signal h-4 w-4 flex-none"
                 />
                 {museum.label}
               </label>
@@ -162,7 +158,7 @@ function FilterFields({
 
       {categories.length > 0 && (
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 text-sm font-semibold">
+          <legend className="text-kicker mb-1">
             {t.pages.browse.categories}
           </legend>
           <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
@@ -176,7 +172,7 @@ function FilterFields({
                   name="category"
                   value={category.id}
                   defaultChecked={filters.categoryIds.includes(category.id)}
-                  className="accent-fg h-4 w-4"
+                  className="accent-signal h-4 w-4 flex-none"
                 />
                 {category.label}
               </label>
@@ -228,20 +224,22 @@ export function FilterSheet(props: {
   return (
     <>
       <div className="hidden sm:block">
-        <h2 className="text-headline mb-4 text-xl">{t.pages.browse.filters}</h2>
+        <h2 className="text-headline mb-4 text-2xl">
+          {t.pages.browse.filters}
+        </h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <FilterFields {...props} />
           <div className="flex flex-col gap-2">
             <button
               type="submit"
-              className="bg-fg text-bg py-2 text-sm font-semibold"
+              className="bg-fg text-bg py-2.5 font-sans text-sm font-semibold"
             >
               {t.pages.browse.applyFilters}
             </button>
             <button
               type="button"
               onClick={handleReset}
-              className="text-muted hover:text-fg py-1 text-sm underline"
+              className="text-muted hover:text-fg py-1 font-sans text-sm underline underline-offset-4"
             >
               {t.pages.browse.resetFilters}
             </button>
@@ -253,36 +251,36 @@ export function FilterSheet(props: {
         <button
           type="button"
           onClick={() => dialogRef.current?.showModal()}
-          className="border-rule w-full border py-2 text-sm font-semibold"
+          className="border-rule w-full border py-2.5 font-sans text-sm font-semibold"
         >
           {t.pages.browse.openFilters}
         </button>
         <dialog
           ref={dialogRef}
           aria-label={t.pages.browse.filters}
-          className="border-rule fixed inset-x-0 bottom-0 m-0 max-h-[85vh] w-full max-w-none overflow-y-auto border-t p-4 backdrop:bg-black/40"
+          className="border-rule bg-bg text-fg fixed inset-x-0 bottom-0 m-0 max-h-[85vh] w-full max-w-none overflow-y-auto border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop:bg-black/40"
         >
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            <h2 className="text-headline text-xl">{t.pages.browse.filters}</h2>
+            <h2 className="text-headline text-2xl">{t.pages.browse.filters}</h2>
             <FilterFields {...props} />
             <div className="flex flex-col gap-2">
               <button
                 type="submit"
-                className="bg-fg text-bg py-2 text-sm font-semibold"
+                className="bg-fg text-bg py-2.5 font-sans text-sm font-semibold"
               >
                 {t.pages.browse.applyFilters}
               </button>
               <button
                 type="button"
                 onClick={handleReset}
-                className="text-muted hover:text-fg py-1 text-sm underline"
+                className="text-muted hover:text-fg py-1 font-sans text-sm underline underline-offset-4"
               >
                 {t.pages.browse.resetFilters}
               </button>
               <button
                 type="button"
                 onClick={() => dialogRef.current?.close()}
-                className="py-1 text-sm font-semibold underline"
+                className="py-1 font-sans text-sm font-semibold underline underline-offset-4"
               >
                 {t.pages.browse.closeFilters}
               </button>

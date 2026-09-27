@@ -1,9 +1,11 @@
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 
-import { NAV_ITEMS } from "~/app/_components/nav";
+import { DesktopNav } from "~/app/_components/DesktopNav";
 import { RegionSelector } from "~/app/_components/RegionSelector";
 import { UserMenu } from "~/app/_components/UserMenu";
+import { formatWeekdayDate } from "~/app/_lib/exhibition-format";
+import { todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
 import { auth, signOut } from "~/server/auth";
 import { getActiveRegions } from "~/server/regions-preference";
@@ -17,47 +19,45 @@ export async function Header() {
   ]);
 
   return (
-    <header className="border-rule bg-bg sticky top-0 z-10 border-b">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <Link href="/" className="text-headline text-xl sm:text-2xl">
+    <header className="mx-auto max-w-5xl px-4 sm:px-6">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center pt-4 pb-2 sm:pt-7 sm:pb-3">
+        <span />
+        <Link
+          href="/"
+          className="font-serif text-[2rem] leading-none tracking-tight italic sm:text-5xl"
+        >
           {t.app.name}
         </Link>
-        <nav aria-label="Päänavigaatio" className="hidden gap-6 sm:flex">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.key}
-              href={item.href}
-              className="hover:text-signal text-sm font-semibold"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-4">
-          <RegionSelector
-            key={`${session?.user?.id ?? "anon"}:${activeRegions.join(",")}`}
-            allRegions={allRegions}
-            initialSelected={activeRegions}
-            isSignedIn={!!session?.user}
-          />
+        <div className="justify-self-end font-sans text-[0.8125rem]">
           {session?.user ? (
-            <UserMenu
-              label={session.user.name ?? session.user.email ?? "Tili"}
-              signOutAction={async () => {
-                "use server";
-                revalidatePath("/", "layout");
-                await signOut({ redirectTo: "/" });
-              }}
-            />
+            <div className="hidden sm:block">
+              <UserMenu
+                label={session.user.name ?? session.user.email ?? "Tili"}
+                signOutAction={async () => {
+                  "use server";
+                  revalidatePath("/", "layout");
+                  await signOut({ redirectTo: "/" });
+                }}
+              />
+            </div>
           ) : (
-            <Link
-              href="/sign-in"
-              className="hover:text-signal text-sm font-semibold"
-            >
+            <Link href="/sign-in" className="hover:text-signal">
               {t.auth.signInLink}
             </Link>
           )}
         </div>
+      </div>
+      <div className="border-rule flex flex-wrap items-center justify-between gap-x-6 gap-y-1 border-y py-2">
+        <p className="text-kicker text-muted">
+          {formatWeekdayDate(todayInHelsinki())}
+        </p>
+        <DesktopNav />
+        <RegionSelector
+          key={`${session?.user?.id ?? "anon"}:${activeRegions.join(",")}`}
+          allRegions={allRegions}
+          initialSelected={activeRegions}
+          isSignedIn={!!session?.user}
+        />
       </div>
     </header>
   );

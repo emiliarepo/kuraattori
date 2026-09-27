@@ -59,19 +59,21 @@ export function ProfileForm({
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-8 py-12">
-      <h1 className="text-headline text-3xl">{t.profile.title}</h1>
+      <h1 className="text-headline text-4xl sm:text-5xl">{t.profile.title}</h1>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">{t.profile.interestsHeading}</h2>
+        <h2 className="text-kicker border-rule border-t pt-3">
+          {t.profile.interestsHeading}
+        </h2>
         <ul className="flex flex-col gap-2">
           {categories.map((category) => (
             <li key={category.id}>
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2.5 text-lg">
                 <input
                   type="checkbox"
                   checked={interestIds.includes(category.id)}
                   onChange={() => toggleInterest(category.id)}
-                  className="accent-fg h-4 w-4"
+                  className="accent-signal h-4 w-4 flex-none"
                 />
                 {category.name}
               </label>
@@ -81,16 +83,18 @@ export function ProfileForm({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">{t.profile.regionsHeading}</h2>
+        <h2 className="text-kicker border-rule border-t pt-3">
+          {t.profile.regionsHeading}
+        </h2>
         <ul className="flex flex-col gap-2">
           {allRegions.map((region) => (
             <li key={region}>
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2.5 text-lg">
                 <input
                   type="checkbox"
                   checked={regions.includes(region)}
                   onChange={() => toggleRegion(region)}
-                  className="accent-fg h-4 w-4"
+                  className="accent-signal h-4 w-4 flex-none"
                 />
                 {region}
               </label>
@@ -102,7 +106,7 @@ export function ProfileForm({
       <form action={signOutAction}>
         <button
           type="submit"
-          className="border-rule border py-2 text-sm font-semibold"
+          className="border-rule hover:bg-surface border px-4 py-2.5 font-sans text-sm font-semibold"
         >
           {t.auth.signOut}
         </button>

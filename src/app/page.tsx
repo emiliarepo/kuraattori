@@ -1,15 +1,13 @@
 import { type Metadata } from "next";
-import Link from "next/link";
 
 import { DaysNumeral } from "~/app/_components/DaysNumeral";
-import { EmptyState } from "~/app/_components/EmptyState";
-import { ExhibitionList } from "~/app/_components/ExhibitionList";
-import { Hero } from "~/app/_components/Hero";
+import { LeadStory } from "~/app/_components/LeadStory";
+import { Rail } from "~/app/_components/Rail";
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import { StaleDataNotice } from "~/app/_components/StaleDataNotice";
-import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
 import {
   dayCaption,
+  excerpt,
   imageAlt,
   urgencyLabelText,
 } from "~/app/_lib/exhibition-format";
@@ -30,21 +28,6 @@ export const metadata: Metadata = {
 };
 
 const SECTION_LIMIT = 8;
-
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="border-rule-soft border-t py-8 first:border-t-0 first:pt-0">
-      <h2 className="text-headline mb-4 text-2xl">{title}</h2>
-      {children}
-    </section>
-  );
-}
 
 export default async function HomePage() {
   const [session, activeRegions] = await Promise.all([
@@ -67,7 +50,7 @@ export default async function HomePage() {
       }),
       listNewAcrossRegions(activeRegions, { limit: SECTION_LIMIT }),
       signedIn
-        ? api.recommendation.forYou({ limit: SECTION_LIMIT })
+        ? api.recommendation.forYou({ limit: SECTION_LIMIT + 1 })
         : Promise.resolve([]),
       api.meta.lastImportAt(),
     ]);
@@ -76,87 +59,77 @@ export default async function HomePage() {
     (a, b) =>
       Number(b.status === "interested") - Number(a.status === "interested"),
   );
-  const heroItem = forYou[0];
-  const heroUrgencyLabel = heroItem
-    ? urgencyLabelText(heroItem.exhibition, today)
-    : null;
+  const [lead, ...forYouRest] = forYou;
 
   return (
-    <div className="py-8">
-      {heroItem && (
-        <section className="mb-8">
-          <Hero
-            imageUrl={heroItem.exhibition.imageUrl}
-            imageAlt={imageAlt(
-              heroItem.exhibition.titleFi,
-              heroItem.museum.name,
-            )}
-            title={heroItem.exhibition.titleFi}
-            museum={heroItem.museum.name}
-            href={`/exhibitions/${heroItem.exhibition.slug}`}
-          />
-          {heroUrgencyLabel && (
-            <div className="mt-2">
-              <UrgencyLabel label={heroUrgencyLabel} />
-            </div>
-          )}
-        </section>
+    <div className="pt-6 sm:pt-8">
+      <h1 className="sr-only">{t.app.name}</h1>
+
+      {lead ? (
+        <LeadStory
+          href={`/exhibitions/${lead.exhibition.slug}`}
+          imageUrl={lead.exhibition.imageUrl}
+          imageAlt={imageAlt(lead.exhibition.titleFi, lead.museum.name)}
+          kicker={[t.pages.home.forYou, ...lead.reasons].join(" · ")}
+          title={lead.exhibition.titleFi}
+          museum={lead.museum.name}
+          city={lead.museum.city ?? ""}
+          excerpt={
+            lead.exhibition.descriptionFi
+              ? excerpt(lead.exhibition.descriptionFi)
+              : null
+          }
+          urgencyLabel={urgencyLabelText(lead.exhibition, today)}
+        />
+      ) : (
+        !signedIn && <SignInPrompt message={t.pages.signIn.home} />
       )}
 
-      {!signedIn && <SignInPrompt message={t.pages.signIn.home} />}
+      <Rail
+        title={t.pages.home.endingSoon}
+        emptyMessage={t.pages.browse.empty}
+        more={{ href: "/exhibitions?ending=14", label: t.pages.home.seeAll }}
+        items={endingSoonSorted.map((item) => {
+          const daysRemaining = getDaysRemaining(item, today) ?? 0;
+          return {
+            view: toRowView(item, today),
+            lead: (
+              <DaysNumeral
+                days={daysRemaining}
+                caption={dayCaption(daysRemaining)}
+              />
+            ),
+          };
+        })}
+      />
 
-      <Section title={t.pages.home.endingSoon}>
-        {endingSoonSorted.length === 0 ? (
-          <EmptyState message={t.pages.browse.empty} />
-        ) : (
-          <ul className="grid grid-cols-2 gap-6 sm:flex sm:flex-wrap sm:gap-10">
-            {endingSoonSorted.map((item) => {
-              const daysRemaining = getDaysRemaining(item, today) ?? 0;
-              return (
-                <li key={item.slug} className="flex flex-col gap-2">
-                  <Link href={`/exhibitions/${item.slug}`}>
-                    <DaysNumeral
-                      days={daysRemaining}
-                      caption={dayCaption(daysRemaining)}
-                    />
-                  </Link>
-                  <p className="max-w-32 text-sm font-semibold">
-                    <Link href={`/exhibitions/${item.slug}`}>
-                      {item.titleFi}
-                    </Link>
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </Section>
-
-      {signedIn && (
-        <Section title={t.pages.home.forYou}>
-          <ExhibitionList
-            items={forYou.map((item) => forYouToRowView(item, today))}
-            emptyMessage={t.pages.browse.empty}
-            className="grid gap-x-8 sm:grid-cols-2"
-          />
-        </Section>
+      {signedIn && (lead === undefined || forYouRest.length > 0) && (
+        <Rail
+          title={t.pages.home.forYou}
+          emptyMessage={t.pages.browse.empty}
+          items={forYouRest.map((item) => ({
+            view: forYouToRowView(item, today),
+          }))}
+        />
       )}
 
-      <Section title={t.pages.home.new}>
-        <ExhibitionList
-          items={freshest.map((item) => toRowView(item, today))}
-          emptyMessage={t.pages.browse.empty}
-        />
-      </Section>
+      <Rail
+        title={t.pages.home.new}
+        emptyMessage={t.pages.browse.empty}
+        items={freshest.map((item) => ({ view: toRowView(item, today) }))}
+      />
 
-      <Section title={t.pages.home.upcoming}>
-        <ExhibitionList
-          items={upcoming.items.map((item) => toRowView(item, today))}
-          emptyMessage={t.pages.browse.empty}
-        />
-      </Section>
+      <Rail
+        title={t.pages.home.upcoming}
+        emptyMessage={t.pages.browse.empty}
+        more={{
+          href: "/exhibitions?state=upcoming",
+          label: t.pages.home.seeAll,
+        }}
+        items={upcoming.items.map((item) => ({ view: toRowView(item, today) }))}
+      />
 
-      <div className="mt-8">
+      <div className="mt-10">
         <StaleDataNotice lastImportAt={lastImportAt} />
       </div>
     </div>

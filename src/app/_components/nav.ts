@@ -12,3 +12,7 @@ export const NAV_ITEMS: readonly {
   { key: "mine", label: t.ui.nav.mine, href: "/my" },
   { key: "profile", label: t.ui.nav.profile, href: "/profile" },
 ];
+
+export function isNavItemActive(href: string, pathname: string): boolean {
+  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
