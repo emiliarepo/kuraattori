@@ -4,7 +4,12 @@ import { todayInHelsinki } from "~/domain/dates";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { cached } from "~/server/cache/kv-cache";
 import { endDateOrFar } from "~/server/db/expressions";
-import { dataSources, exhibitions, museums } from "~/server/db/schema";
+import {
+  dataSources,
+  editions,
+  exhibitions,
+  museums,
+} from "~/server/db/schema";
 
 /** Both only change on import, which runs nightly. */
 const IMPORT_DERIVED_CACHE_TTL_SECONDS = 6 * 60 * 60;
@@ -48,7 +53,7 @@ export const metaRouter = createTRPCRouter({
       endedSince.setUTCDate(
         endedSince.getUTCDate() - SITEMAP_ENDED_WITHIN_DAYS,
       );
-      const [exhibitionRows, museumRows] = await Promise.all([
+      const [exhibitionRows, museumRows, editionRows] = await Promise.all([
         ctx.db
           .select({
             id: exhibitions.id,
@@ -66,6 +71,9 @@ export const metaRouter = createTRPCRouter({
         ctx.db
           .select({ slug: museums.slug, updatedAt: museums.updatedAt })
           .from(museums),
+        ctx.db
+          .select({ region: editions.region, date: editions.date })
+          .from(editions),
       ]);
       const serialize = (row: { slug: string; updatedAt: Date | null }) => ({
         slug: row.slug,
@@ -84,6 +92,7 @@ export const metaRouter = createTRPCRouter({
       return {
         exhibitions: canonicalRows.map(serialize),
         museums: museumRows.map(serialize),
+        editions: editionRows,
       };
     }),
   ),

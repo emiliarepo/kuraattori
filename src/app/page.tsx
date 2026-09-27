@@ -17,6 +17,7 @@ import {
 } from "~/app/_lib/list-across-regions";
 import { forYouToRowView, toRowView } from "~/app/_lib/row";
 import { getDaysRemaining, todayInHelsinki } from "~/domain/dates";
+import { editionSlugForRegion } from "~/domain/edition";
 import { getI18n } from "~/i18n/server";
 import { imageSources } from "~/domain/images";
 import { localized } from "~/domain/localized";
@@ -100,10 +101,24 @@ export default async function HomePage() {
   const [lead, ...forYouRest] = forYou;
   const leadTitle = lead && localized(lead.exhibition, "title", locale);
   const leadMuseum = lead && localized(lead.museum, "name", locale);
+  const editionSlug =
+    activeRegions.map(editionSlugForRegion).find(Boolean) ??
+    (signedIn ? undefined : "paakaupunkiseutu");
 
   return (
     <div className="pt-8">
       <h1 className="sr-only">{t.app.name}</h1>
+
+      {editionSlug && (
+        <p className="mb-4 text-right">
+          <Link
+            href={`/edition/${editionSlug}`}
+            className="text-fg hover:text-signal font-sans text-sm font-semibold underline underline-offset-4"
+          >
+            {t.pages.home.thisWeeksEdition}
+          </Link>
+        </p>
+      )}
 
       {lead && leadTitle && leadMuseum ? (
         <LeadStory

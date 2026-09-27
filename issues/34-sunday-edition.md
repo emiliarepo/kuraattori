@@ -1,5 +1,5 @@
 # 34 Sunday edition ("Sunnuntainumero")
-Status: todo · Model: Sonnet 5 · Blocked by: 30 · Priority: low
+Status: done · Model: Sonnet 5 · Blocked by: 30 · Priority: low
 
 The design is a Sunday culture supplement; lean into it with a weekly, public, shareable edition for the three city regions only: Pääkaupunkiseutu, Tampere, Turku. No RSS.
 

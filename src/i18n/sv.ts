@@ -163,6 +163,7 @@ export const t = {
       my: "Logga in för att se dina utställningar.",
     },
     home: {
+      thisWeeksEdition: "Veckans nummer →",
       endingSoon: "Slutar snart",
       forYou: "För dig",
       new: "Nya utställningar",
@@ -401,7 +402,22 @@ export const t = {
       title: "Kuraattori tar en kort paus",
       body: "Vi är snart tillbaka.",
     },
+    edition: {
+      name: "Söndagsnummer",
+      lead: "Huvudartikel",
+      endingThisWeek: "Slutar den här veckan",
+      openingThisWeek: "Öppnar den här veckan",
+      hiddenGem: "Dold pärla",
+      hiddenGemWhy: "På ett litet museum",
+      archive: "Arkiv",
+      regions: "Regionens nummer",
+      noLead: "Inga nya utställningar har öppnat de senaste två veckorna.",
+      emptyEnding: "Inga utställningar slutar den här veckan.",
+      emptyOpening: "Inga utställningar öppnar den här veckan.",
+    },
     meta: {
+      edition: (region: string) =>
+        `Veckans utställningar: ${region}. Huvudartikeln, utställningar som slutar och öppnar den här veckan och en dold pärla.`,
       home: "Utställningar på finländska museer: bläddra, spara de intressanta och följ när de slutar.",
       browse:
         "Bläddra bland pågående och kommande utställningar efter region, museum, ämne och Museikortet.",

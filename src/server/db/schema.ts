@@ -427,3 +427,21 @@ export const pushSent = createTable(
     index("push_sent_user_day_idx").on(t.userId, t.sentOn),
   ],
 );
+
+/** A Sunday edition's picks, frozen when first generated so the edition never changes afterwards. */
+export const editions = createTable(
+  "edition",
+  (d) => ({
+    region: d.text().notNull(),
+    date: d.text().notNull(),
+    leadId: d.integer(),
+    endingIds: d.text({ mode: "json" }).$type<number[]>().notNull(),
+    openingIds: d.text({ mode: "json" }).$type<number[]>().notNull(),
+    gemId: d.integer(),
+    createdAt: d
+      .integer({ mode: "timestamp" })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+  }),
+  (t) => [primaryKey({ columns: [t.region, t.date] })],
+);

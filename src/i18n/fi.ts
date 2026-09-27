@@ -165,6 +165,7 @@ export const t = {
       my: "Kirjaudu sisään nähdäksesi omat näyttelysi.",
     },
     home: {
+      thisWeeksEdition: "Tämän viikon numero →",
       endingSoon: "Päättyy pian",
       forYou: "Sinulle",
       new: "Uudet näyttelyt",
@@ -403,7 +404,22 @@ export const t = {
       title: "Kuraattori on hetken tauolla",
       body: "Palaamme pian.",
     },
+    edition: {
+      name: "Sunnuntainumero",
+      lead: "Pääjuttu",
+      endingThisWeek: "Päättyy tällä viikolla",
+      openingThisWeek: "Avautuu tällä viikolla",
+      hiddenGem: "Piilohelmi",
+      hiddenGemWhy: "Pienen museon näyttely",
+      archive: "Arkisto",
+      regions: "Alueen numero",
+      noLead: "Viime kahden viikon aikana ei avautunut uusia näyttelyitä.",
+      emptyEnding: "Tällä viikolla ei pääty näyttelyitä.",
+      emptyOpening: "Tällä viikolla ei avaudu näyttelyitä.",
+    },
     meta: {
+      edition: (region: string) =>
+        `Viikon näyttelyt: ${region}. Pääjuttu, tällä viikolla päättyvät ja avautuvat näyttelyt sekä piilohelmi.`,
       home: "Näyttelyt suomalaisissa museoissa: selaa, tallenna kiinnostavat ja seuraa milloin ne päättyvät.",
       browse:
         "Selaa käynnissä ja tulevia näyttelyitä alueen, museon, aiheen ja Museokortin mukaan.",
