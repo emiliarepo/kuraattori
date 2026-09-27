@@ -168,7 +168,7 @@ async function main() {
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   if (!privateKey) throw new Error("VAPID_PRIVATE_KEY is not set.");
   webpush.setVapidDetails(
-    "mailto:hi@emialis.com",
+    "mailto:emiliarepo@icloud.com",
     VAPID_PUBLIC_KEY,
     privateKey,
   );

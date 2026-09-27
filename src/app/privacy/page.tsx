@@ -24,8 +24,8 @@ export default async function PrivacyPage() {
       <h2>Rekisterinpitäjä</h2>
       <p>
         Emilia Repo (yksityishenkilö),{" "}
-        <a href="mailto:hi@emialis.com">hi@emialis.com</a>. Tietosuojaa koskevat
-        pyynnöt voi lähettää samaan osoitteeseen.
+        <a href="mailto:emiliarepo@icloud.com">emiliarepo@icloud.com</a>.
+        Tietosuojaa koskevat pyynnöt voi lähettää samaan osoitteeseen.
       </p>
 
       <h2>Käsiteltävät tiedot</h2>

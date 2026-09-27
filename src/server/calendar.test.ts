@@ -25,7 +25,7 @@ describe("calendar formatting", () => {
     const output = formatCalendar(
       [
         {
-          uid: "group@kuraattori.emialis.com",
+          uid: "group@kuraattori.emiliarepo.dev",
           endDate: "2026-10-31",
           startDate: "2026-09-01",
           title: 'Taide, "ja',

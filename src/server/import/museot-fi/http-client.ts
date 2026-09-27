@@ -1,5 +1,5 @@
 export const USER_AGENT =
-  "KuraattoriBot/0.1 (+https://kuraattori.emialis.com; hi@emialis.com)";
+  "KuraattoriBot/0.1 (+https://kuraattori.emiliarepo.dev; emiliarepo@icloud.com)";
 const MIN_INTERVAL_MS = 550; // stays under museot.fi's ~2 req/s budget
 
 export class MuseotFiHttpClient {

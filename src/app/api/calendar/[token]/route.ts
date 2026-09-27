@@ -87,7 +87,7 @@ export async function GET(
   const events = groupExhibitionRows(rows)
     .filter(({ exhibition }) => exhibition.endDate !== null)
     .map(({ exhibition, museum }) => ({
-      uid: `${exhibition.exhibitionGroup ?? `exhibition-${exhibition.id}`}@kuraattori.emialis.com`,
+      uid: `${exhibition.exhibitionGroup ?? `exhibition-${exhibition.id}`}@kuraattori.emiliarepo.dev`,
       endDate: exhibition.endDate!,
       startDate: exhibition.startDate,
       title: localized(exhibition, "title", locale).text,

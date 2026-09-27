@@ -4,7 +4,7 @@ import { type Db } from "~/server/db";
 import { museums } from "~/server/db/schema";
 
 const USER_AGENT =
-  "KuraattoriBot/0.1 (+https://kuraattori.emialis.com; hi@emialis.com)";
+  "KuraattoriBot/0.1 (+https://kuraattori.emiliarepo.dev; emiliarepo@icloud.com)";
 // Nominatim's usage policy allows at most one request per second.
 const MIN_INTERVAL_MS = 1100;
 

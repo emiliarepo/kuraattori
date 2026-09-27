@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     if (visit.kind !== "visit") return [];
     const url = new URL(`/exhibitions/${exhibition.slug}`, siteUrl).toString();
     return {
-      uid: `day-${date}-${exhibition.id}@kuraattori.emialis.com`,
+      uid: `day-${date}-${exhibition.id}@kuraattori.emiliarepo.dev`,
       start: helsinkiTimeToUtc(date, visit.start),
       end: helsinkiTimeToUtc(date, visit.end),
       title: `${exhibition.titleFi} · ${museum.name}`,

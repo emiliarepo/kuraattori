@@ -41,7 +41,7 @@ export default async function TermsPage() {
       <p>
         Näyttelykuvat kuuluvat museoille ja kuvaajille. Niitä näytetään
         näyttelyiden esittelemiseksi, ja ne poistetaan pyynnöstä:{" "}
-        <a href="mailto:hi@emialis.com">hi@emialis.com</a>.
+        <a href="mailto:emiliarepo@icloud.com">emiliarepo@icloud.com</a>.
       </p>
 
       <h2>Käyttäjän vastuut</h2>
@@ -71,8 +71,8 @@ export default async function TermsPage() {
       <h2>Sovellettava laki ja yhteystiedot</h2>
       <p>
         Ehtoihin sovelletaan Suomen lakia. Kysymykset:{" "}
-        <a href="mailto:hi@emialis.com">hi@emialis.com</a>. Henkilötietojen
-        käsittelystä kerrotaan{" "}
+        <a href="mailto:emiliarepo@icloud.com">emiliarepo@icloud.com</a>.
+        Henkilötietojen käsittelystä kerrotaan{" "}
         <Link href="/privacy">tietosuojaselosteessa</Link>.
       </p>
 
