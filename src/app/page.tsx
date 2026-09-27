@@ -5,6 +5,7 @@ import { DaysNumeral } from "~/app/_components/DaysNumeral";
 import { LeadStory } from "~/app/_components/LeadStory";
 import { Rail } from "~/app/_components/Rail";
 import { Section } from "~/app/_components/Section";
+import { NearbyBanner } from "~/app/nearby/NearbyBanner";
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import {
   dayCaption,
@@ -111,16 +112,17 @@ export default async function HomePage() {
     <div className="pt-8 [&>h1+section]:mt-0">
       <h1 className="sr-only">{t.app.name}</h1>
 
-      {editionSlug && (
-        <p className="mb-4 text-right">
+      <div className="border-rule-soft mb-5 flex flex-wrap items-center justify-between gap-x-6 border-b">
+        <NearbyBanner />
+        {editionSlug && (
           <Link
             href={`/edition/${editionSlug}`}
-            className="text-fg hover:text-signal font-sans text-sm font-semibold underline underline-offset-4"
+            className="text-fg hover:text-signal inline-flex min-h-11 items-center font-sans text-sm font-semibold underline underline-offset-4"
           >
             {t.pages.home.thisWeeksEdition}
           </Link>
-        </p>
-      )}
+        )}
+      </div>
 
       {lead && leadTitle && leadMuseum ? (
         <LeadStory

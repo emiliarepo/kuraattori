@@ -321,6 +321,43 @@ export const t = {
       closedToday: "Suljettu tänään",
       nextFreeDay: (date: string) => `Seuraava ilmaispäivä ${date}`,
     },
+    nearby: {
+      title: "Avoinna nyt lähelläsi",
+      banner: "Avoinna nyt lähelläsi",
+      bannerHint: "Museot kävelymatkan päässä",
+      intro:
+        "Museot, jotka ovat auki juuri nyt kävelymatkan päässä. Sijaintiasi ei tallenneta.",
+      locate: "Käytä sijaintiani",
+      locating: "Paikannetaan…",
+      loading: "Haetaan museoita…",
+      orCity: "tai valitse kaupunki",
+      city: "Kaupunki",
+      chooseCity: "Valitse kaupunki",
+      showCity: "Näytä",
+      denied:
+        "Sijainnin käyttö on estetty. Salli se selaimen asetuksista tai valitse kaupunki.",
+      unavailable: "Sijaintia ei saatu selville. Valitse kaupunki.",
+      timeout:
+        "Paikannus kesti liian kauan. Yritä uudelleen tai valitse kaupunki.",
+      failed: "Museoiden haku epäonnistui. Yritä uudelleen.",
+      nearYou: "Lähelläsi",
+      nearCity: (city: string) => `Lähellä: ${city}`,
+      radius: "Etäisyys",
+      radiusOption: (km: number) => `${km} km`,
+      distance: (km: string, minutes: number) =>
+        `${km} km · ${minutes} min kävellen`,
+      openUntil: (time: string) => `Avoinna klo ${time} asti`,
+      closingSoon: "Sulkeutuu pian",
+      more: (count: number) => `+${count}`,
+      noExhibitions: "Ei käynnissä olevia näyttelyitä.",
+      empty: "Lähistöllä ei ole juuri nyt avoinna olevia museoita.",
+      nextOpens: (museum: string, when: string) =>
+        `Seuraavaksi avautuu: ${museum}, ${when}`,
+      opensToday: (time: string) => `tänään klo ${time}`,
+      opensOn: (weekday: string, time: string) => `${weekday} klo ${time}`,
+      straightLine: "Kävelyajat ovat linnuntietä.",
+      changeLocation: "Vaihda sijaintia",
+    },
     museums: {
       title: "Museot",
       showOnMap: "Näytä kartalla",
