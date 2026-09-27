@@ -27,6 +27,7 @@ const PAD = 60;
 const GRID_TOP = 300;
 const GAP = 22;
 const MAX_STAMPS = 120;
+const REGION_LINE_MAX = 150;
 const PAGE_BG = "#f6f1e7";
 const FG = "#1f1a14";
 const MUTED = "#62594d";
@@ -34,7 +35,8 @@ const MUTED = "#62594d";
 async function loadFont(path: string, request: Request) {
   const url = new URL(path, request.url);
   const { env } = await getCloudflareContext({ async: true });
-  const response = await (env.ASSETS?.fetch(url) ?? fetch(url));
+  const asset = await env.ASSETS?.fetch(url);
+  const response = asset?.ok ? asset : await fetch(url);
   if (!response.ok) throw new Error(`font ${path}: ${response.status}`);
   return response.arrayBuffer();
 }
@@ -94,7 +96,6 @@ function ShareStamp({
   const ink = STAMP_INKS[look.ink];
   const label = stampLabel(museum.name);
   const size = labelSize(label) * u;
-  const ring = "KURAATTORI".split("");
   const postmarkInk = { color: STAMP_POSTMARK, opacity: 0.62 };
   return (
     <div
@@ -174,37 +175,26 @@ function ShareStamp({
           width: 42 * u,
           height: 42 * u,
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           transform: `rotate(${look.postmarkRotation}deg)`,
         }}
       >
-        {ring.map((char, index) => (
-          <div
-            key={index}
-            style={{
-              position: "absolute",
-              left: 21 * u - 2 * u,
-              top: 21 * u - 16.5 * u - 3.8 * u,
-              width: 4 * u,
-              height: 16.5 * u + 3.8 * u,
-              display: "flex",
-              justifyContent: "center",
-              fontFamily: "Inter",
-              fontSize: 5 * u,
-              transformOrigin: "50% 100%",
-              transform: `rotate(${(index - (ring.length - 1) / 2) * 11.5}deg)`,
-              ...postmarkInk,
-            }}
-          >
-            {char}
-          </div>
-        ))}
+        <div
+          style={{
+            fontFamily: "Inter",
+            fontSize: 2.9 * u,
+            ...postmarkInk,
+          }}
+        >
+          KURAATTORI
+        </div>
         <div
           style={{
             fontFamily: "Inter",
             fontSize: 4.6 * u,
-            marginTop: 1.2 * u,
+            marginTop: 0.6 * u,
             ...postmarkInk,
           }}
         >
@@ -237,7 +227,17 @@ export async function GET(request: Request) {
       (region) =>
         `${region.region} ${copy.regionCount(region.stamped.length, region.total)}`,
     )
-    .join(" · ");
+    .reduce(
+      (line, part) =>
+        !line
+          ? part
+          : line.endsWith("…")
+            ? line
+            : line.length + part.length > REGION_LINE_MAX
+              ? `${line} …`
+              : `${line} · ${part}`,
+      "",
+    );
 
   return new ImageResponse(
     <div
