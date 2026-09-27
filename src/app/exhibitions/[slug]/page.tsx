@@ -10,6 +10,7 @@ import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import { TimeBar } from "~/app/_components/TimeBar";
 import { UrgencyLabel } from "~/app/_components/UrgencyLabel";
 import {
+  excerpt,
   formatLongDate,
   imageAlt,
   timeBarProps,
@@ -37,12 +38,16 @@ export async function generateMetadata({
   if (!exhibition) return {};
   return {
     title: `${exhibition.titleFi} — ${exhibition.museum.name} — ${t.app.name}`,
-    description: exhibition.descriptionFi?.slice(0, 200),
+    description: exhibition.descriptionFi
+      ? excerpt(exhibition.descriptionFi, 200)
+      : undefined,
     alternates: { canonical: `/exhibitions/${exhibition.slug}` },
     openGraph: {
       type: "article",
       title: `${exhibition.titleFi} — ${exhibition.museum.name}`,
-      description: exhibition.descriptionFi?.slice(0, 200),
+      description: exhibition.descriptionFi
+        ? excerpt(exhibition.descriptionFi, 200)
+        : undefined,
       url: new URL(`/exhibitions/${exhibition.slug}`, siteUrl),
       images: [exhibition.imageUrl ?? "/logo-512.png"],
     },

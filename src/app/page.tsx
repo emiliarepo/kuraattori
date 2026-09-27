@@ -7,7 +7,6 @@ import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import { StaleDataNotice } from "~/app/_components/StaleDataNotice";
 import {
   dayCaption,
-  excerpt,
   imageAlt,
   urgencyLabelText,
 } from "~/app/_lib/exhibition-format";
@@ -74,11 +73,6 @@ export default async function HomePage() {
           title={lead.exhibition.titleFi}
           museum={lead.museum.name}
           city={lead.museum.city ?? ""}
-          excerpt={
-            lead.exhibition.descriptionFi
-              ? excerpt(lead.exhibition.descriptionFi)
-              : null
-          }
           urgencyLabel={urgencyLabelText(lead.exhibition, today)}
         />
       ) : (

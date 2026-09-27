@@ -87,6 +87,7 @@ export default async function ExhibitionsPage({
       </aside>
       <div>
         <ExhibitionListClient
+          key={JSON.stringify(listInput)}
           initialItems={items}
           initialNextCursor={nextCursor}
           input={listInput}

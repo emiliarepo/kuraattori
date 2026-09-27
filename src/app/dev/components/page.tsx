@@ -257,7 +257,6 @@ export default function ComponentLibraryPage() {
           title={LEAD.title}
           museum={LEAD.museum}
           city={LEAD.city}
-          excerpt="Näyttely kertoo elämän kehityksestä maapallolla ensimmäisistä soluista nykyhetkeen."
           urgencyLabel="126 päivää jäljellä"
         />
       </Section>

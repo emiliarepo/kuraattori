@@ -79,33 +79,35 @@ export function RegionSelector({
             onKeyDown={(event) => {
               if (event.key === "Escape") setOpen(false);
             }}
-            className="border-rule bg-bg fixed inset-x-0 bottom-0 z-20 border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:absolute sm:top-full sm:right-0 sm:bottom-auto sm:mt-2 sm:w-64 sm:border sm:pb-4"
+            className="border-rule bg-bg fixed inset-x-0 bottom-0 z-20 flex max-h-[85dvh] flex-col border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:absolute sm:top-full sm:right-0 sm:bottom-auto sm:mt-2 sm:max-h-[70vh] sm:w-64 sm:border sm:pb-4"
           >
             <p className="text-headline mb-3 text-xl">
               {t.ui.region.sheetTitle}
             </p>
-            {[groups.cities, groups.others]
-              .filter((group) => group.length > 0)
-              .map((group, index) => (
-                <ul
-                  key={index}
-                  className={`flex flex-col gap-2 ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
-                >
-                  {group.map((region) => (
-                    <li key={region}>
-                      <label className="flex items-center gap-2 py-0.5">
-                        <input
-                          type="checkbox"
-                          checked={selected.includes(region)}
-                          onChange={() => toggle(region)}
-                          className="accent-signal h-4 w-4"
-                        />
-                        {region}
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              ))}
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+              {[groups.cities, groups.others]
+                .filter((group) => group.length > 0)
+                .map((group, index) => (
+                  <ul
+                    key={index}
+                    className={`flex flex-col gap-2 ${index > 0 ? "border-rule-soft mt-3 border-t pt-3" : ""}`}
+                  >
+                    {group.map((region) => (
+                      <li key={region}>
+                        <label className="flex items-center gap-2 py-0.5">
+                          <input
+                            type="checkbox"
+                            checked={selected.includes(region)}
+                            onChange={() => toggle(region)}
+                            className="accent-signal h-4 w-4"
+                          />
+                          {region}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                ))}
+            </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
