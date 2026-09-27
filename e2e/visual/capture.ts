@@ -30,7 +30,7 @@ export async function isolatePage(page: Page): Promise<void> {
  * eager) decoded. A full-page shot grows the viewport to the document height
  * instead of using Playwright's `fullPage`, which stitches fixed elements
  * (the mobile tab bar) into the middle of the page. The import timestamp
- * comes from the seed's real clock, so it is the one masked region.
+ * comes from the seed's real clock, so its text is pinned before capture.
  */
 export async function capture(
   page: Page,
@@ -52,7 +52,12 @@ export async function capture(
     );
     await page.setViewportSize({ width: viewport.width, height });
   }
+  await page.getByText(/^Tiedot päivitetty/).evaluateAll((elements) =>
+    elements.forEach((element) => {
+      element.textContent = "Tiedot päivitetty 27.9.2026 klo 12.00";
+    }),
+  );
   await expect(page).toHaveScreenshot(`${name}.png`, {
-    mask: [page.getByText(/^Tiedot päivitetty/), ...(options.mask ?? [])],
+    mask: options.mask ?? [],
   });
 }
