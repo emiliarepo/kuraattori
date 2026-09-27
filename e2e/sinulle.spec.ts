@@ -7,7 +7,7 @@ test("dev sign-in, set an interest and a region, then Sinulle shows reasons", as
   assertPageClean,
   resetPageClean,
 }) => {
-  await devSignIn(page, uniqueEmail("sinulle"), "/profile");
+  await devSignIn(page, uniqueEmail("sinulle"), "/profile/interests");
   resetPageClean();
 
   await expect(
@@ -17,6 +17,7 @@ test("dev sign-in, set an interest and a region, then Sinulle shows reasons", as
     .getByRole("radiogroup", { name: "Taide", exact: true })
     .getByRole("radio", { name: t.ui.interest.interested })
     .click();
+  await page.goto("/profile/regions");
   await page.getByRole("checkbox", { name: "Pääkaupunkiseutu" }).check();
 
   await page.goto("/");
