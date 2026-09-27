@@ -18,6 +18,7 @@ const ctx = {
 } as unknown as Parameters<typeof createCaller>[0];
 
 afterEach(async () => {
+  await client.execute("delete from kuraattori_saved_trip");
   await client.execute("delete from kuraattori_user_interest");
   await client.execute("delete from kuraattori_user_exhibition");
   await client.execute("delete from kuraattori_user");
@@ -259,5 +260,135 @@ describe("trip API", () => {
       "relevant",
       "closes-later",
     ]);
+  });
+});
+
+const asUser = (id: string) =>
+  ({
+    ...ctx,
+    session: { user: { id }, expires: "2099-01-01" },
+  }) as typeof ctx;
+
+describe("day planner API", () => {
+  it("lists exhibitions open that day in the city, interested first", async () => {
+    await db.insert(schema.users).values({ id: "u1", email: "u1@example.com" });
+    await db.insert(schema.museums).values([
+      {
+        id: 1,
+        source: "test",
+        sourceId: "m1",
+        name: "Ateneum",
+        slug: "ateneum",
+        city: "Helsinki",
+        latitude: 60.17,
+        longitude: 24.94,
+      },
+      {
+        id: 2,
+        source: "test",
+        sourceId: "m2",
+        name: "Amos Rex",
+        slug: "amos",
+        city: "Helsinki",
+      },
+      {
+        id: 3,
+        source: "test",
+        sourceId: "m3",
+        name: "Sara Hildén",
+        slug: "sara",
+        city: "Tampere",
+      },
+    ]);
+    const exhibition = (
+      id: number,
+      museumId: number,
+      startDate: string,
+      endDate: string | null,
+    ) => ({
+      id,
+      source: "test",
+      sourceId: `e${id}`,
+      museumId,
+      slug: `e${id}`,
+      titleFi: `Näyttely ${id}`,
+      startDate,
+      endDate,
+      sourcePayloadHash: String(id),
+    });
+    await db
+      .insert(schema.exhibitions)
+      .values([
+        exhibition(1, 1, "2026-09-01", "2026-12-31"),
+        exhibition(2, 2, "2026-09-01", null),
+        exhibition(3, 2, "2026-10-03", "2026-12-31"),
+        exhibition(4, 3, "2026-09-01", "2026-12-31"),
+      ]);
+    await db
+      .insert(schema.userExhibitions)
+      .values({ userId: "u1", exhibitionId: 2, status: "interested" });
+
+    const result = await createCaller(asUser("u1")).trip.day({
+      city: "Helsinki",
+      date: "2026-10-02",
+    });
+    expect(result.map((row) => [row.id, row.interested])).toEqual([
+      [2, true],
+      [1, false],
+    ]);
+    expect(result[1]).toMatchObject({ latitude: 60.17, longitude: 24.94 });
+  });
+
+  it("saves a trip once per place and dates, replacing a day's plan", async () => {
+    await db.insert(schema.users).values([
+      { id: "u1", email: "u1@example.com" },
+      { id: "u2", email: "u2@example.com" },
+    ]);
+    const caller = createCaller(asUser("u1"));
+    const trip = { place: "Helsinki", from: "2026-10-01", to: "2026-10-03" };
+    await caller.trip.save(trip);
+    await caller.trip.save({
+      ...trip,
+      day: {
+        city: "Helsinki",
+        date: "2026-10-02",
+        exhibitionIds: [1, 2],
+        start: "11:00",
+      },
+    });
+    await caller.trip.save({
+      ...trip,
+      day: {
+        city: "Helsinki",
+        date: "2026-10-02",
+        exhibitionIds: [3, 1],
+        start: "12:00",
+      },
+    });
+
+    const [saved, ...rest] = await caller.trip.saved();
+    expect(rest).toEqual([]);
+    expect(saved).toMatchObject({
+      place: "Helsinki",
+      exhibitionIds: [3, 1],
+      days: [{ date: "2026-10-02", exhibitionIds: [3, 1], start: "12:00" }],
+    });
+
+    await expect(
+      caller.trip.save({
+        ...trip,
+        day: {
+          city: "Helsinki",
+          date: "2026-10-05",
+          exhibitionIds: [1],
+          start: "11:00",
+        },
+      }),
+    ).rejects.toThrow();
+
+    await createCaller(asUser("u2")).trip.remove({ id: saved!.id });
+    expect(await caller.trip.saved()).toHaveLength(1);
+    await caller.trip.remove({ id: saved!.id });
+    expect(await caller.trip.saved()).toHaveLength(0);
   });
 });

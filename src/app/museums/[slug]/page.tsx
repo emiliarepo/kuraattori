@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 
@@ -6,6 +7,7 @@ import { ExhibitionList } from "~/app/_components/ExhibitionList";
 import { MuseumAddress } from "~/app/_components/MuseumAddress";
 import { FollowToggle } from "~/app/_components/FollowToggle";
 import { Section } from "~/app/_components/Section";
+import { dayPlanHref } from "~/app/_lib/day-plan-params";
 import { toRowView } from "~/app/_lib/row";
 import { todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
@@ -77,7 +79,15 @@ export default async function MuseumDetailPage({
         )}
       </div>
       {museum.city && (
-        <p className="text-muted mt-2 text-xl italic">{museum.city}</p>
+        <p className="mt-2 flex flex-wrap items-baseline gap-x-4">
+          <span className="text-muted text-xl italic">{museum.city}</span>
+          <Link
+            href={dayPlanHref({ city: museum.city, date: today })}
+            className="hover:text-signal font-sans text-sm underline underline-offset-4"
+          >
+            {t.pages.day.fromMuseum}
+          </Link>
+        </p>
       )}
       {museum.address && (
         <div className="mt-3">

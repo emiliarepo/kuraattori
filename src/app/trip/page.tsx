@@ -4,9 +4,11 @@ import { EmptyState } from "~/app/_components/EmptyState";
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
 import { tripToRowView } from "~/app/_lib/row";
 import { hasValidTripRange, parseTripFilters } from "~/app/_lib/trip-filters";
-import { todayInHelsinki } from "~/domain/dates";
+import { datesInRange, todayInHelsinki } from "~/domain/dates";
 import { groupRegions } from "~/domain/regions";
 import { t } from "~/i18n/fi";
+import { formatWeekdayDate } from "~/i18n/format";
+import { SaveTripButton } from "~/app/trip/SaveTripButton";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 import type { RouterOutputs } from "~/trpc/react";
@@ -49,12 +51,17 @@ export default async function TripPage({
     });
   }
   const today = todayInHelsinki();
+  const tripCities = [
+    ...new Set(
+      (items ?? [])
+        .map((item) => item.museum.city)
+        .filter((city): city is string => !!city),
+    ),
+  ].sort((a, b) => a.localeCompare(b, "fi"));
+  const tripDays = range ? datesInRange(range.from, range.to, 31) : [];
 
   return (
-    <div className="py-8">
-      <h1 className="text-headline mb-2 text-4xl sm:text-5xl">
-        {t.pages.trip.title}
-      </h1>
+    <>
       <p className="text-muted mb-6 max-w-prose">{t.pages.trip.intro}</p>
 
       <form
@@ -133,14 +140,75 @@ export default async function TripPage({
           }
         />
       ) : (
-        <ExhibitionList
-          items={items.map((item) =>
-            tripToRowView(item, today, range.from, range.to),
-          )}
-          emptyMessage={t.pages.trip.empty}
-          signedIn={signedIn}
-        />
+        <>
+          <div className="border-rule-soft mb-8 flex flex-col gap-6 border-b pb-8">
+            {tripCities.length > 0 && (
+              <form
+                method="get"
+                action="/trip/day"
+                className="flex flex-col gap-4 font-sans sm:flex-row sm:flex-wrap sm:items-end"
+              >
+                <h2 className="text-kicker w-full">{t.pages.trip.planDay}</h2>
+                {filters.place && (
+                  <input type="hidden" name="place" value={filters.place} />
+                )}
+                <input type="hidden" name="from" value={range.from} />
+                <input type="hidden" name="to" value={range.to} />
+                <label className="text-kicker flex flex-col gap-1.5 sm:min-w-[12rem]">
+                  {t.pages.trip.planDayCity}
+                  <select
+                    name="city"
+                    defaultValue={
+                      filters.place && tripCities.includes(filters.place)
+                        ? filters.place
+                        : tripCities[0]
+                    }
+                    className="border-rule-soft bg-bg focus:border-fg min-h-11 border px-2 py-2 text-base font-normal tracking-normal normal-case"
+                  >
+                    {tripCities.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="text-kicker flex flex-col gap-1.5">
+                  {t.pages.trip.planDayDate}
+                  <select
+                    name="date"
+                    className="border-rule-soft bg-bg focus:border-fg min-h-11 border px-2 py-2 text-base font-normal tracking-normal normal-case"
+                  >
+                    {tripDays.map((day) => (
+                      <option key={day} value={day}>
+                        {formatWeekdayDate(day)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button type="submit" className="btn btn-secondary">
+                  {t.pages.trip.planDaySubmit}
+                </button>
+              </form>
+            )}
+            {signedIn && (
+              <SaveTripButton
+                trip={{
+                  place: filters.place ?? "",
+                  from: range.from,
+                  to: range.to,
+                }}
+              />
+            )}
+          </div>
+          <ExhibitionList
+            items={items.map((item) =>
+              tripToRowView(item, today, range.from, range.to),
+            )}
+            emptyMessage={t.pages.trip.empty}
+            signedIn={signedIn}
+          />
+        </>
       )}
-    </div>
+    </>
   );
 }

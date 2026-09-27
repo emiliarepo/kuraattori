@@ -4,6 +4,7 @@ import { type Db } from "~/server/db";
 import {
   accounts,
   calendarFeeds,
+  savedTrips,
   sessions,
   userExhibitions,
   userFollowedMuseums,
@@ -22,6 +23,7 @@ export async function exportUserData(db: Db, userId: string) {
     followedMuseums,
     exhibitions,
     [calendarFeed],
+    trips,
   ] = await Promise.all([
     db
       .select({
@@ -72,6 +74,18 @@ export async function exportUserData(db: Db, userId: string) {
       })
       .from(calendarFeeds)
       .where(eq(calendarFeeds.userId, userId)),
+    db
+      .select({
+        place: savedTrips.place,
+        fromDate: savedTrips.fromDate,
+        toDate: savedTrips.toDate,
+        exhibitionIds: savedTrips.exhibitionIds,
+        days: savedTrips.days,
+        createdAt: savedTrips.createdAt,
+        updatedAt: savedTrips.updatedAt,
+      })
+      .from(savedTrips)
+      .where(eq(savedTrips.userId, userId)),
   ]);
 
   return {
@@ -82,6 +96,7 @@ export async function exportUserData(db: Db, userId: string) {
     followedMuseums: followedMuseums.map((row) => row.museumId),
     exhibitions,
     calendarFeed: calendarFeed ?? null,
+    savedTrips: trips,
   };
 }
 
@@ -105,6 +120,7 @@ export async function deleteUserData(db: Db, userId: string) {
       .where(eq(userFollowedMuseums.userId, userId)),
     db.delete(userExhibitions).where(eq(userExhibitions.userId, userId)),
     db.delete(calendarFeeds).where(eq(calendarFeeds.userId, userId)),
+    db.delete(savedTrips).where(eq(savedTrips.userId, userId)),
     db.delete(users).where(eq(users.id, userId)),
   ]);
 }

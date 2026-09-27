@@ -37,6 +37,10 @@ export default function PrivacyPage() {
           Näyttelymerkintäsi (kiinnostaa, käyty, piilotettu), käyntipäivät ja
           muistiinpanot.
         </li>
+        <li>
+          Tallentamasi matkat: paikka, päivämäärät, valitut näyttelyt ja
+          museopäivien suunnitelmat.
+        </li>
         <li>Henkilökohtaisen kalenteriosoitteesi tunniste.</li>
         <li>
           Palvelimen tekniset lokit, joissa voi näkyä esimerkiksi IP-osoite ja
@@ -76,6 +80,19 @@ export default function PrivacyPage() {
         Molemmat ovat yhdysvaltalaisia yrityksiä. Tietoja voidaan siirtää
         Yhdysvaltoihin EU:n ja Yhdysvaltojen välisen tietosuojakehyksen (Data
         Privacy Framework) tai EU:n vakiosopimuslausekkeiden perusteella.
+      </p>
+
+      <h2>Karttatiedot</h2>
+      <p>
+        Museoiden sijainnit ovat museot.fi-palvelusta tai niitä on haettu
+        museoiden osoitteilla OpenStreetMapin Nominatim-palvelusta tietojen
+        tuonnin yhteydessä. Käyttäjien tietoja ei lähetetä Nominatimiin.
+        Karttatiedot ©{" "}
+        <a href="https://www.openstreetmap.org/copyright">
+          OpenStreetMap-tekijät
+        </a>
+        , ODbL-lisenssi. Reittilinkki avaa Apple Mapsin tai Google Mapsin, jotka
+        käsittelevät pyyntöä omien tietosuojakäytäntöjensä mukaisesti.
       </p>
 
       <h2>Säilytysaika</h2>
