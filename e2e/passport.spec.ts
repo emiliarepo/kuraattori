@@ -119,7 +119,7 @@ test("Jaa passi shares the image with the link inside the text", async ({
     .toEqual([
       {
         keys: ["files", "text"],
-        text: expect.stringContaining("https://kuraattori.emialis.com"),
+        text: expect.stringContaining("https://kuraattori.emiliarepo.dev"),
         files: 1,
       },
     ]);

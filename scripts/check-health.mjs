@@ -1,6 +1,6 @@
 import { appendFile } from "node:fs/promises";
 
-const origin = "https://kuraattori.emialis.com";
+const origin = "https://kuraattori.emiliarepo.dev";
 const rows = [];
 let failed = false;
 
@@ -27,7 +27,7 @@ const sitemap = await check(`${origin}/sitemap.xml`);
 let exhibitionUrl;
 if (sitemap?.ok) {
   const xml = await sitemap.text();
-  const match = xml.match(/<loc>https:\/\/kuraattori\.emialis\.com\/exhibitions\/([^<]+)<\/loc>/);
+  const match = xml.match(/<loc>https:\/\/kuraattori\.emiliarepo\.dev\/exhibitions\/([^<]+)<\/loc>/);
   if (match) exhibitionUrl = `${origin}/exhibitions/${match[1]}`;
   else {
     record("Exhibition URL in sitemap", "missing", null);

@@ -2,7 +2,7 @@
 
 Kuraattori is a Finnish web app (also in English and Swedish) for finding museum exhibitions in Finland and keeping track of the ones you want to see. It shows what is on, what closes soon and what matches your interests, and it remembers where you have been.
 
-Live at **https://kuraattori.emialis.com**.
+Live at **https://kuraattori.emiliarepo.dev**.
 
 ## Features
 
@@ -142,7 +142,7 @@ If a budget trips on normal traffic, raise its repository variable first, then t
 
 ## Data and privacy
 
-Exhibition data comes from [museot.fi](https://www.museot.fi) and belongs to them and the museums. Kuraattori links back to the source for every exhibition. What the app stores about users, and why, is described on the [privacy page](https://kuraattori.emialis.com/privacy). The short version: your Google name and email, your preferences and statuses. There is no analytics or advertising.
+Exhibition data comes from [museot.fi](https://www.museot.fi) and belongs to them and the museums. Kuraattori links back to the source for every exhibition. What the app stores about users, and why, is described on the [privacy page](https://kuraattori.emiliarepo.dev/privacy). The short version: your Google name and email, your preferences and statuses. There is no analytics or advertising.
 
 ## License
 

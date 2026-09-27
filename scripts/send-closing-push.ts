@@ -21,7 +21,7 @@ import { VAPID_PUBLIC_KEY } from "~/push/vapid";
 
 import { createRemoteDb } from "./d1-http-driver";
 
-const SITE_URL = "https://kuraattori.emialis.com";
+const SITE_URL = "https://kuraattori.emiliarepo.dev";
 
 interface Payload {
   title: string;
