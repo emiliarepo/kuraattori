@@ -98,7 +98,7 @@ export default async function ExhibitionsPage({
       <h1 className="text-headline mb-6 text-4xl sm:col-span-2 sm:text-5xl">
         {t.pages.browse.title}
       </h1>
-      <aside className="mb-4 sm:sticky sm:top-6 sm:mb-0">
+      <aside className="mb-6 sm:sticky sm:top-6 sm:mb-0">
         <FilterSheet
           filters={filters}
           cities={cities}

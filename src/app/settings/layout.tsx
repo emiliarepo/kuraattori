@@ -2,6 +2,7 @@ import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ProfileTabs } from "~/app/_components/ProfileTabs";
+import { TabbedPage } from "~/app/_components/TabbedPage";
 import { getI18n } from "~/i18n/server";
 import { auth } from "~/server/auth";
 
@@ -23,10 +24,12 @@ export default async function ProfileLayout({
   if (!session?.user) redirect("/sign-in?callbackUrl=/profile");
 
   return (
-    <div className="mx-auto flex max-w-lg flex-col gap-6 py-8">
-      <h1 className="text-headline text-4xl sm:text-5xl">{t.profile.title}</h1>
-      <ProfileTabs />
+    <TabbedPage
+      title={t.profile.title}
+      tabs={<ProfileTabs />}
+      className="mx-auto max-w-lg"
+    >
       {children}
-    </div>
+    </TabbedPage>
   );
 }

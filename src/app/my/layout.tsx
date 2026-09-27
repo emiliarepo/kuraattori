@@ -1,6 +1,7 @@
 import { type Metadata } from "next";
 
 import { MyTabs } from "~/app/_components/MyTabs";
+import { TabbedPage } from "~/app/_components/TabbedPage";
 import { getI18n } from "~/i18n/server";
 
 export const metadata: Metadata = {
@@ -14,12 +15,8 @@ export default async function MyLayout({
 }) {
   const { t } = await getI18n();
   return (
-    <div className="py-8">
-      <h1 className="text-headline mb-6 text-4xl sm:text-5xl">
-        {t.ui.nav.mine}
-      </h1>
-      <MyTabs />
-      <div className="pt-2">{children}</div>
-    </div>
+    <TabbedPage title={t.ui.nav.mine} tabs={<MyTabs />}>
+      {children}
+    </TabbedPage>
   );
 }

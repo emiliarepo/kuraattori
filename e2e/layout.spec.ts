@@ -107,8 +107,11 @@ for (const viewport of VIEWPORTS) {
       "/exhibitions",
       detailHref!,
       "/my/visited",
-      "/settings",
-      `/settings/year/${year}`,
+      `/my/year/${year}`,
+      "/settings/interests",
+      "/settings/regions",
+      "/settings/calendar",
+      "/settings/account",
     ];
     const findings: string[] = [];
     for (const path of paths) {
@@ -121,3 +124,63 @@ for (const viewport of VIEWPORTS) {
     expect(findings).toEqual([]);
   });
 }
+
+/**
+ * Distance from the tab strip's rule to the top of the first box in the
+ * panel. `TabbedPage` owns the gap, so every tab page should report the same
+ * number however its content starts.
+ */
+function tabGap(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const panel = document.querySelector("[data-tab-panel]")!;
+    const rule = panel.previousElementSibling!.getBoundingClientRect().bottom;
+    let first = panel.firstElementChild;
+    while (first && first.getBoundingClientRect().height === 0)
+      first = first.nextElementSibling;
+    return Math.round(first!.getBoundingClientRect().top - rule);
+  });
+}
+
+test("tab pages start their content 24 px below the tab rule", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await devSignIn(page, uniqueEmail("tab-gap"), "/exhibitions");
+  await page.locator('main a[href^="/exhibitions/"]').first().waitFor();
+  const hrefs = await page
+    .locator('main a[href^="/exhibitions/"]')
+    .evaluateAll((links) => links.map((link) => link.getAttribute("href")!));
+  for (const [href, status] of [
+    [hrefs[0]!, t.ui.status.visited],
+    [hrefs.find((h) => h !== hrefs[0])!, t.ui.status.interested],
+  ] as const) {
+    await page.goto(href);
+    const button = page.getByRole("button", { name: status, exact: true });
+    await button.click();
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+  }
+
+  const year = new Date().getFullYear();
+  await page.goto(`/my/year/${year}`);
+  const kicker = page.getByText(t.profile.year.kicker);
+  const rule = await page
+    .getByRole("navigation", { name: t.ui.nav.mine })
+    .evaluate((nav) => nav.parentElement!.getBoundingClientRect().bottom);
+  const kickerTop = (await kicker.boundingBox())!.y;
+  expect(Math.round(kickerTop - rule)).toBe(24);
+
+  const gaps: Record<string, number> = {};
+  for (const path of [
+    "/my/interested",
+    "/my/visited",
+    "/my/passport",
+    `/my/year/${year}`,
+    "/settings/interests",
+    "/settings/account",
+    "/trip",
+  ]) {
+    await page.goto(path);
+    gaps[path] = await tabGap(page);
+  }
+  expect(new Set(Object.values(gaps))).toEqual(new Set([24]));
+});

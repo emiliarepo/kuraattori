@@ -7,7 +7,7 @@ export async function CalendarPrompt({ token }: { token: string | null }) {
   const { t } = await getI18n();
   if (!token)
     return (
-      <p className="mt-2 mb-4 font-sans text-sm">
+      <p className="mb-4 font-sans text-sm">
         <Link
           href="/settings/calendar"
           className="hover:text-signal underline underline-offset-4"
@@ -22,7 +22,7 @@ export async function CalendarPrompt({ token }: { token: string | null }) {
     .replace(/^https?:/, "webcal:");
 
   return (
-    <p className="mt-2 mb-4 flex flex-wrap gap-x-5 gap-y-1 font-sans text-sm">
+    <p className="mb-4 flex flex-wrap gap-x-5 gap-y-1 font-sans text-sm">
       <a
         href={webcalUrl}
         className="hover:text-signal underline underline-offset-4"

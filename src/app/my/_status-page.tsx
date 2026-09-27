@@ -1,4 +1,5 @@
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
+import { Section } from "~/app/_components/Section";
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import { toRowView } from "~/app/_lib/row";
 import { todayInHelsinki } from "~/domain/dates";
@@ -47,10 +48,7 @@ export async function MyStatusPage({
         />
       )}
       {endedAt >= 0 && (
-        <section className="mt-8">
-          <h2 className="text-headline border-rule border-t pt-5 text-2xl">
-            {t.pages.my.ended}
-          </h2>
+        <Section title={t.pages.my.ended}>
           <ExhibitionList
             items={items
               .slice(endedAt)
@@ -59,7 +57,7 @@ export async function MyStatusPage({
             signedIn
             ratable={status === "visited"}
           />
-        </section>
+        </Section>
       )}
     </>
   );

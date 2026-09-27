@@ -47,7 +47,7 @@ export default async function ProfileYearPage({
   const maxMonthCount = review.busiestMonth.count;
 
   return (
-    <div className="pb-10">
+    <div>
       <header className="border-rule border-b pb-6">
         <p className="text-kicker text-muted">{t.profile.year.kicker}</p>
         <h2 className="text-headline mt-2 text-5xl sm:text-7xl">

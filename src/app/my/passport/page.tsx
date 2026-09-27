@@ -34,7 +34,7 @@ export default async function MyPassportPage() {
   const stampedRegions = passport.regions.filter((r) => r.stamped.length);
 
   return (
-    <div className="pt-6">
+    <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <p className="text-headline text-4xl tabular-nums sm:text-6xl">
           {copy.summary(passport.stampedCount, passport.total)}

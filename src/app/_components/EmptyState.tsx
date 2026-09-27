@@ -1,6 +1,6 @@
 export function EmptyState({
   message,
-  className = "py-6",
+  className = "",
 }: {
   message: string;
   className?: string;

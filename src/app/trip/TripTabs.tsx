@@ -36,7 +36,7 @@ export function TripTabs() {
   return (
     <nav
       aria-label={t.pages.trip.tabs}
-      className="border-rule-soft mb-8 flex border-b"
+      className="border-rule-soft flex border-b"
     >
       {tabs.map((tab) => (
         <Link

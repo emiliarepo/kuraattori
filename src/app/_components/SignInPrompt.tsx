@@ -5,7 +5,7 @@ import { getI18n } from "~/i18n/server";
 export async function SignInPrompt({ message }: { message: string }) {
   const { t } = await getI18n();
   return (
-    <p className="text-muted py-6 text-lg italic">
+    <p className="text-muted text-lg italic">
       {message}{" "}
       <Link
         href="/sign-in"
