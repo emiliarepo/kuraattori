@@ -19,6 +19,15 @@ export const profileRouter = createTRPCRouter({
       .limit(1);
     return { token: feed!.token };
   }),
+  getExistingCalendarFeed: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    const [feed] = await ctx.db
+      .select({ token: calendarFeeds.token })
+      .from(calendarFeeds)
+      .where(eq(calendarFeeds.userId, userId))
+      .limit(1);
+    return { token: feed?.token ?? null };
+  }),
   rotateCalendarFeed: protectedProcedure.mutation(async ({ ctx }) => {
     const userId = ctx.session.user.id;
     const token = createCalendarToken();

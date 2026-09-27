@@ -40,6 +40,8 @@ export const t = {
       interested: "Kiinnostaa",
       strong: "Erityisesti",
       excluded: "Ei kiinnosta",
+      explanation:
+        "Kiinnostaa ja Erityisesti nostavat aihetta Sinulle-suosituksissa, Erityisesti eniten. Ei kiinnosta piilottaa sen kokonaan.",
     },
   },
   auth: {
@@ -64,8 +66,13 @@ export const t = {
   },
   profile: {
     title: "Profiili",
-    interestsHeading: "Kiinnostuksen kohteet",
-    regionsHeading: "Alueet",
+    saved: "Tallennettu",
+    tabs: {
+      interests: "Kiinnostukset",
+      regions: "Alueet",
+      calendar: "Kalenteri",
+      account: "Tili",
+    },
     calendarHeading: "Kalenteri",
     calendarDescription:
       "Kiinnostavien näyttelyiden päättymispäivät omassa kalenterissasi.",
@@ -75,6 +82,8 @@ export const t = {
     calendarRotate: "Luo uusi osoite",
     calendarRotateConfirm:
       "Vanha kalenteriosoite lakkaa toimimasta. Luodaanko uusi?",
+    accountName: "Nimi",
+    accountEmail: "Sähköposti",
   },
   pages: {
     signIn: {
@@ -171,6 +180,8 @@ export const t = {
       emptyInterested: "Ei kiinnostavia näyttelyitä vielä.",
       emptyVisited: "Ei käytyjä näyttelyitä vielä.",
       emptyHidden: "Ei piilotettuja näyttelyitä.",
+      calendarPrompt: "Päättymispäivät kalenteriisi →",
+      calendarSettings: "Asetukset",
     },
     timeBar: {
       daysCompact: (days: number) => `${days} pv`,
