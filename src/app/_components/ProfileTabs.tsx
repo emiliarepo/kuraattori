@@ -19,7 +19,7 @@ export function ProfileTabs() {
   return (
     <nav
       aria-label={t.ui.nav.profile}
-      className="border-rule-soft flex [scrollbar-width:none] overflow-x-auto border-b"
+      className="flex [scrollbar-width:none] overflow-x-auto overflow-y-hidden overscroll-x-contain shadow-[inset_0_-1px_0_var(--rule-soft)]"
     >
       {TABS.map((tab) => {
         const active = pathname.startsWith(tab.href);
@@ -28,7 +28,7 @@ export function ProfileTabs() {
             key={tab.href}
             href={tab.href}
             aria-current={active ? "page" : undefined}
-            className={`text-kicker -mb-px border-b-2 px-3 py-3.5 whitespace-nowrap transition-colors duration-150 first:pl-0 focus-visible:-outline-offset-2 sm:px-4 ${
+            className={`text-kicker border-b-2 px-3 py-3.5 whitespace-nowrap transition-colors duration-150 first:pl-0 focus-visible:-outline-offset-2 sm:px-4 ${
               active ? "border-b-signal text-signal" : "border-b-transparent"
             }`}
           >

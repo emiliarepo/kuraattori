@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "./tokens.css";
 
+@custom-variant standalone (@media (display-mode: standalone));
+
 @theme {
   --color-bg: var(--bg);
   --color-fg: var(--fg);
