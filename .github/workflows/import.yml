@@ -27,7 +27,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Run importer against remote D1
+      - name: Import and check source counts against remote D1
         run: pnpm import:museot
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
