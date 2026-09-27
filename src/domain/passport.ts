@@ -55,7 +55,7 @@ function isGeneric(word: string) {
   return GENERIC_WORDS.has(word.toLowerCase()) || word.startsWith("-");
 }
 
-function wrap(words: string[]): string[] | null {
+function wrap(words: string[], max = LINE_MAX): string[] | null {
   const text = words.join(" ");
   if (!words.length) return null;
   if (text.length <= 10 || words.length === 1) return [text];
@@ -67,7 +67,7 @@ function wrap(words: string[]): string[] | null {
     ];
     const longest = Math.max(...lines.map((line) => line.length));
     if (
-      longest <= LINE_MAX &&
+      longest <= max &&
       (!best || longest < Math.max(...best.map((line) => line.length)))
     )
       best = lines;
@@ -78,8 +78,8 @@ function wrap(words: string[]): string[] | null {
 /**
  * One or two lines for the stamp face. Prefers the proper name after a
  * generic word ("Nykytaiteen museo Kiasma" → "Kiasma"), then an acronym,
- * then the name without generic words wrapped onto two lines, then its
- * first word.
+ * then the name without generic words wrapped onto two lines. A generic
+ * word after a genitive stays ("Kuurojen museo"), or the name reads cut off.
  */
 export function stampLabel(name: string): string[] {
   const head = name.split(/,|:|\s\(|\s[–-]\s/)[0]!.trim();
@@ -92,18 +92,24 @@ export function stampLabel(name: string): string[] {
     -1,
   );
   const tail = words.slice(lastGeneric + 1);
-  const kept = words.filter((word) => !isGeneric(word));
+  const endsInGenitive = (candidate: string[]) =>
+    (candidate.at(-1) ?? "").endsWith("n");
+  const kept = words.filter(
+    (word, index) =>
+      !isGeneric(word) || (index > 0 && endsInGenitive(words.slice(0, index))),
+  );
+  const withoutSuffixed = kept.filter((word) => !GENERIC_SUFFIX.test(word));
   const candidates = [
     lastGeneric >= 0 && /^\p{Lu}/u.test(tail[0] ?? "") ? tail : [],
     kept.filter((word) => /^\p{Lu}{2,}$/u.test(word)).slice(0, 1),
     kept,
-    kept.filter((word) => !GENERIC_SUFFIX.test(word)),
+    endsInGenitive(withoutSuffixed) ? [] : withoutSuffixed,
   ];
   for (const candidate of candidates) {
     const lines = wrap(candidate);
     if (lines) return lines;
   }
-  return [kept[0] ?? words[0]!];
+  return wrap(kept, Infinity) ?? [words[0]!];
 }
 
 const ROMAN_MONTHS = [

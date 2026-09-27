@@ -75,10 +75,13 @@ describe("stampLabel", () => {
     ["Urheilun ja liikunnan kulttuurikeskus TAHTO", ["TAHTO"]],
     ["Sinebrychoffin taidemuseo", ["Sinebrychoffin", "taidemuseo"]],
     ["Sotamuseo Maneesi", ["Maneesi"]],
+    ["Kuurojen museo", ["Kuurojen", "museo"]],
+    ["Herttoniemen kartanon museo", ["Herttoniemen", "kartanon museo"]],
+    ["Kuntsin modernin taiteen museo", ["Kuntsin modernin", "taiteen museo"]],
     ["Nykytaiteen museo Kiasma", ["Kiasma"]],
     ["LUOMUS Luonnontieteellinen museo", ["LUOMUS"]],
     ["Särestöniemi-museo", ["Särestöniemi"]],
-    ["Vantaan historian museo", ["Vantaan", "historian"]],
+    ["Vantaan historian museo", ["Vantaan", "historian museo"]],
     ["Näyttelykeskus WeeGee", ["WeeGee"]],
   ])("%s", (name, expected) => {
     expect(stampLabel(name)).toEqual(expected);
