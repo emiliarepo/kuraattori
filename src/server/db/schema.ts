@@ -142,6 +142,8 @@ export const museums = createTable(
     openingHours: d.text({ mode: "json" }).$type<OpeningHours>(),
     /** Upcoming free-entry dates, ISO, as listed in the museum's events. */
     freeDays: d.text({ mode: "json" }).$type<string[]>(),
+    /** When the importer last fetched the museum page; null until the first fetch. */
+    pageFetchedAt: d.integer({ mode: "timestamp" }),
     createdAt: d
       .integer({ mode: "timestamp" })
       .default(sql`(unixepoch())`)

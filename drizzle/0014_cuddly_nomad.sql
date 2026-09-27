@@ -1,0 +1,1 @@
+ALTER TABLE `kuraattori_museum` ADD `pageFetchedAt` integer;

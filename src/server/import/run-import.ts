@@ -9,6 +9,7 @@ import {
 } from "~/server/db/schema";
 
 import { classify } from "./grouping";
+import { selectMuseumsForPageFetch } from "./museum-refresh";
 import { importSanityError } from "./sanity";
 import type { ExhibitionSourceAdapter } from "./types";
 import {
@@ -16,6 +17,7 @@ import {
   loadExistingCategories,
   loadExistingExhibitions,
   loadExistingMuseums,
+  markMuseumPageFetched,
   syncExhibitionCategories,
   touchExhibition,
   upsertCategory,
@@ -46,6 +48,10 @@ export interface ImportRunStats {
   translationsFailed: number;
   /** Requests made for English and Swedish pages. */
   translationRequests: number;
+  /** Museum pages requested this run; the rest are refreshed on later nights. */
+  museumPagesFetched: number;
+  museumCount: number;
+  phaseMs: { exhibitions: number; museumPages: number; total: number };
 }
 
 async function reportGroupingAndNotices(
@@ -184,6 +190,9 @@ export async function runImport(
       translationsUpdated: 0,
       translationsFailed: 0,
       translationRequests: 0,
+      museumPagesFetched: 0,
+      museumCount: 0,
+      phaseMs: { exhibitions: 0, museumPages: 0, total: 0 },
     };
   }
 }
@@ -193,6 +202,7 @@ async function performImport(
   adapter: ExhibitionSourceAdapter,
 ): Promise<Omit<ImportRunStats, "status" | "errorMessage">> {
   const source = adapter.name;
+  const startedAt = Date.now();
 
   const existingMuseums = await loadExistingMuseums(db, source);
   const existingExhibitions = await loadExistingExhibitions(db, source);
@@ -214,6 +224,7 @@ async function performImport(
     knownHashes,
     knownTranslationHashes,
   );
+  const exhibitionsMs = Date.now() - startedAt;
 
   const museumSlugs = new Set(
     [...existingMuseums.values()].map((row) => row.slug),
@@ -279,11 +290,23 @@ async function performImport(
 
   let museumFailures = 0;
   const hoursUnparsed: string[] = [];
+  const museumPagesStartedAt = Date.now();
+  const changedMuseumIds = new Set(
+    result.changed.map((item) => item.museum.sourceId),
+  );
+  const museumsToFetch = adapter.fetchMuseumPage
+    ? selectMuseumsForPageFetch(
+        [...existingMuseums].map(([sourceId, museum]) => ({
+          sourceId,
+          museum,
+          pageFetchedAt: museum.pageFetchedAt,
+        })),
+        changedMuseumIds,
+        new Date(),
+      )
+    : [];
   if (adapter.fetchMuseumPage) {
-    const changedMuseumIds = new Set(
-      result.changed.map((item) => item.museum.sourceId),
-    );
-    for (const [sourceId, museum] of existingMuseums) {
+    for (const { sourceId, museum } of museumsToFetch) {
       try {
         const page = await adapter.fetchMuseumPage(sourceId, museum.city);
         if (
@@ -298,11 +321,13 @@ async function performImport(
           );
         if (!page.openingHours) hoursUnparsed.push(museum.name);
         await updateMuseumSchedule(db, museum, page);
+        await markMuseumPageFetched(db, museum.id, new Date());
       } catch {
         museumFailures++;
       }
     }
   }
+  const museumPagesMs = Date.now() - museumPagesStartedAt;
 
   let itemsUnchanged = 0;
   for (const exhibition of result.unchanged) {
@@ -358,5 +383,12 @@ async function performImport(
     translationsUpdated,
     translationsFailed: result.translationsFailed,
     translationRequests: result.translationRequests,
+    museumPagesFetched: museumsToFetch.length,
+    museumCount: existingMuseums.size,
+    phaseMs: {
+      exhibitions: exhibitionsMs,
+      museumPages: museumPagesMs,
+      total: Date.now() - startedAt,
+    },
   };
 }

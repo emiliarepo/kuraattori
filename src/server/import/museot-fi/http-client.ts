@@ -1,16 +1,13 @@
-const USER_AGENT =
+export const USER_AGENT =
   "KuraattoriBot/0.1 (+https://kuraattori.emialis.com; hi@emialis.com)";
 const MIN_INTERVAL_MS = 550; // stays under museot.fi's ~2 req/s budget
 
 export class MuseotFiHttpClient {
   private nextRequestAt = 0;
+  requestCount = 0;
 
   async getText(path: string): Promise<string> {
     return (await this.get(path)).text();
-  }
-
-  async getBytes(url: string): Promise<Uint8Array> {
-    return new Uint8Array(await (await this.get(url)).arrayBuffer());
   }
 
   private async get(path: string): Promise<Response> {
@@ -19,6 +16,7 @@ export class MuseotFiHttpClient {
     const wait = requestAt - Date.now();
     if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
 
+    this.requestCount++;
     const url = new URL(path, "https://museot.fi/");
     const response = await fetch(url, {
       headers: { "User-Agent": USER_AGENT },

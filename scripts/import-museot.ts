@@ -6,8 +6,15 @@ import {
   createNominatimGeocoder,
   geocodeMuseums,
 } from "~/server/import/geocode";
-import { archiveImages } from "~/server/import/image-archive";
-import { MuseotFiHttpClient } from "~/server/import/museot-fi/http-client";
+import {
+  archiveImages,
+  createImageDownloader,
+  type ImageArchiveStats,
+} from "~/server/import/image-archive";
+import {
+  MuseotFiHttpClient,
+  USER_AGENT,
+} from "~/server/import/museot-fi/http-client";
 import { runImport } from "~/server/import/run-import";
 import * as schema from "~/server/db/schema";
 import { type Db } from "~/server/db";
@@ -19,9 +26,6 @@ import {
   resizeImage,
   type ArchiveStore,
 } from "./image-archive-store";
-
-// About 2 downloads/s keeps the whole backfill (~650 images) inside one run.
-const IMAGE_ARCHIVE_LIMIT = 800;
 
 async function getDbAndDispose(): Promise<{
   db: Db;
@@ -56,27 +60,30 @@ async function getDbAndDispose(): Promise<{
 
 async function main() {
   const { db, store, dispose } = await getDbAndDispose();
+  const startedAt = Date.now();
   try {
-    const stats = await runImport(db, createMuseotFiAdapter());
+    const client = new MuseotFiHttpClient();
+    const stats = await runImport(db, createMuseotFiAdapter(client));
     console.log(JSON.stringify(stats, null, 2));
     if (stats.status === "failed") {
       process.exitCode = 1;
       return;
     }
+    const geocodingStartedAt = Date.now();
     const geocoding = await geocodeMuseums(db, createNominatimGeocoder());
+    const geocodingMs = Date.now() - geocodingStartedAt;
     console.log(JSON.stringify({ geocoding }, null, 2));
 
+    let imageArchive: ImageArchiveStats | undefined;
     try {
-      const http = new MuseotFiHttpClient();
-      const imageArchive = await archiveImages(
-        db,
-        {
-          download: (url) => http.getBytes(url),
-          resize: resizeImage,
-          put: store.put,
-        },
-        IMAGE_ARCHIVE_LIMIT,
-      );
+      imageArchive = await archiveImages(db, {
+        download: createImageDownloader({
+          userAgent: USER_AGENT,
+          timeoutMs: 30_000,
+        }),
+        resize: resizeImage,
+        put: store.put,
+      });
       const coverage = imageArchive.withImage
         ? Math.round((imageArchive.archived / imageArchive.withImage) * 100)
         : 100;
@@ -89,6 +96,32 @@ async function main() {
         error,
       );
     }
+
+    console.log(
+      JSON.stringify(
+        {
+          budget: {
+            requests: {
+              museotFi: client.requestCount,
+              museumPages: stats.museumPagesFetched,
+              translations: stats.translationRequests,
+              geocoder: geocoding.attempted,
+              images: imageArchive?.attempted ?? 0,
+            },
+            durationMs: {
+              exhibitions: stats.phaseMs.exhibitions,
+              museumPages: stats.phaseMs.museumPages,
+              import: stats.phaseMs.total,
+              geocoding: geocodingMs,
+              images: imageArchive?.durationMs ?? 0,
+              total: Date.now() - startedAt,
+            },
+          },
+        },
+        null,
+        2,
+      ),
+    );
   } finally {
     await dispose();
   }
