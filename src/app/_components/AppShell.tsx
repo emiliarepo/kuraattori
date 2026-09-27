@@ -27,6 +27,15 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/privacy" className="hover:text-fg">
             {t.legal.privacy}
           </Link>
+          <span aria-hidden>·</span>
+          <a
+            href="https://github.com/emiliarepo/kuraattori"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-fg"
+          >
+            GitHub
+          </a>
         </footer>
       </main>
       <BottomTabBar omatEndingSoonCount={omatEndingSoonCount} />
