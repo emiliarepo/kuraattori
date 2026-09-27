@@ -321,6 +321,43 @@ export const t = {
       closedToday: "Stängt i dag",
       nextFreeDay: (date: string) => `Nästa gratisdag ${date}`,
     },
+    nearby: {
+      title: "Öppet nu nära dig",
+      banner: "Öppet nu nära dig",
+      bannerHint: "Museer på gångavstånd",
+      intro:
+        "Museer som är öppna just nu på gångavstånd. Din plats sparas inte.",
+      locate: "Använd min plats",
+      locating: "Söker plats…",
+      loading: "Hämtar museer…",
+      orCity: "eller välj en stad",
+      city: "Stad",
+      chooseCity: "Välj en stad",
+      showCity: "Visa",
+      denied:
+        "Platsåtkomst är blockerad. Tillåt den i webbläsarens inställningar eller välj en stad.",
+      unavailable: "Din plats kunde inte fastställas. Välj en stad.",
+      timeout:
+        "Platssökningen tog för lång tid. Försök igen eller välj en stad.",
+      failed: "Museerna kunde inte hämtas. Försök igen.",
+      nearYou: "Nära dig",
+      nearCity: (city: string) => `Nära ${city}`,
+      radius: "Avstånd",
+      radiusOption: (km: number) => `${km} km`,
+      distance: (km: string, minutes: number) =>
+        `${km} km · ${minutes} min promenad`,
+      openUntil: (time: string) => `Öppet till kl. ${time}`,
+      closingSoon: "Stänger snart",
+      more: (count: number) => `+${count}`,
+      noExhibitions: "Inga pågående utställningar.",
+      empty: "Inga museer i närheten är öppna just nu.",
+      nextOpens: (museum: string, when: string) =>
+        `Öppnar härnäst: ${museum}, ${when}`,
+      opensToday: (time: string) => `i dag kl. ${time}`,
+      opensOn: (weekday: string, time: string) => `${weekday} kl. ${time}`,
+      straightLine: "Gångtiderna är fågelvägen.",
+      changeLocation: "Byt plats",
+    },
     museums: {
       title: "Museer",
       showOnMap: "Visa på kartan",

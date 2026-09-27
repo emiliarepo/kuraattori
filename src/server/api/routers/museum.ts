@@ -11,25 +11,21 @@ import {
 import { getActiveExhibitionPool } from "~/server/cache/active-pool";
 import { exhibitions, museums, userFollowedMuseums } from "~/server/db/schema";
 import { deserializeMuseum, serializeMuseum } from "~/server/db/serialize";
+import type { Db } from "~/server/db";
 import { onlyExhibitions, whereVisible, withDetails } from "./exhibition";
 
 const MUSEUMS_CACHE_TTL_SECONDS = 60 * 60;
 
+export async function listMuseums(db: Db) {
+  const rows = await cached("museums", MUSEUMS_CACHE_TTL_SECONDS, async () => {
+    const rows = await db.select().from(museums).orderBy(asc(museums.name));
+    return rows.map(serializeMuseum);
+  });
+  return rows.map(deserializeMuseum);
+}
+
 export const museumRouter = createTRPCRouter({
-  list: publicProcedure.query(async ({ ctx }) => {
-    const rows = await cached(
-      "museums",
-      MUSEUMS_CACHE_TTL_SECONDS,
-      async () => {
-        const rows = await ctx.db
-          .select()
-          .from(museums)
-          .orderBy(asc(museums.name));
-        return rows.map(serializeMuseum);
-      },
-    );
-    return rows.map(deserializeMuseum);
-  }),
+  list: publicProcedure.query(({ ctx }) => listMuseums(ctx.db)),
   bySlug: publicProcedure
     .input(z.object({ slug: z.string().min(1) }))
     .query(
