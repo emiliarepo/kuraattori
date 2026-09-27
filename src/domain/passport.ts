@@ -93,7 +93,7 @@ export function stampLabel(name: string): string[] {
   );
   const tail = words.slice(lastGeneric + 1);
   const endsInGenitive = (candidate: string[]) =>
-    /n$/.test(candidate.at(-1) ?? "");
+    (candidate.at(-1) ?? "").endsWith("n");
   const kept = words.filter(
     (word, index) =>
       !isGeneric(word) || (index > 0 && endsInGenitive(words.slice(0, index))),
