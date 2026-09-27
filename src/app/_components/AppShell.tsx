@@ -21,7 +21,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       <Header omatEndingSoonCount={omatEndingSoonCount} />
       <main className="mx-auto max-w-5xl px-4 pb-20 sm:px-6 sm:pb-8">
         {children}
-        <footer className="border-rule-soft text-muted mt-12 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t py-6 font-sans text-xs">
+        <footer className="border-rule-soft text-muted mt-12 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-0.5 border-t py-6 font-sans text-xs">
           <div className="flex gap-2">
             <Link href="/terms" className="hover:text-fg">
               {t.legal.terms}
