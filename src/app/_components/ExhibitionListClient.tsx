@@ -15,12 +15,14 @@ export function ExhibitionListClient({
   input,
   today,
   emptyMessage,
+  signedIn = false,
 }: {
   initialItems: readonly ExhibitionWithDetails[];
   initialNextCursor: string | null;
   input: ListInput;
   today: string;
   emptyMessage: string;
+  signedIn?: boolean;
 }) {
   const utils = api.useUtils();
   const [items, setItems] = useState(initialItems);
@@ -47,6 +49,7 @@ export function ExhibitionListClient({
       <ExhibitionList
         items={items.map((item) => toRowView(item, today))}
         emptyMessage={emptyMessage}
+        signedIn={signedIn}
       />
       {cursor && (
         <button

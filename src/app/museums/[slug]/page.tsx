@@ -6,6 +6,7 @@ import { Section } from "~/app/_components/Section";
 import { toRowView } from "~/app/_lib/row";
 import { todayInHelsinki } from "~/domain/dates";
 import { t } from "~/i18n/fi";
+import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { siteUrl } from "~/app/_lib/site-url";
 
@@ -40,13 +41,15 @@ export default async function MuseumDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [museum, exhibitions] = await Promise.all([
+  const [museum, exhibitions, session] = await Promise.all([
     api.museum.bySlug({ slug }),
     api.museum.exhibitions({ slug }),
+    auth(),
   ]);
   if (!museum) notFound();
 
   const today = todayInHelsinki();
+  const signedIn = Boolean(session?.user);
   const present = exhibitions.filter(
     (item): item is NonNullable<typeof item> => item !== null,
   );
@@ -77,6 +80,7 @@ export default async function MuseumDetailPage({
         <ExhibitionList
           items={byPhase.current.map((item) => toRowView(item, today))}
           emptyMessage={t.pages.museums.empty}
+          signedIn={signedIn}
         />
       </Section>
 
@@ -84,6 +88,7 @@ export default async function MuseumDetailPage({
         <ExhibitionList
           items={byPhase.upcoming.map((item) => toRowView(item, today))}
           emptyMessage={t.pages.museums.empty}
+          signedIn={signedIn}
         />
       </Section>
 
@@ -91,6 +96,7 @@ export default async function MuseumDetailPage({
         <ExhibitionList
           items={byPhase.ended.map((item) => toRowView(item, today))}
           emptyMessage={t.pages.museums.empty}
+          signedIn={signedIn}
         />
       </Section>
     </div>

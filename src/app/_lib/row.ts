@@ -19,6 +19,7 @@ export type ExhibitionWithDetails = NonNullable<
 >;
 
 export interface ExhibitionRowView {
+  exhibitionId: number;
   href: string;
   title: string;
   museum: string;
@@ -45,6 +46,7 @@ export function toRowView(
   today: string,
 ): ExhibitionRowView {
   return {
+    exhibitionId: item.id,
     href: `/exhibitions/${item.slug}`,
     title: item.titleFi,
     museum: venueNames(item.venues),
@@ -76,6 +78,7 @@ export function forYouToRowView(
   today: string,
 ): ExhibitionRowView {
   return {
+    exhibitionId: item.exhibition.id,
     href: `/exhibitions/${item.exhibition.slug}`,
     title: item.exhibition.titleFi,
     museum: venueNames(item.venues),

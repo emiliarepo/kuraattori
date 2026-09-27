@@ -221,6 +221,7 @@ export default async function ExhibitionDetailPage({
         title="Samankaltaisia"
         items={similar.map((item) => ({ view: toRowView(item, today) }))}
         emptyMessage="Ei samankaltaisia näyttelyitä."
+        signedIn={Boolean(session?.user)}
       />
     </article>
   );

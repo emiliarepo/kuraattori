@@ -19,6 +19,7 @@ export const t = {
       browse: "Selaa",
       mine: "Omat",
       profile: "Profiili",
+      omatEndingSoon: (count: number) => `Omat, ${count} päättyy pian`,
     },
     region: {
       label: "Alueet",
@@ -32,6 +33,7 @@ export const t = {
       hidden: "Piilota",
       announceSet: (label: string) => `Merkitty: ${label}`,
       announceCleared: "Merkintä poistettu",
+      heartLabel: (title: string) => `Kiinnostaa: ${title}`,
     },
     interest: {
       none: "–",
@@ -88,6 +90,7 @@ export const t = {
       upcoming: "Tulossa",
       whyNew: "Uusi",
       seeAll: "Kaikki",
+      chooseInterests: "Valitse kiinnostuksen kohteet",
     },
     browse: {
       title: "Selaa",

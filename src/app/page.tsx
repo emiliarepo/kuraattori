@@ -4,6 +4,7 @@ import Link from "next/link";
 import { DaysNumeral } from "~/app/_components/DaysNumeral";
 import { LeadStory } from "~/app/_components/LeadStory";
 import { Rail } from "~/app/_components/Rail";
+import { Section } from "~/app/_components/Section";
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
 import { StaleDataNotice } from "~/app/_components/StaleDataNotice";
 import {
@@ -37,7 +38,7 @@ export default async function HomePage() {
   const signedIn = Boolean(session?.user);
   const today = todayInHelsinki();
 
-  const [endingSoon, upcoming, freshest, forYou, lastImportAt] =
+  const [endingSoon, upcoming, freshest, forYou, lastImportAt, interests] =
     await Promise.all([
       listAcrossRegions(activeRegions, {
         state: "current",
@@ -53,7 +54,9 @@ export default async function HomePage() {
         ? api.recommendation.forYou({ limit: SECTION_LIMIT + 1 })
         : Promise.resolve([]),
       api.meta.lastImportAt(),
+      signedIn ? api.profile.get().then((profile) => profile.interests) : [],
     ]);
+  const hasInterests = interests.some((interest) => interest.weight !== -1);
 
   const endingSoonSorted = [...endingSoon.items].sort(
     (a, b) =>
@@ -93,6 +96,7 @@ export default async function HomePage() {
         title={t.pages.home.endingSoon}
         emptyMessage={t.pages.browse.empty}
         more={{ href: "/exhibitions?ending=14", label: t.pages.home.seeAll }}
+        signedIn={signedIn}
         items={endingSoonSorted.map((item) => {
           const daysRemaining = getDaysRemaining(item, today) ?? 0;
           return {
@@ -107,19 +111,35 @@ export default async function HomePage() {
         })}
       />
 
-      {signedIn && (lead === undefined || forYouRest.length > 0) && (
-        <Rail
-          title={t.pages.home.forYou}
-          emptyMessage={t.pages.browse.empty}
-          items={forYouRest.map((item) => ({
-            view: forYouToRowView(item, today),
-          }))}
-        />
-      )}
+      {signedIn &&
+        (hasInterests ? (
+          (lead === undefined || forYouRest.length > 0) && (
+            <Rail
+              title={t.pages.home.forYou}
+              emptyMessage={t.pages.browse.empty}
+              signedIn={signedIn}
+              items={forYouRest.map((item) => ({
+                view: forYouToRowView(item, today),
+              }))}
+            />
+          )
+        ) : (
+          <Section title={t.pages.home.forYou}>
+            <p className="text-muted py-6 italic">
+              <Link
+                href="/profile"
+                className="text-signal font-sans text-sm font-semibold not-italic underline underline-offset-4"
+              >
+                {t.pages.home.chooseInterests}
+              </Link>
+            </p>
+          </Section>
+        ))}
 
       <Rail
         title={t.pages.home.new}
         emptyMessage={t.pages.browse.empty}
+        signedIn={signedIn}
         items={freshest.map((item) => ({ view: toRowView(item, today) }))}
       />
 
@@ -130,6 +150,7 @@ export default async function HomePage() {
           href: "/exhibitions?state=upcoming",
           label: t.pages.home.seeAll,
         }}
+        signedIn={signedIn}
         items={upcoming.items.map((item) => ({ view: toRowView(item, today) }))}
       />
 

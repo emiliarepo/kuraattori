@@ -223,6 +223,7 @@ function toView(
   index: number,
 ): ExhibitionRowView {
   return {
+    exhibitionId: index + 1,
     href: `/exhibitions/${exhibition.slug}`,
     title: exhibition.title,
     museum: exhibition.museum,
@@ -267,6 +268,7 @@ export default function ComponentLibraryPage() {
         title="Rail (ExhibitionCard)"
         emptyMessage="Ei näyttelyitä."
         more={{ href: "/exhibitions", label: "Kaikki" }}
+        signedIn
         items={EXHIBITIONS.map((exhibition, index) => ({
           view: toView(exhibition, index),
         }))}
@@ -275,6 +277,7 @@ export default function ComponentLibraryPage() {
       <Rail
         title="Rail, DaysNumeral (Päättyy pian)"
         emptyMessage="Ei näyttelyitä."
+        signedIn
         items={ENDING_SOON.map((exhibition, index) => {
           const remaining = daysBetween(
             TODAY,
@@ -349,6 +352,7 @@ export default function ComponentLibraryPage() {
             <ExhibitionRow
               key={exhibition.slug}
               {...toView(exhibition, index)}
+              signedIn
             />
           ))}
         </ul>
