@@ -157,7 +157,7 @@ async function sendTestPush(db: Db, email: string) {
   const delivered = await sendToUser(db, user.id, {
     title: "Testimuistutus Kuraattorista",
     body: "Muistutukset toimivat tällä laitteella.",
-    url: "/profile/calendar",
+    url: "/settings/calendar",
   });
   if (delivered === 0)
     throw new Error("The user has no subscription that accepted the push.");
