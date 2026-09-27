@@ -27,4 +27,4 @@ Commits use the repo-local identity emilia@repo.codes; rebase agent branches if 
 1. 30 design verification (Opus low) — now, before new features.
 2. Then in parallel where files allow: 35 Museopassi (Opus low), 36 day planner (Opus low), 22 en/sv (Opus low); 34 Sunday edition (Sonnet, low priority) last.
 3. 37 final verification (Opus low) after everything.
-4. Before going public: minimal fixtures (chore/minimal-fixtures), then rewrite history with git filter-repo to drop the old fixture snapshots, force-push main (approved by the user).
+4. Public release: fixtures stay as they are (user decision, 27.9.2026); no history rewrite. MIT licence added.
