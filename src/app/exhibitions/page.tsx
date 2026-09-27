@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { ExhibitionListClient } from "~/app/_components/ExhibitionListClient";
 import { FilterSheet } from "~/app/_components/FilterSheet";
-import { StaleDataNotice } from "~/app/_components/StaleDataNotice";
 import {
   browseFiltersToListInput,
   browseFiltersToParams,
@@ -34,21 +33,14 @@ export default async function ExhibitionsPage({
   // Filter metadata is secondary to the list itself: each falls back
   // independently rather than sinking the whole page. Already logged by the
   // tRPC error-logging middleware.
-  const [
-    activeRegions,
-    museums,
-    categories,
-    showMuseumCardFilter,
-    lastImportAt,
-    session,
-  ] = await Promise.all([
-    getActiveRegions(),
-    api.museum.list().catch(() => []),
-    api.category.list().catch(() => []),
-    api.meta.hasIneligibleExhibitions().catch(() => false),
-    api.meta.lastImportAt().catch(() => null),
-    auth(),
-  ]);
+  const [activeRegions, museums, categories, showMuseumCardFilter, session] =
+    await Promise.all([
+      getActiveRegions(),
+      api.museum.list().catch(() => []),
+      api.category.list().catch(() => []),
+      api.meta.hasIneligibleExhibitions().catch(() => false),
+      auth(),
+    ]);
   const signedIn = Boolean(session?.user);
 
   const listInputBase = {
@@ -108,9 +100,6 @@ export default async function ExhibitionsPage({
           emptyMessage={t.pages.browse.empty}
           signedIn={signedIn}
         />
-        <div className="mt-8">
-          <StaleDataNotice lastImportAt={lastImportAt} />
-        </div>
       </div>
     </div>
   );

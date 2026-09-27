@@ -6,6 +6,7 @@ const dateFormat = new Intl.DateTimeFormat("fi-FI", {
   year: "numeric",
   hour: "2-digit",
   minute: "2-digit",
+  timeZone: "Europe/Helsinki",
 });
 
 export function StaleDataNotice({

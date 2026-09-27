@@ -6,7 +6,6 @@ import { LeadStory } from "~/app/_components/LeadStory";
 import { Rail } from "~/app/_components/Rail";
 import { Section } from "~/app/_components/Section";
 import { SignInPrompt } from "~/app/_components/SignInPrompt";
-import { StaleDataNotice } from "~/app/_components/StaleDataNotice";
 import {
   dayCaption,
   imageAlt,
@@ -48,7 +47,6 @@ export default async function HomePage() {
     upcoming,
     freshest,
     forYou,
-    lastImportAt,
     interests,
     followedMuseumCount,
     followedExhibitions,
@@ -68,7 +66,6 @@ export default async function HomePage() {
     signedIn
       ? api.recommendation.forYou({ limit: SECTION_LIMIT + 1 }).catch(() => [])
       : Promise.resolve([]),
-    api.meta.lastImportAt().catch(() => null),
     signedIn
       ? api.profile
           .get()
@@ -193,10 +190,6 @@ export default async function HomePage() {
         signedIn={signedIn}
         items={upcoming.items.map((item) => ({ view: toRowView(item, today) }))}
       />
-
-      <div className="mt-10">
-        <StaleDataNotice lastImportAt={lastImportAt} />
-      </div>
     </div>
   );
 }
