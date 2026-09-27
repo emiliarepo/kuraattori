@@ -29,3 +29,6 @@ Deliverables: fixes committed per area, before/after screenshots for anything vi
 | /offline | Nested `<main>` plus its own `px-5` doubled the page-edge padding | Plain `div`, shared edges | spacing |
 | All screens | Buttons used four paddings (py-1.5 to py-3), 34 to 46 px tall; only secondary buttons had hover | `btn` / `btn-primary` / `btn-secondary` utilities, 44 px minimum | consistency |
 | Masthead, /my, /profile, detail, museum, trip, filters | Touch targets under 44 px: region trigger 16, tabs 40, StatusActions 40, follow 34, sort select 33, form controls 40–42, checkbox rows 20–28 | `min-h-11` (region trigger via negative margin so the date line keeps its height); desktop filter sidebar stays dense | consistency |
+| Home (no interests), sign-in prompts | Action links were rust, which is reserved for urgency, "why" and active states | `--fg`, rust on hover, like the 404 link; rule added to design.md | consistency |
+| /profile/account | Delete confirmation button 40 px and off the button scale | `btn` with the rust fill kept for the destructive action | consistency |
+| /profile, /my tabs | Focus outline clipped by the scrolling tab row | Outline inset by 2 px on both tab bars | consistency |

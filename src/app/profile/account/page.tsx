@@ -64,10 +64,7 @@ export default async function ProfileAccountPage({
           >
             <p>{t.profile.deleteConfirm}</p>
             <div className="flex flex-wrap items-center gap-4">
-              <button
-                type="submit"
-                className="bg-signal text-on-signal px-4 py-2.5 font-semibold"
-              >
+              <button type="submit" className="btn bg-signal text-on-signal">
                 {t.profile.deleteConfirmSubmit}
               </button>
               <Link href="/profile/account" className="underline">

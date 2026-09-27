@@ -43,6 +43,7 @@ A Sunday culture supplement. A serif masthead with the date, one lead recommenda
 - **CategoryList:** plain sans text links separated by `·`, not chips.
 - **ImageFallback:** if the image is missing or broken, the title is set in serif on `--surface`. It keeps the aspect ratio, so it never collapses the layout.
 - **Forms** (filters, profile, onboarding, sign-in): kicker labels, `--rule-soft` input borders on `--bg`, checkboxes with a rust accent.
+- **Action links** (sign-in prompt, "Valitse kiinnostuksen kohteet", "Etusivulle"): sans 14 px semibold, underlined, `--fg`, rust only on hover.
 - **Buttons:** the `btn` utility (sans 14 px semibold, 44 px minimum height) plus `btn-primary` (`--fg` with `--bg` text) for the one main action in a view, or `btn-secondary` (1 px `--rule` border, `--surface` on hover) for the rest. Segmented controls (StatusActions, interest weights) and the follow toggle keep their own shape but the same height.
 
 ## Navigation and screens

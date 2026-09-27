@@ -157,7 +157,7 @@ export default async function HomePage() {
             <p className="text-muted py-6 italic">
               <Link
                 href="/profile"
-                className="text-signal font-sans text-sm font-semibold not-italic underline underline-offset-4"
+                className="text-fg hover:text-signal font-sans text-sm font-semibold not-italic underline underline-offset-4"
               >
                 {t.pages.home.chooseInterests}
               </Link>
