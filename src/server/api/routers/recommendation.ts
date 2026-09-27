@@ -1,4 +1,4 @@
-import { count, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { todayInHelsinki } from "~/domain/dates";
@@ -55,7 +55,7 @@ export const recommendationRouter = createTRPCRouter({
         regions,
         followed,
         states,
-        importRunCount,
+        secondSucceededImport,
         pool,
         allCategories,
       ] = await Promise.all([
@@ -82,9 +82,11 @@ export const recommendationRouter = createTRPCRouter({
           .from(userExhibitions)
           .where(eq(userExhibitions.userId, userId)),
         ctx.db
-          .select({ count: count() })
+          .select({ id: importRuns.id })
           .from(importRuns)
-          .where(eq(importRuns.status, "succeeded")),
+          .where(eq(importRuns.status, "succeeded"))
+          .limit(1)
+          .offset(1),
         getActiveExhibitionPool(ctx.db),
         categoryRouter.createCaller(ctx).list(),
       ]);
@@ -112,7 +114,7 @@ export const recommendationRouter = createTRPCRouter({
         followedMuseumIds: new Set(followed.map((x) => x.id)),
       };
       const today = todayInHelsinki();
-      const hasMultipleImports = (importRunCount[0]?.count ?? 0) > 1;
+      const hasMultipleImports = secondSucceededImport.length > 0;
       const groups = groupExhibitionRows(rows);
       return groups
         .flatMap(({ exhibition, museum, venues, memberIds }) => {

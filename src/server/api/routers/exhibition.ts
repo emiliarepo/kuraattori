@@ -19,14 +19,15 @@ import { getUrgency } from "~/domain/urgency";
 import { batchedByIds } from "~/server/api/batch";
 import { groupExhibitionRows } from "~/server/api/grouping";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { listCategories } from "~/server/api/routers/category";
 import { getActiveExhibitionPool } from "~/server/cache/active-pool";
 import {
-  categories,
   exhibitionCategories,
   exhibitions,
   museums,
   userExhibitions,
 } from "~/server/db/schema";
+import { endDateOrFar } from "~/server/db/expressions";
 import type { createTRPCContext } from "~/server/api/trpc";
 import type { Db } from "~/server/db";
 
@@ -51,34 +52,89 @@ const listInput = z.object({
 
 const selectExhibitions = () => ({ exhibition: exhibitions, museum: museums });
 export const onlyExhibitions = eq(exhibitions.kind, "exhibition");
-/** Hidden on any member hides the whole group: a group is one thing to the user, even split across rows for traceability. */
-export const whereVisible = (userId: string | null) =>
-  userId
-    ? sql`not exists (
-        select 1 from ${userExhibitions} ue
-        inner join ${exhibitions} e2 on e2.id = ue.exhibitionId
-        where ue.userId = ${userId}
-          and ue.status = 'hidden'
-          and (e2.id = ${exhibitions.id}
-            or (${exhibitions.exhibitionGroup} is not null and e2.exhibitionGroup = ${exhibitions.exhibitionGroup}))
-      )`
-    : undefined;
+/**
+ * Excludes exhibitions the user has marked with any of `statuses`, expanding
+ * to the whole group: a group is one thing to the user, even split across
+ * rows for traceability. Uncorrelated `not in` subqueries run once per
+ * statement; a correlated `not exists` ran once per scanned row.
+ */
+const whereNoUserStatus = (
+  userId: string | null,
+  statuses: readonly (typeof userExhibitions.$inferSelect)["status"][],
+) => {
+  if (!userId) return undefined;
+  const statusList = sql.join(
+    statuses.map((status) => sql`${status}`),
+    sql`, `,
+  );
+  return sql`(${exhibitions.id} not in (
+      select ue.exhibitionId from ${userExhibitions} ue
+      where ue.userId = ${userId} and ue.status in (${statusList})
+    )
+    and (${exhibitions.exhibitionGroup} is null or ${exhibitions.exhibitionGroup} not in (
+      select e2.exhibitionGroup from ${userExhibitions} ue
+      inner join ${exhibitions} e2 on e2.id = ue.exhibitionId
+      where ue.userId = ${userId} and ue.status in (${statusList})
+        and e2.exhibitionGroup is not null
+    )))`;
+};
 
-/** Same shape as `whereVisible`, for "new": visited exhibitions are still on Päättyy pian and in lists, just not here. */
-const whereNotVisited = (userId: string | null) =>
-  userId
-    ? sql`not exists (
-        select 1 from ${userExhibitions} ue
-        inner join ${exhibitions} e2 on e2.id = ue.exhibitionId
-        where ue.userId = ${userId}
-          and ue.status = 'visited'
-          and (e2.id = ${exhibitions.id}
-            or (${exhibitions.exhibitionGroup} is not null and e2.exhibitionGroup = ${exhibitions.exhibitionGroup}))
-      )`
-    : undefined;
+export const whereVisible = (userId: string | null) =>
+  whereNoUserStatus(userId, ["hidden"]);
 
 type ApiContext = Awaited<ReturnType<typeof createTRPCContext>>;
 type ListInput = z.infer<typeof listInput>;
+
+async function loadCategoryIds(db: Db, exhibitionIds: readonly number[]) {
+  const rows = await batchedByIds(exhibitionIds, (batch) =>
+    db
+      .select({
+        exhibitionId: exhibitionCategories.exhibitionId,
+        categoryId: exhibitionCategories.categoryId,
+      })
+      .from(exhibitionCategories)
+      .where(inArray(exhibitionCategories.exhibitionId, batch)),
+  );
+  const byExhibition = new Map<number, number[]>();
+  for (const row of rows)
+    byExhibition.set(row.exhibitionId, [
+      ...(byExhibition.get(row.exhibitionId) ?? []),
+      row.categoryId,
+    ]);
+  return byExhibition;
+}
+
+/** The user's hidden exhibitions as an in-memory predicate, with the same group expansion as `whereVisible`. */
+export async function loadHiddenMatcher(db: Db, userId: string | null) {
+  const hiddenRows = userId
+    ? await db
+        .select({
+          exhibitionId: userExhibitions.exhibitionId,
+          exhibitionGroup: exhibitions.exhibitionGroup,
+        })
+        .from(userExhibitions)
+        .innerJoin(
+          exhibitions,
+          eq(exhibitions.id, userExhibitions.exhibitionId),
+        )
+        .where(
+          and(
+            eq(userExhibitions.userId, userId),
+            eq(userExhibitions.status, "hidden"),
+          ),
+        )
+    : [];
+  const hiddenIds = new Set(hiddenRows.map((row) => row.exhibitionId));
+  const hiddenGroups = new Set(
+    hiddenRows.flatMap((row) =>
+      row.exhibitionGroup ? [row.exhibitionGroup] : [],
+    ),
+  );
+  return (exhibition: typeof exhibitions.$inferSelect) =>
+    hiddenIds.has(exhibition.id) ||
+    (exhibition.exhibitionGroup !== null &&
+      hiddenGroups.has(exhibition.exhibitionGroup));
+}
 
 export async function withDetails(
   db: Db,
@@ -87,22 +143,17 @@ export async function withDetails(
     museum: typeof museums.$inferSelect;
   }[],
   userId: string | null,
+  /** From the active pool, so a large result set doesn't query exhibition_category again. */
+  poolCategoryIds?: ReadonlyMap<number, readonly number[]>,
 ) {
   if (!rows.length) return [];
   const groups = groupExhibitionRows(rows);
   const canonicalIds = groups.map((group) => group.exhibition.id);
   const memberIds = groups.flatMap((group) => group.memberIds);
-  const categoryRows = await batchedByIds(canonicalIds, (batch) =>
-    db
-      .select({
-        exhibitionId: exhibitionCategories.exhibitionId,
-        id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
-      })
-      .from(exhibitionCategories)
-      .innerJoin(categories, eq(categories.id, exhibitionCategories.categoryId))
-      .where(inArray(exhibitionCategories.exhibitionId, batch)),
+  const categoryIdsByExhibition =
+    poolCategoryIds ?? (await loadCategoryIds(db, canonicalIds));
+  const categoryById = new Map(
+    (await listCategories(db)).map((category) => [category.id, category]),
   );
   const states = userId
     ? await batchedByIds(memberIds, (batch) =>
@@ -132,9 +183,14 @@ export async function withDetails(
     venues,
     /** Every exhibition id this canonical row stands in for (itself, or its whole group). */
     memberIds: groupIds,
-    categories: categoryRows
-      .filter((c) => c.exhibitionId === exhibition.id)
-      .map(({ id, name, slug }) => ({ id, name, slug })),
+    categories: (categoryIdsByExhibition.get(exhibition.id) ?? []).flatMap(
+      (categoryId) => {
+        const category = categoryById.get(categoryId);
+        return category
+          ? [{ id: category.id, name: category.name, slug: category.slug }]
+          : [];
+      },
+    ),
     status:
       states.find((state) => groupIds.includes(state.exhibitionId))?.status ??
       null,
@@ -161,25 +217,18 @@ async function listExhibitions(ctx: ApiContext, input: ListInput) {
     filters.push(eq(exhibitions.museumCardEligible, true));
   if (input.state === "upcoming")
     filters.push(gt(exhibitions.startDate, today));
-  if (input.state === "current")
-    filters.push(
-      and(
-        lte(exhibitions.startDate, today),
-        or(
-          sql`${exhibitions.endDate} is null`,
-          gte(exhibitions.endDate, today),
-        ),
-      ),
-    );
+  // One combined lower bound: SQLite seeks `exhibition_kind_end_idx` by a
+  // single range term, and a cursor's `or` can't be used for the seek.
+  const endLowerBounds: string[] = [];
+  if (input.state === "current") {
+    filters.push(lte(exhibitions.startDate, today));
+    endLowerBounds.push(today);
+  }
   if (input.endingWithinDays !== undefined) {
     const end = new Date(`${today}T00:00:00Z`);
     end.setUTCDate(end.getUTCDate() + input.endingWithinDays);
-    filters.push(
-      and(
-        gte(exhibitions.endDate, today),
-        lte(exhibitions.endDate, end.toISOString().slice(0, 10)),
-      ),
-    );
+    filters.push(lte(endDateOrFar, end.toISOString().slice(0, 10)));
+    endLowerBounds.push(today);
   }
   if (input.search)
     filters.push(
@@ -209,23 +258,20 @@ async function listExhibitions(ctx: ApiContext, input: ListInput) {
     const id = Number(input.cursor.slice(separator + 1));
     filters.push(
       or(
-        gt(sql`coalesce(${exhibitions.endDate}, '9999-12-31')`, date),
-        and(
-          eq(sql`coalesce(${exhibitions.endDate}, '9999-12-31')`, date),
-          gt(exhibitions.id, id),
-        ),
+        gt(endDateOrFar, date),
+        and(eq(endDateOrFar, date), gt(exhibitions.id, id)),
       ),
     );
+    endLowerBounds.push(date);
   }
+  const endFrom = endLowerBounds.sort().at(-1);
+  if (endFrom) filters.push(gte(endDateOrFar, endFrom));
   const rows = await ctx.db
     .select(selectExhibitions())
     .from(exhibitions)
     .innerJoin(museums, eq(exhibitions.museumId, museums.id))
     .where(and(...filters))
-    .orderBy(
-      asc(sql`coalesce(${exhibitions.endDate}, '9999-12-31')`),
-      asc(exhibitions.id),
-    )
+    .orderBy(asc(endDateOrFar), asc(exhibitions.id))
     .limit(input.limit + 1);
   const hasMore = rows.length > input.limit;
   const page = rows.slice(0, input.limit);
@@ -300,32 +346,7 @@ export const exhibitionRouter = createTRPCRouter({
         sourceCategoryRows.map((row) => row.categoryId),
       );
 
-      // Hidden-group expansion mirrors `whereVisible`: hiding one member
-      // hides the whole group.
-      const hiddenRows = userId
-        ? await ctx.db
-            .select({
-              exhibitionId: userExhibitions.exhibitionId,
-              exhibitionGroup: exhibitions.exhibitionGroup,
-            })
-            .from(userExhibitions)
-            .innerJoin(
-              exhibitions,
-              eq(exhibitions.id, userExhibitions.exhibitionId),
-            )
-            .where(
-              and(
-                eq(userExhibitions.userId, userId),
-                eq(userExhibitions.status, "hidden"),
-              ),
-            )
-        : [];
-      const hiddenIds = new Set(hiddenRows.map((row) => row.exhibitionId));
-      const hiddenGroups = new Set(
-        hiddenRows.flatMap((row) =>
-          row.exhibitionGroup ? [row.exhibitionGroup] : [],
-        ),
-      );
+      const isHidden = await loadHiddenMatcher(ctx.db, userId);
 
       const scoreOf = (
         museum: typeof museums.$inferSelect,
@@ -338,12 +359,7 @@ export const exhibitionRouter = createTRPCRouter({
         (museum.id === source.museum.id ? 3 : 0);
       const pool = await getActiveExhibitionPool(ctx.db);
       const candidates = pool.flatMap(({ exhibition, museum, categoryIds }) => {
-        if (hiddenIds.has(exhibition.id)) return [];
-        if (
-          exhibition.exhibitionGroup &&
-          hiddenGroups.has(exhibition.exhibitionGroup)
-        )
-          return [];
+        if (isHidden(exhibition)) return [];
         const isSourceGroup = sourceGroup
           ? exhibition.exhibitionGroup === sourceGroup
           : exhibition.id === source.exhibition.id;
@@ -432,8 +448,8 @@ export const exhibitionRouter = createTRPCRouter({
       openedSince.setUTCDate(openedSince.getUTCDate() - NEW_WITHIN_DAYS);
       const filters = [
         onlyExhibitions,
-        whereVisible(ctx.session?.user?.id ?? null),
-        whereNotVisited(ctx.session?.user?.id ?? null),
+        // Visited exhibitions are still on Päättyy pian and in lists, just not here.
+        whereNoUserStatus(ctx.session?.user?.id ?? null, ["hidden", "visited"]),
         gte(exhibitions.startDate, openedSince.toISOString().slice(0, 10)),
         lte(exhibitions.startDate, today),
       ];
