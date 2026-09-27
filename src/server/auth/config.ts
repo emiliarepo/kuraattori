@@ -5,8 +5,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import "next-auth/jwt";
 
-import { env } from "~/env";
 import { getDb } from "~/server/db";
+import { isTestAuthEnabled } from "~/server/auth/test-auth";
 import {
   accounts,
   sessions,
@@ -47,20 +47,22 @@ declare module "next-auth/jwt" {
  *
  * @see https://next-auth.js.org/configuration/options
  */
-const isDev = env.NODE_ENV === "development";
-
 export async function buildAuthConfig(): Promise<NextAuthConfig> {
-  const db = await getDb();
+  const [db, testAuthEnabled] = await Promise.all([
+    getDb(),
+    isTestAuthEnabled(),
+  ]);
 
   return {
     trustHost: true,
     providers: [
       GoogleProvider,
       /**
-       * Dev-only: lets the full sign-in flow be verified without real Google
-       * credentials. Never registered outside NODE_ENV=development.
+       * Test-only: lets the full sign-in flow be verified without real
+       * Google credentials. Never registered outside the Playwright test
+       * server; see `isTestAuthEnabled`.
        */
-      ...(isDev
+      ...(testAuthEnabled
         ? [
             CredentialsProvider({
               id: "dev",
@@ -108,7 +110,7 @@ export async function buildAuthConfig(): Promise<NextAuthConfig> {
     // The Credentials provider only works with JWT sessions; Google keeps the
     // adapter's database sessions in every environment where it's the only
     // provider.
-    session: isDev ? { strategy: "jwt" } : undefined,
+    session: testAuthEnabled ? { strategy: "jwt" } : undefined,
     callbacks: {
       jwt: ({ token, user }) => {
         if (user?.id) token.id = user.id;

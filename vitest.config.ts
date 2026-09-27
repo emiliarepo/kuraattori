@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   oxc: {
@@ -8,5 +8,9 @@ export default defineConfig({
     alias: {
       "~": new URL("./src", import.meta.url).pathname,
     },
+  },
+  test: {
+    // Playwright's suite, not vitest's.
+    exclude: [...configDefaults.exclude, "e2e/**"],
   },
 });

@@ -1,9 +1,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { env } from "~/env";
 import { t } from "~/i18n/fi";
 import { auth, signIn } from "~/server/auth";
+import { isTestAuthEnabled } from "~/server/auth/test-auth";
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -16,7 +16,11 @@ export default async function SignInPage({
 }: {
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
-  const [session, { callbackUrl }] = await Promise.all([auth(), searchParams]);
+  const [session, { callbackUrl }, testAuthEnabled] = await Promise.all([
+    auth(),
+    searchParams,
+    isTestAuthEnabled(),
+  ]);
   const redirectTo = callbackUrl ?? "/welcome";
   if (session?.user) redirect(redirectTo);
 
@@ -39,7 +43,7 @@ export default async function SignInPage({
         </button>
       </form>
 
-      {env.NODE_ENV === "development" && (
+      {testAuthEnabled && (
         <form
           action={async (formData: FormData) => {
             "use server";

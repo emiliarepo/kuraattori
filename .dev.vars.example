@@ -2,3 +2,8 @@ NEXTJS_ENV=development
 # Uncomment to make one tRPC procedure fail with a D1-shaped error, to verify
 # the friendly error state and per-section fallbacks without a real outage:
 # DEV_SIMULATE_D1_FAILURE=recommendation.forYou
+
+# Enables the dev-only credentials sign-in against a built Worker (CI sets
+# this only for the Playwright test server). Uncomment to test the sign-in
+# flow locally without Google OAuth.
+# E2E_TEST_AUTH=1
