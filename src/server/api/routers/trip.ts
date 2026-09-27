@@ -198,6 +198,7 @@ export const tripRouter = createTRPCRouter({
           address: museum.address,
           latitude: museum.latitude,
           longitude: museum.longitude,
+          openingHours: museum.openingHours?.days ?? null,
           interested:
             interestedIds.has(exhibition.id) ||
             (exhibition.exhibitionGroup !== null &&

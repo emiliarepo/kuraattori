@@ -3,7 +3,11 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { parseMuseumPage } from "./parse-museum";
+import {
+  parseFreeDays,
+  parseMuseumPage,
+  parseOpeningHours,
+} from "./parse-museum";
 
 const fixture = readFileSync(
   join(import.meta.dirname, "../../../../fixtures/museot/museum-21118.html"),
@@ -45,5 +49,72 @@ describe("parseMuseumPage", () => {
     expect(parseMuseumPage(html, "Mänttä-Vilppula")?.address).toBe(
       "R. Erik Serlachiuksen katu, Mänttä",
     );
+  });
+});
+
+const fixtureFor = (id: number) =>
+  readFileSync(
+    join(import.meta.dirname, `../../../../fixtures/museot/museum-${id}.html`),
+    "utf-8",
+  );
+
+describe("parseOpeningHours", () => {
+  it("reads the weekly table, closed days included", () => {
+    expect(parseOpeningHours(fixture)).toEqual({
+      days: [
+        null,
+        { open: "10:00", close: "20:00" },
+        { open: "10:00", close: "18:00" },
+        { open: "10:00", close: "18:00" },
+        { open: "10:00", close: "20:00" },
+        { open: "10:00", close: "17:00" },
+        { open: "10:00", close: "17:00" },
+      ],
+      note: "kiasma.fi",
+    });
+  });
+
+  it("keeps the museum's note on exceptions", () => {
+    expect(parseOpeningHours(fixtureFor(21094))?.note).toBe(
+      "Poikkeusaukioloajat: https://ateneum.fi/aukioloajat-ja-liput",
+    );
+  });
+
+  it("reads a temporary closure as closed every day", () => {
+    expect(parseOpeningHours(fixtureFor(21903))?.days).toEqual([
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ]);
+  });
+
+  it("gives up on anything but the regular block", () => {
+    expect(parseOpeningHours("<p>Ei aukioloaikoja</p>")).toBeUndefined();
+    expect(
+      parseOpeningHours(
+        fixture.replace("<td>10:00-20:00</td>", "<td>Sopimuksen mukaan</td>"),
+      ),
+    ).toBeUndefined();
+    expect(
+      parseOpeningHours(fixture.replace("<td>Ma&nbsp;</td>", "<td>Ark</td>")),
+    ).toBeUndefined();
+  });
+});
+
+describe("parseFreeDays", () => {
+  it("reads single-date free days from the event list", () => {
+    expect(parseFreeDays(fixture)).toEqual([
+      "2026-10-02",
+      "2026-11-06",
+      "2026-12-04",
+    ]);
+  });
+
+  it("skips events that are free only for some visitors", () => {
+    expect(parseFreeDays(fixtureFor(21094))).toEqual([]);
   });
 });

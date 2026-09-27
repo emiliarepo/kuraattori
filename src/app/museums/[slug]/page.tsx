@@ -5,6 +5,7 @@ import { cache } from "react";
 
 import { ExhibitionList } from "~/app/_components/ExhibitionList";
 import { MuseumAddress } from "~/app/_components/MuseumAddress";
+import { OpeningHoursList } from "~/app/_components/OpeningHoursList";
 import { FollowToggle } from "~/app/_components/FollowToggle";
 import { Section } from "~/app/_components/Section";
 import { dayPlanHref } from "~/app/_lib/day-plan-params";
@@ -104,6 +105,11 @@ export default async function MuseumDetailPage({
           {museum.websiteUrl}
         </a>
       )}
+      <OpeningHoursList
+        hours={museum.openingHours}
+        freeDays={museum.freeDays}
+        today={today}
+      />
 
       <Section title={t.pages.museums.current}>
         <ExhibitionList

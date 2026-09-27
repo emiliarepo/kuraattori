@@ -1,3 +1,5 @@
+import { toMinutes, type DayHours } from "./opening-hours";
+
 export interface Coordinates {
   readonly latitude: number;
   readonly longitude: number;
@@ -111,4 +113,42 @@ export function addMinutes(time: string, minutes: number): string {
   const [hours, mins] = time.split(":").map(Number) as [number, number];
   const total = (((hours * 60 + mins + minutes) % 1440) + 1440) % 1440;
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
+export type ScheduledVisit =
+  | { readonly kind: "closed" }
+  | {
+      readonly kind: "visit";
+      readonly start: string;
+      readonly end: string;
+      /** The museum closes before the full visit length. */
+      readonly cutShort: boolean;
+    }
+  | { readonly kind: "tooLate"; readonly close: string };
+
+/**
+ * Visits back to back from `start`, each waiting for its museum to open and
+ * ending at closing time at the latest. `hours` is per stop in route order:
+ * `null` closed that day, `undefined` unknown (no constraint).
+ */
+export function scheduleVisits(
+  hours: readonly (DayHours | null | undefined)[],
+  start: string,
+  visitMinutes: number,
+): ScheduledVisit[] {
+  let cursor = toMinutes(start);
+  return hours.map((day) => {
+    if (day === null) return { kind: "closed" };
+    const visitStart = day ? Math.max(cursor, toMinutes(day.open)) : cursor;
+    const close = day ? toMinutes(day.close) : Infinity;
+    if (visitStart >= close) return { kind: "tooLate", close: day!.close };
+    const visitEnd = Math.min(visitStart + visitMinutes, close);
+    cursor = visitEnd;
+    return {
+      kind: "visit",
+      start: addMinutes("00:00", visitStart),
+      end: addMinutes("00:00", visitEnd),
+      cutShort: visitEnd < visitStart + visitMinutes,
+    };
+  });
 }

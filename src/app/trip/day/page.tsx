@@ -14,12 +14,13 @@ import { SaveTripButton } from "~/app/trip/SaveTripButton";
 import { RouteLink } from "~/app/trip/day/RouteLink";
 import { todayInHelsinki } from "~/domain/dates";
 import {
-  addMinutes,
   MAX_DAY_STOPS,
   MIN_DAY_STOPS,
   orderStops,
+  scheduleVisits,
   walkingMinutes,
 } from "~/domain/day-plan";
+import { formatHours, formatTime, hoursOn } from "~/domain/opening-hours";
 import { partitionEndingSoon } from "~/domain/trip";
 import { t } from "~/i18n/fi";
 import { formatWeekdayDate } from "~/i18n/format";
@@ -52,11 +53,14 @@ function CandidateRow({
   candidate,
   checked,
   urgency,
+  date,
 }: {
   candidate: Candidate;
   checked: boolean;
   urgency: string | null;
+  date: string;
 }) {
+  const hours = hoursOn(candidate.openingHours, date);
   return (
     <li>
       <label className="flex min-h-11 items-start gap-3 py-2">
@@ -74,6 +78,17 @@ function CandidateRow({
           <span className="text-muted font-serif italic">
             {candidate.museumName}
           </span>
+          {hours === null ? (
+            <span className="text-sm font-semibold">
+              {t.pages.day.closedOn}
+            </span>
+          ) : (
+            hours && (
+              <span className="text-muted text-sm tabular-nums">
+                {t.pages.day.openOn(formatHours(hours))}
+              </span>
+            )
+          )}
           {urgency && (
             <span className="mt-1.5">
               <UrgencyLabel label={urgency} />
@@ -193,10 +208,16 @@ export default async function DayPage({
   );
   const validCount =
     chosen.length >= MIN_DAY_STOPS && chosen.length <= MAX_DAY_STOPS;
+  const closedChosen = chosen.filter(
+    (candidate) => hoursOn(candidate.openingHours, date) === null,
+  );
+  const openChosen = chosen.filter(
+    (candidate) => !closedChosen.includes(candidate),
+  );
 
   const itinerary = validCount
     ? orderStops(
-        chosen.map((candidate) => ({
+        openChosen.map((candidate) => ({
           ...candidate,
           coordinates:
             candidate.latitude !== null && candidate.longitude !== null
@@ -206,6 +227,11 @@ export default async function DayPage({
       )
     : [];
   const orderedIds = itinerary.map(({ stop }) => stop.id);
+  const schedule = scheduleVisits(
+    itinerary.map(({ stop }) => hoursOn(stop.openingHours, date)),
+    plan.start,
+    VISIT_MINUTES,
+  );
   const totalKm = itinerary.reduce((sum, leg) => sum + (leg.legKm ?? 0), 0);
   const totalMinutes = itinerary.reduce(
     (sum, leg) => sum + (leg.legKm === null ? 0 : walkingMinutes(leg.legKm)),
@@ -230,6 +256,15 @@ export default async function DayPage({
         </span>
       </h2>
 
+      {closedChosen.length > 0 && (
+        <p role="status" className="mb-6 font-sans text-sm">
+          <span className="font-semibold">{t.pages.day.closedStops}</span>{" "}
+          {closedChosen
+            .map((candidate) => `${candidate.title} (${candidate.museumName})`)
+            .join(", ")}
+        </p>
+      )}
+
       {itinerary.length > 0 && (
         <section aria-labelledby="itinerary" className="mb-10">
           <h3
@@ -240,7 +275,7 @@ export default async function DayPage({
           </h3>
           <ol>
             {itinerary.map(({ stop, legKm }, index) => {
-              const visitStart = addMinutes(plan.start, index * VISIT_MINUTES);
+              const visit = schedule[index]!;
               const next = itinerary[index + 1]?.stop;
               return (
                 <li
@@ -255,8 +290,14 @@ export default async function DayPage({
                       {index + 1}
                     </span>
                     <div className="flex min-w-0 flex-col gap-1.5">
-                      <p className="text-kicker text-muted tabular-nums">
-                        {`${visitStart}–${addMinutes(visitStart, VISIT_MINUTES)}`}
+                      <p
+                        className={`text-kicker tabular-nums ${visit.kind === "visit" && !visit.cutShort ? "text-muted" : ""}`}
+                      >
+                        {visit.kind === "visit"
+                          ? `${visit.start}–${visit.end}${visit.cutShort ? ` · ${t.pages.day.cutShort(formatTime(visit.end))}` : ""}`
+                          : visit.kind === "tooLate"
+                            ? t.pages.day.tooLate(formatTime(visit.close))
+                            : t.pages.day.closedOn}
                       </p>
                       <Link
                         href={`/exhibitions/${stop.slug}`}
@@ -420,6 +461,7 @@ export default async function DayPage({
                     candidate={candidate}
                     urgency={urgency}
                     checked={chosenIds.has(candidate.id)}
+                    date={date}
                   />
                 ))}
               </ul>
@@ -447,6 +489,7 @@ export default async function DayPage({
                     candidate={candidate}
                     urgency={urgency}
                     checked={chosenIds.has(candidate.id)}
+                    date={date}
                   />
                 ))}
               </ul>
