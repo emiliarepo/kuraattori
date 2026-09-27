@@ -73,7 +73,10 @@ export default async function ExhibitionDetailPage({
   if (!exhibition) notFound();
 
   const today = todayInHelsinki();
-  const similar = await api.exhibition.similar({ slug });
+  // A secondary rail: falls back to an EmptyState rather than the failure
+  // sinking the whole page. Already logged by the tRPC error-logging
+  // middleware.
+  const similar = await api.exhibition.similar({ slug }).catch(() => []);
   const urgencyLabel = urgencyLabelText(exhibition, today);
   const openLabel = exhibition.endDate
     ? `${formatLongDate(exhibition.startDate)}–${formatLongDate(exhibition.endDate)}`

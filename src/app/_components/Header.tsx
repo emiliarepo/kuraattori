@@ -18,7 +18,10 @@ export async function Header({
 }) {
   const [session, allRegions, activeRegions] = await Promise.all([
     auth(),
-    api.system.regions(),
+    // Falls back to no regions rather than crashing the masthead; the
+    // underlying failure is already logged by the tRPC error-logging
+    // middleware. `getActiveRegions` degrades the same way on its own.
+    api.system.regions().catch(() => []),
     getActiveRegions(),
   ]);
 

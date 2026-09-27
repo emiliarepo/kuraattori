@@ -12,7 +12,8 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { auth } from "~/server/auth";
-import { getDb } from "~/server/db";
+import { getDb, shouldSimulateD1Failure } from "~/server/db";
+import { logServerError } from "~/server/observability/log-error";
 
 /**
  * 1. CONTEXT
@@ -79,6 +80,37 @@ export const createCallerFactory = t.createCallerFactory;
 export const createTRPCRouter = t.router;
 
 /**
+ * Logs every procedure failure with enough context to diagnose it from
+ * `wrangler tail`/Workers Logs: the procedure path, whether a user was
+ * signed in, and the D1 error code when the failure came from D1.
+ * tRPC wraps a raw thrown error in a `TRPCError`, moving the original to
+ * `.cause`, so that's what carries the useful message.
+ */
+const errorLoggingMiddleware = t.middleware(async ({ ctx, next, path }) => {
+  const result = await next();
+  if (!result.ok) {
+    logServerError(`trpc.${path}`, result.error.cause ?? result.error, {
+      userId: ctx.session?.user?.id,
+    });
+  }
+  return result;
+});
+
+/**
+ * Dev-only: throws a D1-shaped error for the procedure named by
+ * `DEV_SIMULATE_D1_FAILURE`, to verify error visibility against a real
+ * D1-style failure without a real outage.
+ */
+const devFailureSimulationMiddleware = t.middleware(async ({ path, next }) => {
+  if (await shouldSimulateD1Failure(path)) {
+    throw new Error(
+      "D1_ERROR: simulated failure for verification: SQLITE_ERROR",
+    );
+  }
+  return next();
+});
+
+/**
  * Middleware for timing procedure execution and adding an artificial delay in development.
  *
  * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
@@ -108,7 +140,10 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure.use(timingMiddleware);
+export const publicProcedure = t.procedure
+  .use(errorLoggingMiddleware)
+  .use(devFailureSimulationMiddleware)
+  .use(timingMiddleware);
 
 /**
  * Protected (authenticated) procedure
@@ -119,6 +154,8 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure
+  .use(errorLoggingMiddleware)
+  .use(devFailureSimulationMiddleware)
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
     if (!ctx.session?.user) {

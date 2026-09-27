@@ -5,8 +5,10 @@ import { api } from "~/trpc/server";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const session = await auth();
+  // Falls back to 0 rather than crashing the masthead; the underlying
+  // failure is already logged by the tRPC error-logging middleware.
   const omatEndingSoonCount = session?.user
-    ? await api.my.endingSoonCount()
+    ? await api.my.endingSoonCount().catch(() => 0)
     : 0;
 
   return (

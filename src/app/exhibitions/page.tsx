@@ -31,6 +31,9 @@ export default async function ExhibitionsPage({
   const filters = parseBrowseFilters(await searchParams);
   const today = todayInHelsinki();
 
+  // Filter metadata is secondary to the list itself: each falls back
+  // independently rather than sinking the whole page. Already logged by the
+  // tRPC error-logging middleware.
   const [
     activeRegions,
     museums,
@@ -40,10 +43,10 @@ export default async function ExhibitionsPage({
     session,
   ] = await Promise.all([
     getActiveRegions(),
-    api.museum.list(),
-    api.category.list(),
-    api.meta.hasIneligibleExhibitions(),
-    api.meta.lastImportAt(),
+    api.museum.list().catch(() => []),
+    api.category.list().catch(() => []),
+    api.meta.hasIneligibleExhibitions().catch(() => false),
+    api.meta.lastImportAt().catch(() => null),
     auth(),
   ]);
   const signedIn = Boolean(session?.user);

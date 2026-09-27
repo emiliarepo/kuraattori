@@ -8,6 +8,11 @@
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
+	"observability": {
+		// Workers Logs: free-tier, needed for `wrangler tail`/the dashboard to
+		// show anything a request logs.
+		"enabled": true
+	},
 	"assets": {
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"

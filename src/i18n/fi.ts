@@ -183,7 +183,7 @@ export const t = {
     updatedUnknown: "Tietoja ei ole vielä päivitetty.",
     error: {
       title: "Jokin meni pieleen",
-      body: "Sivun lataaminen epäonnistui. Yritä hetken kuluttua uudelleen.",
+      body: "Tietoja ei juuri nyt voitu ladata. Yritä hetken kuluttua uudelleen.",
       retry: "Yritä uudelleen",
     },
     notFound: {

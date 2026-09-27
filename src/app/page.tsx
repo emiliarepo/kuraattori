@@ -38,23 +38,37 @@ export default async function HomePage() {
   const signedIn = Boolean(session?.user);
   const today = todayInHelsinki();
 
+  // Each rail is an independent query: one D1 failure falls back to an empty
+  // section (rendered as an EmptyState by Rail) instead of the whole page.
+  // The underlying failure is already logged by the tRPC error-logging
+  // middleware.
+  const emptyList = { items: [], nextCursor: null };
   const [endingSoon, upcoming, freshest, forYou, lastImportAt, interests] =
     await Promise.all([
       listAcrossRegions(activeRegions, {
         state: "current",
         endingWithinDays: 14,
         limit: SECTION_LIMIT,
-      }),
+      }).catch(() => emptyList),
       listAcrossRegions(activeRegions, {
         state: "upcoming",
         limit: SECTION_LIMIT,
-      }),
-      listNewAcrossRegions(activeRegions, { limit: SECTION_LIMIT }),
+      }).catch(() => emptyList),
+      listNewAcrossRegions(activeRegions, { limit: SECTION_LIMIT }).catch(
+        () => [],
+      ),
       signedIn
-        ? api.recommendation.forYou({ limit: SECTION_LIMIT + 1 })
+        ? api.recommendation
+            .forYou({ limit: SECTION_LIMIT + 1 })
+            .catch(() => [])
         : Promise.resolve([]),
-      api.meta.lastImportAt(),
-      signedIn ? api.profile.get().then((profile) => profile.interests) : [],
+      api.meta.lastImportAt().catch(() => null),
+      signedIn
+        ? api.profile
+            .get()
+            .then((profile) => profile.interests)
+            .catch(() => [])
+        : [],
     ]);
   const hasInterests = interests.some((interest) => interest.weight !== -1);
 
