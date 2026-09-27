@@ -250,6 +250,105 @@ export const exhibitionRouter = createTRPCRouter({
       );
       return item;
     }),
+  similar: publicProcedure
+    .input(z.object({ slug: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const [source] = await ctx.db
+        .select({ exhibition: exhibitions, museum: museums })
+        .from(exhibitions)
+        .innerJoin(museums, eq(exhibitions.museumId, museums.id))
+        .where(eq(exhibitions.slug, input.slug))
+        .limit(1);
+      if (!source) return [];
+
+      const today = todayInHelsinki();
+      const sharedCategories = sql<number>`(
+        select count(distinct candidate_category."categoryId")
+        from kuraattori_exhibition_category candidate_category
+        where candidate_category."exhibitionId" = ${exhibitions.id}
+          and exists (
+            select 1 from kuraattori_exhibition_category source_category
+            inner join kuraattori_exhibition source_exhibition
+              on source_exhibition.id = source_category."exhibitionId"
+            where source_category."categoryId" = candidate_category."categoryId"
+              and (source_exhibition.id = ${source.exhibition.id}
+                or (${source.exhibition.exhibitionGroup} is not null
+                  and source_exhibition."exhibitionGroup" = ${source.exhibition.exhibitionGroup}))
+          )
+      )`;
+      const score = sql<number>`(${sharedCategories} * 10
+        + case when ${museums.region} = ${source.museum.region} then 5 else 0 end
+        + case when ${museums.id} = ${source.museum.id} then 3 else 0 end)`;
+      const candidates = await ctx.db
+        .select({
+          exhibition: exhibitions,
+          museum: museums,
+          score,
+        })
+        .from(exhibitions)
+        .innerJoin(museums, eq(exhibitions.museumId, museums.id))
+        .where(
+          and(
+            onlyExhibitions,
+            whereVisible(ctx.session?.user?.id ?? null),
+            or(
+              and(
+                lte(exhibitions.startDate, today),
+                or(
+                  sql`${exhibitions.endDate} is null`,
+                  gte(exhibitions.endDate, today),
+                ),
+              ),
+              gt(exhibitions.startDate, today),
+            ),
+            source.exhibition.exhibitionGroup
+              ? or(
+                  sql`${exhibitions.exhibitionGroup} is null`,
+                  sql`${exhibitions.exhibitionGroup} != ${source.exhibition.exhibitionGroup}`,
+                )
+              : sql`${exhibitions.id} != ${source.exhibition.id}`,
+          ),
+        )
+        .orderBy(
+          desc(score),
+          asc(sql`coalesce(${exhibitions.endDate}, '9999-12-31')`),
+        );
+
+      const byGroup = new Map<string, typeof candidates>();
+      for (const candidate of candidates) {
+        const key =
+          candidate.exhibition.exhibitionGroup ??
+          `id:${candidate.exhibition.id}`;
+        byGroup.set(key, [...(byGroup.get(key) ?? []), candidate]);
+      }
+      const ranked = [...byGroup.values()]
+        .map((members) => ({
+          members,
+          score: Math.max(...members.map((member) => member.score)),
+          endDate: members
+            .map((member) => member.exhibition.endDate ?? "9999-12-31")
+            .sort()[0]!,
+        }))
+        .sort((a, b) => b.score - a.score || a.endDate.localeCompare(b.endDate))
+        .slice(0, 6);
+      const items = await withDetails(
+        ctx.db,
+        ranked.flatMap(({ members }) =>
+          members.map(({ exhibition, museum }) => ({ exhibition, museum })),
+        ),
+        ctx.session?.user?.id ?? null,
+      );
+      const itemsByGroup = new Map(
+        items.map((item) => [item.exhibitionGroup ?? `id:${item.id}`, item]),
+      );
+      return ranked.flatMap(({ members }) => {
+        const item = itemsByGroup.get(
+          members[0]!.exhibition.exhibitionGroup ??
+            `id:${members[0]!.exhibition.id}`,
+        );
+        return item ? [item] : [];
+      });
+    }),
   endingSoon: publicProcedure
     .input(
       z
