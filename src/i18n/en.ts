@@ -163,6 +163,7 @@ export const t = {
       my: "Sign in to see your exhibitions.",
     },
     home: {
+      thisWeeksEdition: "This week's edition →",
       endingSoon: "Ending soon",
       forYou: "For you",
       new: "New exhibitions",
@@ -401,7 +402,22 @@ export const t = {
       title: "Kuraattori is taking a short break",
       body: "We'll be back soon.",
     },
+    edition: {
+      name: "Sunday edition",
+      lead: "Lead story",
+      endingThisWeek: "Ending this week",
+      openingThisWeek: "Opening this week",
+      hiddenGem: "Hidden gem",
+      hiddenGemWhy: "At a small museum",
+      archive: "Archive",
+      regions: "Regional edition",
+      noLead: "No new exhibitions opened in the past two weeks.",
+      emptyEnding: "No exhibitions end this week.",
+      emptyOpening: "No exhibitions open this week.",
+    },
     meta: {
+      edition: (region: string) =>
+        `This week's exhibitions: ${region}. The lead story, exhibitions ending and opening this week, and a hidden gem.`,
       home: "Exhibitions in Finnish museums: browse, save the interesting ones and follow when they close.",
       browse:
         "Browse current and upcoming exhibitions by region, museum, topic and Museum Card.",

@@ -34,6 +34,7 @@ export async function cached<T>(
   if (stored !== null) return stored;
 
   const value = await load();
+  if (value === null) return value;
   await kv.put(KEY_PREFIX + key, JSON.stringify(value), {
     expirationTtl: ttlSeconds,
   });
