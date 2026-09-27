@@ -9,7 +9,13 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
   title: t.app.name,
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 const grotesk = Archivo({
