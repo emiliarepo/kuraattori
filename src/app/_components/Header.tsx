@@ -1,16 +1,21 @@
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 
 import { NAV_ITEMS } from "~/app/_components/nav";
-import { RegionSelector, type Region } from "~/app/_components/RegionSelector";
+import { RegionSelector } from "~/app/_components/RegionSelector";
+import { UserMenu } from "~/app/_components/UserMenu";
 import { t } from "~/i18n/fi";
+import { auth, signOut } from "~/server/auth";
+import { getActiveRegions } from "~/server/regions-preference";
+import { api } from "~/trpc/server";
 
-export function Header({
-  regions,
-  onRegionsChange,
-}: {
-  regions: readonly Region[];
-  onRegionsChange: (ids: string[]) => void;
-}) {
+export async function Header() {
+  const [session, allRegions, activeRegions] = await Promise.all([
+    auth(),
+    api.system.regions(),
+    getActiveRegions(),
+  ]);
+
   return (
     <header className="border-rule bg-bg sticky top-0 z-10 border-b">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
@@ -28,7 +33,31 @@ export function Header({
             </Link>
           ))}
         </nav>
-        <RegionSelector regions={regions} onChange={onRegionsChange} />
+        <div className="flex items-center gap-4">
+          <RegionSelector
+            key={session?.user?.id ?? "anon"}
+            allRegions={allRegions}
+            initialSelected={activeRegions}
+            isSignedIn={!!session?.user}
+          />
+          {session?.user ? (
+            <UserMenu
+              label={session.user.name ?? session.user.email ?? "Tili"}
+              signOutAction={async () => {
+                "use server";
+                revalidatePath("/", "layout");
+                await signOut({ redirectTo: "/" });
+              }}
+            />
+          ) : (
+            <Link
+              href="/sign-in"
+              className="hover:text-signal text-sm font-semibold"
+            >
+              {t.auth.signInLink}
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );
