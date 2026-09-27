@@ -24,6 +24,7 @@ const screenshotProjects: Project[] = Object.entries(VIEWPORTS).flatMap(
         ...devices["Desktop Chrome"],
         viewport,
         colorScheme,
+        reducedMotion: "reduce",
         storageState: VISUAL_STORAGE_STATE,
       },
     })),

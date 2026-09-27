@@ -46,6 +46,15 @@ export async function capture(
     );
   });
   if (options.fullPage ?? true) {
+    // Growing the viewport would also grow anything sized from it (the
+    // landing hero's `svh` minimum), so those heights are frozen first.
+    await page.evaluate(() => {
+      for (const element of document.querySelectorAll<HTMLElement>("body *")) {
+        const minHeight = getComputedStyle(element).minHeight;
+        if (minHeight.endsWith("px") && parseFloat(minHeight) > 0)
+          element.style.minHeight = minHeight;
+      }
+    });
     const viewport = page.viewportSize()!;
     const height = await page.evaluate(
       () => document.documentElement.scrollHeight,
