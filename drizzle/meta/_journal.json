@@ -43,6 +43,13 @@
       "when": 1790496178514,
       "tag": "0005_goofy_xorn",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1790504143650,
+      "tag": "0006_fat_ender_wiggin",
+      "breakpoints": true
     }
   ]
 }

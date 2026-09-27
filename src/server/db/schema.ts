@@ -130,6 +130,8 @@ export const museums = createTable(
     address: d.text(),
     latitude: d.real(),
     longitude: d.real(),
+    /** The address last sent to the geocoder, so a miss isn't retried until the address changes. */
+    geocodedAddress: d.text(),
     museumCardEligible: d.integer({ mode: "boolean" }).notNull().default(false),
     websiteUrl: d.text(),
     createdAt: d
@@ -321,3 +323,42 @@ export const calendarFeeds = createTable("calendar_feed", (d) => ({
     .default(sql`(unixepoch())`)
     .notNull(),
 }));
+
+export interface SavedTripDay {
+  city: string;
+  date: string;
+  exhibitionIds: number[];
+  start: string;
+}
+
+export const savedTrips = createTable(
+  "saved_trip",
+  (d) => ({
+    id: d.integer().primaryKey({ autoIncrement: true }),
+    userId: d
+      .text({ length: 255 })
+      .notNull()
+      .references(() => users.id),
+    place: d.text().notNull().default(""),
+    fromDate: d.text().notNull(),
+    toDate: d.text().notNull(),
+    exhibitionIds: d
+      .text({ mode: "json" })
+      .$type<number[]>()
+      .notNull()
+      .default(sql`'[]'`),
+    days: d
+      .text({ mode: "json" })
+      .$type<SavedTripDay[]>()
+      .notNull()
+      .default(sql`'[]'`),
+    createdAt: d
+      .integer({ mode: "timestamp" })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+    updatedAt: d.integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
+  }),
+  (t) => [
+    unique("saved_trip_user_idx").on(t.userId, t.place, t.fromDate, t.toDate),
+  ],
+);
