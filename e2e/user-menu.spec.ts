@@ -5,11 +5,7 @@ import { t } from "../src/i18n/fi";
 test("user menu closes after following its profile link", async ({ page }) => {
   await devSignIn(page, uniqueEmail("user-menu"));
   await page.goto("/");
-  await page
-    .locator("header")
-    .getByRole("button", { name: /▾/ })
-    .first()
-    .click();
+  await page.locator("header button[aria-haspopup]").first().click();
   await page
     .locator("header")
     .getByRole("dialog")
