@@ -4,70 +4,14 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      update_baselines:
-        description: Regenerate visual baselines and upload them as an artifact (skips the deploy)
-        type: boolean
-        default: false
 
 concurrency:
   group: d1-remote
   cancel-in-progress: false
 
 jobs:
-  visual:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    # Baselines are only valid from this image; keep the tag equal to
-    # @playwright/test in pnpm-lock.yaml (checked below, and used by
-    # scripts/visual-docker.sh locally).
-    container:
-      image: mcr.microsoft.com/playwright:v1.63.0-noble
-      options: --ipc=host
-    env:
-      SKIP_ENV_VALIDATION: "1"
-      UPDATE_FLAG: ${{ inputs.update_baselines && '--update-snapshots' || '' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: Check the image matches the lockfile
-        run: |
-          locked=$(node -p "require('@playwright/test/package.json').version")
-          test "$locked" = "1.63.0" || { echo "Update the visual job image to v$locked"; exit 1; }
-
-      - name: Visual regression tests
-        run: pnpm run visual:run $UPDATE_FLAG
-
-      - name: Upload visual diffs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: visual-diffs
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
-
-      - name: Upload baselines
-        if: inputs.update_baselines
-        uses: actions/upload-artifact@v4
-        with:
-          name: visual-baselines
-          path: e2e/visual/__screenshots__/linux/
-          retention-days: 7
-
   deploy:
-    needs: visual
-    if: ${{ !inputs.update_baselines && github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:

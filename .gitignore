@@ -61,5 +61,3 @@ cloudflare-env.d.ts
 /e2e/.tmp
 
 # Visual baselines are generated in the Linux Playwright image only
-/e2e/visual/__screenshots__/*
-!/e2e/visual/__screenshots__/linux
