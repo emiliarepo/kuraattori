@@ -33,7 +33,7 @@ export async function Header({
         signedIn={!!session?.user}
         landing={
           <div className="flex flex-col items-center pt-16 sm:pt-24">
-            <h1 className="landing-rise text-headline text-center text-[20vw] leading-[0.85] tracking-[-0.04em] italic sm:text-[9.5rem]">
+            <h1 className="landing-rise text-headline px-[0.08em] py-[0.04em] text-center text-[20vw] leading-[0.85] tracking-[-0.04em] italic sm:text-[9.5rem]">
               {t.app.name}
             </h1>
             <p
