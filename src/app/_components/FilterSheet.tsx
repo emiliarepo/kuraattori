@@ -204,21 +204,17 @@ export function FilterSheet(props: {
     dialogRef.current?.close(),
   );
 
+  const [formKey, setFormKey] = useState(0);
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
   function apply(next: BrowseFilters) {
     const query = browseFiltersToParams(next).toString();
     const href = query ? `${pathname}?${query}` : pathname;
-    if (sheetOpen) {
-      releaseHistoryEntry();
-      dialogRef.current?.close();
-      start(() => router.replace(href));
-    } else {
-      start(() => router.push(href));
-    }
+    start(() => router.replace(href, { scroll: false }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
+  function applyForm(form: HTMLFormElement) {
+    const data = new FormData(form);
     apply(
       parseBrowseFilters({
         q: toFormValue(data.get("q")),
@@ -232,26 +228,50 @@ export function FilterSheet(props: {
     );
   }
 
+  // Every change applies at once; typing in the search box waits for a pause.
+  function handleChange(event: FormEvent<HTMLFormElement>) {
+    const target = event.target as HTMLInputElement;
+    if (!target.name) return;
+    const form = event.currentTarget;
+    clearTimeout(searchTimer.current);
+    if (target.name === "q")
+      searchTimer.current = setTimeout(() => applyForm(form), 350);
+    else applyForm(form);
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    clearTimeout(searchTimer.current);
+    applyForm(event.currentTarget);
+    if (sheetOpen) {
+      releaseHistoryEntry();
+      dialogRef.current?.close();
+    }
+  }
+
   function handleReset() {
+    clearTimeout(searchTimer.current);
+    setFormKey((key) => key + 1);
     apply(parseBrowseFilters({}));
   }
 
   return (
     <>
-      <div className="hidden sm:block">
-        <h2 className="text-headline mb-4 text-2xl">
-          {t.pages.browse.filters}
-        </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <div className="hidden overscroll-contain sm:block sm:max-h-[calc(100dvh-3rem)] sm:overflow-y-auto sm:pr-3">
+        <div className="mb-4 flex items-baseline justify-between gap-3">
+          <h2 className="text-headline text-2xl">{t.pages.browse.filters}</h2>
+          <span role="status" className="text-muted font-sans text-xs">
+            {pending ? t.ui.updating : ""}
+          </span>
+        </div>
+        <form
+          key={formKey}
+          onSubmit={handleSubmit}
+          onChange={handleChange}
+          className="flex flex-col gap-6"
+        >
           <FilterFields {...props} />
           <div className="flex flex-col gap-2">
-            <button
-              type="submit"
-              disabled={pending}
-              className="btn btn-primary disabled:opacity-60"
-            >
-              {pending ? t.ui.updating : t.pages.browse.applyFilters}
-            </button>
             <button
               type="button"
               onClick={handleReset}
@@ -280,12 +300,21 @@ export function FilterSheet(props: {
           onClose={() => setSheetOpen(false)}
           className="border-rule bg-bg text-fg fixed inset-x-0 bottom-0 m-0 max-h-[85vh] w-full max-w-none overflow-y-auto border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop:bg-black/40"
         >
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <form
+            key={formKey}
+            onSubmit={handleSubmit}
+            onChange={handleChange}
+            className="flex flex-col gap-6"
+          >
             <h2 className="text-headline text-2xl">{t.pages.browse.filters}</h2>
             <FilterFields {...props} />
-            <div className="flex flex-col gap-2">
-              <button type="submit" className="btn btn-primary">
-                {t.pages.browse.applyFilters}
+            <div className="bg-bg border-rule-soft sticky bottom-0 -mx-4 flex flex-col gap-2 border-t px-4 pt-3">
+              <button
+                type="submit"
+                disabled={pending}
+                className="btn btn-primary"
+              >
+                {pending ? t.ui.updating : t.pages.browse.applyFilters}
               </button>
               <button
                 type="button"

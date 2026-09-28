@@ -45,7 +45,7 @@ export async function HomeFeed() {
     freshest,
     forYou,
     interests,
-    followedMuseumCount,
+    followedMuseumIds,
     followedExhibitions,
   ] = await Promise.all([
     api.exhibition
@@ -80,9 +80,9 @@ export async function HomeFeed() {
     signedIn
       ? api.museum
           .followed()
-          .then((rows) => rows.length)
-          .catch(() => 0)
-      : 0,
+          .then((rows) => rows.map((row) => row.id))
+          .catch(() => [])
+      : [],
     signedIn
       ? api.museum.followedExhibitions({ limit: SECTION_LIMIT }).catch(() => [])
       : Promise.resolve([]),
@@ -152,6 +152,7 @@ export async function HomeFeed() {
             <Rail
               title={t.pages.home.forYou}
               emptyMessage={t.pages.browse.empty}
+              more={{ href: "/feed/for-you", label: t.pages.home.seeAll }}
               signedIn={signedIn}
               items={forYouRest.map((item) => ({
                 view: forYouToRowView(item, today, i18n),
@@ -171,10 +172,14 @@ export async function HomeFeed() {
           </Section>
         ))}
 
-      {signedIn && followedMuseumCount > 0 && (
+      {signedIn && followedMuseumIds.length > 0 && (
         <Rail
           title={t.pages.home.followedMuseums}
           emptyMessage={t.pages.browse.empty}
+          more={{
+            href: `/exhibitions?museum=${followedMuseumIds.join(",")}`,
+            label: t.pages.home.seeAll,
+          }}
           signedIn={signedIn}
           items={followedExhibitions.map((item) => ({
             view: toRowView(item, today, i18n),
@@ -185,6 +190,7 @@ export async function HomeFeed() {
       <Rail
         title={t.pages.home.new}
         emptyMessage={t.pages.browse.empty}
+        more={{ href: "/feed/new", label: t.pages.home.seeAll }}
         signedIn={signedIn}
         items={freshest.map((item) => ({ view: toRowView(item, today, i18n) }))}
       />

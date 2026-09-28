@@ -16,7 +16,6 @@ test("browse: a category filter narrows results without a reload", async ({
   expect(baselineCount).toBeGreaterThan(0);
 
   await page.getByRole("checkbox", { name: "Nykytaide" }).check();
-  await page.getByRole("button", { name: t.pages.browse.applyFilters }).click();
 
   await expect(page).toHaveURL(/category=/);
   const exhibitionRows = page.getByRole("main").locator("ul > li");
@@ -30,6 +29,15 @@ test("browse: a category filter narrows results without a reload", async ({
   expect(markerSurvived, "filtering should not reload the page").toBe(true);
 
   assertPageClean();
+});
+
+test("browse: the search box filters live after a pause", async ({ page }) => {
+  await page.goto("/exhibitions");
+  await page
+    .getByPlaceholder(t.pages.browse.searchPlaceholder)
+    .first()
+    .fill("Kiasma");
+  await expect(page).toHaveURL(/q=Kiasma/);
 });
 
 test.describe("mobile filter sheet", () => {

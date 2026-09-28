@@ -129,10 +129,15 @@ export const recommendationRouter = createTRPCRouter({
             ),
           ),
       ]);
-      const rows = pool.map(({ exhibition, museum }) => ({
-        exhibition,
-        museum,
-      }));
+      // Sinulle follows the masthead region choice; none chosen means all of Finland.
+      const chosenRegions = new Set(regions.map((row) => row.region));
+      const rows = pool
+        .filter(
+          ({ museum }) =>
+            chosenRegions.size === 0 ||
+            (museum.region !== null && chosenRegions.has(museum.region)),
+        )
+        .map(({ exhibition, museum }) => ({ exhibition, museum }));
       const categoryIdsByExhibition = new Map(
         pool.map((entry) => [entry.exhibition.id, entry.categoryIds]),
       );
